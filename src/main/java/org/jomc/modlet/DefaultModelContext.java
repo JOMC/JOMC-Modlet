@@ -340,7 +340,7 @@ public class DefaultModelContext extends ModelContext
 
             if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINE, getMessage( "modletReport", modlets.getModlet().size(),
+                this.log( Level.FINE, getMessage( "modletReport", this.getClass().getName(), modlets.getModlet().size(),
                                                   System.currentTimeMillis() - t0 ), null );
 
             }
@@ -802,7 +802,9 @@ public class DefaultModelContext extends ModelContext
                         packageNames.append( ':' ).append( schema.getContextId() );
                         if ( this.isLoggable( Level.CONFIG ) )
                         {
-                            this.log( Level.CONFIG, getMessage( "foundContext", model, schema.getContextId() ), null );
+                            this.log( Level.CONFIG, getMessage( "foundContext", this.getClass().getName(), model,
+                                                                schema.getContextId() ), null );
+
                         }
                     }
                 }
@@ -1113,7 +1115,9 @@ public class DefaultModelContext extends ModelContext
             {
                 if ( this.isLoggable( Level.FINE ) )
                 {
-                    this.log( Level.FINE, getMessage( "processing", platformProviders.getAbsolutePath() ), null );
+                    this.log( Level.FINE, getMessage( "processing", this.getClass().getName(),
+                                                      platformProviders.getAbsolutePath() ), null );
+
                 }
 
                 InputStream in = null;
@@ -1156,7 +1160,8 @@ public class DefaultModelContext extends ModelContext
 
                         if ( this.isLoggable( Level.CONFIG ) )
                         {
-                            this.log( Level.CONFIG, getMessage( "providerInfo", platformProviders.getAbsolutePath(),
+                            this.log( Level.CONFIG, getMessage( "providerInfo", this.getClass().getName(),
+                                                                platformProviders.getAbsolutePath(),
                                                                 providerClass.getName(), provider.getName() ), null );
 
                         }
@@ -1175,7 +1180,9 @@ public class DefaultModelContext extends ModelContext
 
                 if ( this.isLoggable( Level.FINE ) )
                 {
-                    this.log( Level.FINE, getMessage( "processing", url.toExternalForm() ), null );
+                    this.log( Level.FINE, getMessage( "processing", this.getClass().getName(),
+                                                      url.toExternalForm() ), null );
+
                 }
 
                 final BufferedReader reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
@@ -1206,8 +1213,9 @@ public class DefaultModelContext extends ModelContext
 
                     if ( this.isLoggable( Level.CONFIG ) )
                     {
-                        this.log( Level.CONFIG, getMessage( "providerInfo", url.toExternalForm(),
-                                                            providerClass.getName(), provider.getName() ), null );
+                        this.log( Level.CONFIG, getMessage( "providerInfo", this.getClass().getName(),
+                                                            url.toExternalForm(), providerClass.getName(),
+                                                            provider.getName() ), null );
 
                     }
 
@@ -1257,7 +1265,7 @@ public class DefaultModelContext extends ModelContext
 
                 if ( this.isLoggable( Level.FINE ) )
                 {
-                    this.log( Level.FINE, getMessage( "processing", externalForm ), null );
+                    this.log( Level.FINE, getMessage( "processing", this.getClass().getName(), externalForm ), null );
                 }
 
                 for ( Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
@@ -1271,8 +1279,8 @@ public class DefaultModelContext extends ModelContext
 
                             if ( this.isLoggable( Level.CONFIG ) )
                             {
-                                this.log( Level.CONFIG, getMessage(
-                                    "foundSchemaCandidate", schemaUrl.toExternalForm() ), null );
+                                this.log( Level.CONFIG, getMessage( "foundSchemaCandidate", this.getClass().getName(),
+                                                                    schemaUrl.toExternalForm() ), null );
 
                             }
                         }
@@ -1282,7 +1290,8 @@ public class DefaultModelContext extends ModelContext
 
             if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF",
+                this.log( Level.FINE, getMessage( "contextReport", this.getClass().getName(), count,
+                                                  "META-INF/MANIFEST.MF",
                                                   Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
 
             }
