@@ -297,12 +297,11 @@ public class DefaultModelContext extends ModelContext
                     {
                         for ( Modlet m : provided.getModlet() )
                         {
-                            this.log( Level.CONFIG, getMessage( "modletInfo", modletProvider.getClass().getName(),
-                                                                m.getName(), m.getModel(),
-                                                                m.getVendor() != null
-                                                                ? m.getVendor() : getMessage( "noVendor" ),
-                                                                m.getVersion() != null
-                                                                ? m.getVersion() : getMessage( "noVersion" ) ), null );
+                            this.log( Level.CONFIG, getMessage(
+                                "modletInfo", this.getClass().getName(), modletProvider.getClass().getName(),
+                                m.getName(), m.getModel(),
+                                m.getVendor() != null ? m.getVendor() : getMessage( "noVendor" ),
+                                m.getVersion() != null ? m.getVersion() : getMessage( "noVersion" ) ), null );
 
                             if ( this.isLoggable( Level.FINE ) )
                             {
@@ -310,12 +309,14 @@ public class DefaultModelContext extends ModelContext
                                 {
                                     for ( Schema s : m.getSchemas().getSchema() )
                                     {
-                                        this.log( Level.FINE, getMessage(
-                                            "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
-                                            s.getContextId() != null
-                                            ? s.getContextId() : getMessage( "noContext" ),
-                                            s.getClasspathId() != null
-                                            ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
+                                        this.log( Level.FINE, getMessage( "modletSchemaInfo", this.getClass().getName(),
+                                                                          m.getName(), s.getPublicId(), s.getSystemId(),
+                                                                          s.getContextId() != null
+                                                                          ? s.getContextId()
+                                                                          : getMessage( "noContext" ),
+                                                                          s.getClasspathId() != null
+                                                                          ? s.getClasspathId()
+                                                                          : getMessage( "noClasspathId" ) ), null );
 
                                     }
                                 }
@@ -324,8 +325,8 @@ public class DefaultModelContext extends ModelContext
                                 {
                                     for ( Service s : m.getServices().getService() )
                                     {
-                                        this.log( Level.FINE, getMessage( "modletServiceInfo", m.getName(),
-                                                                          s.getOrdinal(), s.getIdentifier(),
+                                        this.log( Level.FINE, getMessage( "modletServiceInfo", this.getClass().getName(),
+                                                                          m.getName(), s.getOrdinal(), s.getIdentifier(),
                                                                           s.getClazz() ), null );
 
                                     }
