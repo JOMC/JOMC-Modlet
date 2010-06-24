@@ -367,19 +367,19 @@ public class DefaultModelContext extends ModelContext
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      */
     @Override
-    public Model findModel( final String identifier ) throws ModelException
+    public Model findModel( final String model ) throws ModelException
     {
-        if ( identifier == null )
+        if ( model == null )
         {
-            throw new NullPointerException( "identifier" );
+            throw new NullPointerException( "model" );
         }
 
         try
         {
-            Model model = new Model();
-            model.setIdentifier( identifier );
+            Model m = new Model();
+            m.setIdentifier( model );
 
-            final Services services = this.getModlets().getServices( identifier );
+            final Services services = this.getModlets().getServices( model );
             if ( services != null )
             {
                 for ( Service provider : services.getServices( ModelProvider.class ) )
@@ -403,15 +403,15 @@ public class DefaultModelContext extends ModelContext
 
                     final Class<? extends ModelProvider> modelProviderClass = clazz.asSubclass( ModelProvider.class );
                     final ModelProvider modelProvider = modelProviderClass.newInstance();
-                    final Model provided = modelProvider.findModel( this, model );
+                    final Model provided = modelProvider.findModel( this, m );
                     if ( provided != null )
                     {
-                        model = provided;
+                        m = provided;
                     }
                 }
             }
 
-            return model;
+            return m;
         }
         catch ( final InstantiationException e )
         {
@@ -801,12 +801,6 @@ public class DefaultModelContext extends ModelContext
                     if ( schema.getContextId() != null )
                     {
                         packageNames.append( ':' ).append( schema.getContextId() );
-                        if ( this.isLoggable( Level.CONFIG ) )
-                        {
-                            this.log( Level.CONFIG, getMessage( "foundContext", this.getClass().getName(), model,
-                                                                schema.getContextId() ), null );
-
-                        }
                     }
                 }
             }
