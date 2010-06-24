@@ -94,7 +94,7 @@ public abstract class ModelContext
 
     }
 
-    /** Constant for the {@code http://jomc.org/modlet} namespace URI. */
+    /** Public identifier of the modlet model. */
     public static final String MODLET_PUBLIC_ID = "http://jomc.org/modlet";
 
     /**
