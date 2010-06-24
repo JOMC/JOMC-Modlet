@@ -494,12 +494,16 @@ public abstract class ModelContext
 
     /**
      * Gets the {@code Modlets} of the context.
+     * <p>This method calls the {@code findModlets} method to initialize the {@code Modlets} of the context, if no
+     * {@code Modlets} instance has been set with the {@code setModlets} method.</p>
      *
-     * @return The {@code Modlets} of the context.
+     * @return The {@code Modlets} of the context. This accessor method returns a reference to the live list, not a
+     * snapshot. Therefore any modification you make to the returned list will be present inside the object.
      *
      * @throws ModelException if getting the {@code Modlets} of the context fails.
      *
      * @see #findModlets()
+     * @see #setModlets(org.jomc.modlet.Modlets)
      */
     public Modlets getModlets() throws ModelException
     {
@@ -573,7 +577,7 @@ public abstract class ModelContext
     /**
      * Sets the {@code Modlets} of the context.
      *
-     * @param value The new {@code Modlets} of the context.
+     * @param value The new {@code Modlets} of the context or {@code null}.
      *
      * @see #getModlets()
      */
