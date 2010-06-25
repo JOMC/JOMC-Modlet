@@ -94,9 +94,6 @@ public abstract class ModelContext
 
     }
 
-    /** Public identifier of the modlet model. */
-    public static final String MODLET_PUBLIC_ID = "http://jomc.org/modlet";
-
     /**
      * Default {@code http://jomc.org/modlet} namespace schema system id.
      * @see #getDefaultModletSchemaSystemId()
@@ -518,7 +515,7 @@ public abstract class ModelContext
                 modlet.setSchemas( new Schemas() );
 
                 final Schema schema = new Schema();
-                schema.setPublicId( MODLET_PUBLIC_ID );
+                schema.setPublicId( ModletObject.MODEL_PUBLIC_ID );
                 schema.setSystemId( this.getModletSchemaSystemId() );
                 schema.setContextId( this.getClass().getPackage().getName() );
                 schema.setClasspathId( this.getClass().getPackage().getName().replace( '.', '/' )
@@ -539,9 +536,9 @@ public abstract class ModelContext
                     }
                 }
 
-                final javax.xml.validation.Schema modletSchema = this.createSchema( MODLET_PUBLIC_ID );
+                final javax.xml.validation.Schema modletSchema = this.createSchema( ModletObject.MODEL_PUBLIC_ID );
                 final Validator validator = modletSchema.newValidator();
-                validator.validate( new JAXBSource( this.createContext( MODLET_PUBLIC_ID ),
+                validator.validate( new JAXBSource( this.createContext( ModletObject.MODEL_PUBLIC_ID ),
                                                     new ObjectFactory().createModlets( this.modlets ) ) );
 
             }
@@ -796,7 +793,7 @@ public abstract class ModelContext
      * @throws ModelException if creating a new {@code Model} instance fails.
      *
      * @see #createModelContext(java.lang.ClassLoader)
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Model findModel( String model ) throws ModelException;
 
@@ -811,7 +808,7 @@ public abstract class ModelContext
      * @throws ModelException if creating a new SAX entity resolver instance fails.
      *
      * @see #createModelContext(java.lang.ClassLoader)
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract EntityResolver createEntityResolver( String model ) throws ModelException;
 
@@ -826,7 +823,7 @@ public abstract class ModelContext
      * @throws ModelException if creating a new L/S resource resolver instance fails.
      *
      * @see #createModelContext(java.lang.ClassLoader)
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract LSResourceResolver createResourceResolver( String model ) throws ModelException;
 
@@ -841,7 +838,7 @@ public abstract class ModelContext
      * @throws ModelException if creating a new JAXP schema instance fails.
      *
      * @see #createModelContext(java.lang.ClassLoader)
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract javax.xml.validation.Schema createSchema( String model ) throws ModelException;
 
@@ -856,7 +853,7 @@ public abstract class ModelContext
      * @throws ModelException if creating a new JAXB context instance fails.
      *
      * @see #createModelContext(java.lang.ClassLoader)
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract JAXBContext createContext( String model ) throws ModelException;
 
@@ -871,7 +868,7 @@ public abstract class ModelContext
      * @throws ModelException if creating a new JAXB marshaller instance fails.
      *
      * @see #createModelContext(java.lang.ClassLoader)
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Marshaller createMarshaller( String model ) throws ModelException;
 
@@ -886,7 +883,7 @@ public abstract class ModelContext
      * @throws ModelException if creating a new JAXB unmarshaller instance fails.
      *
      * @see #createModelContext(java.lang.ClassLoader)
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Unmarshaller createUnmarshaller( String model ) throws ModelException;
 
@@ -932,7 +929,7 @@ public abstract class ModelContext
      *
      * @see #createModelContext(java.lang.ClassLoader)
      * @see ModelValidationReport#isModelValid()
-     * @see #MODLET_PUBLIC_ID
+     * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract ModelValidationReport validateModel( String model, Source source ) throws ModelException;
 

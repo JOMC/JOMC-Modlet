@@ -228,10 +228,10 @@ public class DefaultModletProvider implements ModletProvider
         try
         {
             Modlets modlets = null;
-            final JAXBContext ctx = context.createContext( ModelContext.MODLET_PUBLIC_ID );
+            final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
             final Unmarshaller u = ctx.createUnmarshaller();
             final Enumeration<URL> e = context.findResources( location );
-            u.setSchema( context.createSchema( ModelContext.MODLET_PUBLIC_ID ) );
+            u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
 
             while ( e.hasMoreElements() )
             {

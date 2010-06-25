@@ -43,6 +43,9 @@
     <!-- *********************************************************************************************************** -->
     <jaxb:bindings node="xs:complexType[@name='ModletObject']">
       <ci:code><![CDATA[
+    /** Public identifier of the modlet model. */
+    public static final String MODEL_PUBLIC_ID = "http://jomc.org/modlet";
+
     /**
      * Gets a single {@code JAXBElement} matching a namespace URI and local part from a given list of objects.
      *

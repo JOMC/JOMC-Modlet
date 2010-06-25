@@ -32,6 +32,7 @@
  */
 package org.jomc.modlet.test;
 
+import org.jomc.modlet.ModletObject;
 import java.io.IOException;
 import java.util.Properties;
 import org.w3c.dom.ls.LSInput;
@@ -341,7 +342,7 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        final EntityResolver r = this.getModelContext().createEntityResolver( ModelContext.MODLET_PUBLIC_ID );
+        final EntityResolver r = this.getModelContext().createEntityResolver( ModletObject.MODEL_PUBLIC_ID );
         assertNotNull( r );
 
         try
@@ -374,13 +375,13 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        final LSResourceResolver r = this.getModelContext().createResourceResolver( ModelContext.MODLET_PUBLIC_ID );
+        final LSResourceResolver r = this.getModelContext().createResourceResolver( ModletObject.MODEL_PUBLIC_ID );
 
         assertNotNull( r );
         assertNull( r.resolveResource( null, null, null, null, null ) );
         assertNull( r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, null, "DOES_NOT_EXIST", null ) );
-        assertNull( r.resolveResource( "UNSUPPORTED", null, ModelContext.MODLET_PUBLIC_ID, null, null ) );
-        assertNotNull( r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, ModelContext.MODLET_PUBLIC_ID,
+        assertNull( r.resolveResource( "UNSUPPORTED", null, ModletObject.MODEL_PUBLIC_ID, null, null ) );
+        assertNotNull( r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, ModletObject.MODEL_PUBLIC_ID,
                                           ModelContext.getDefaultModletSchemaSystemId(), null ) );
 
         final LSInput input = r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, null,
@@ -422,7 +423,7 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        assertNotNull( this.getModelContext().createContext( ModelContext.MODLET_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createContext( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
     public void testCreateMarshaller() throws Exception
@@ -440,7 +441,7 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        assertNotNull( this.getModelContext().createMarshaller( ModelContext.MODLET_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createMarshaller( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
     public void testCreateUnmarshaller() throws Exception
@@ -458,7 +459,7 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        assertNotNull( this.getModelContext().createUnmarshaller( ModelContext.MODLET_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createUnmarshaller( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
     public void testCreateSchema() throws Exception
@@ -476,7 +477,7 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        assertNotNull( this.getModelContext().createSchema( ModelContext.MODLET_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createSchema( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
     public void testClassLoader() throws Exception
@@ -591,7 +592,7 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        assertNotNull( this.getModelContext().findModel( ModelContext.MODLET_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().findModel( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
     public void testProcessModel() throws Exception
