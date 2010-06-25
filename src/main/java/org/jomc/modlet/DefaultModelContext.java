@@ -480,9 +480,7 @@ public class DefaultModelContext extends ModelContext
                             }
                             else if ( isLoggable( Level.WARNING ) )
                             {
-                                log( Level.WARNING, getMessage( "resourceNotFound", logPrefix, s.getClasspathId() ),
-                                     null );
-
+                                log( Level.WARNING, getMessage( "resourceNotFound", s.getClasspathId() ), null );
                             }
                         }
 
@@ -531,8 +529,8 @@ public class DefaultModelContext extends ModelContext
                         {
                             if ( isLoggable( Level.WARNING ) )
                             {
-                                log( Level.WARNING, getMessage( "unsupportedSystemIdUri", logPrefix,
-                                                                systemId, systemUri.toASCIIString() ), null );
+                                log( Level.WARNING, getMessage( "unsupportedSystemIdUri", systemId,
+                                                                systemUri.toASCIIString() ), null );
 
                             }
 
@@ -544,9 +542,7 @@ public class DefaultModelContext extends ModelContext
                 {
                     if ( isLoggable( Level.WARNING ) )
                     {
-                        log( Level.WARNING, getMessage( "unsupportedSystemIdUri", logPrefix, systemId,
-                                                        e.getMessage() ), null );
-
+                        log( Level.WARNING, getMessage( "unsupportedSystemIdUri", systemId, e.getMessage() ), null );
                     }
 
                     schemaSource = null;
@@ -705,7 +701,7 @@ public class DefaultModelContext extends ModelContext
                     }
                     else if ( isLoggable( Level.WARNING ) )
                     {
-                        log( Level.WARNING, getMessage( "unsupportedResourceType", logPrefix, type ), null );
+                        log( Level.WARNING, getMessage( "unsupportedResourceType", type ), null );
                     }
                 }
                 catch ( final SAXException e )
