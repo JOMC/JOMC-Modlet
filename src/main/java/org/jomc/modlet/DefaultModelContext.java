@@ -71,6 +71,7 @@ import javax.xml.validation.Validator;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -762,6 +763,30 @@ public class DefaultModelContext extends ModelContext
             }
 
             f.setResourceResolver( this.createResourceResolver( model ) );
+            f.setErrorHandler( new ErrorHandler()
+            {
+                // See https://jaxp.dev.java.net/issues/show_bug.cgi?id=66
+
+                public void warning( final SAXParseException e ) throws SAXException
+                {
+                    if ( isLoggable( Level.WARNING ) )
+                    {
+                        log( Level.WARNING, e.getMessage(), e );
+                    }
+                }
+
+                public void error( final SAXParseException e ) throws SAXException
+                {
+                    throw e;
+                }
+
+                public void fatalError( final SAXParseException e ) throws SAXException
+                {
+                    throw e;
+                }
+
+            } );
+
             return f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
         }
         catch ( final IOException e )
