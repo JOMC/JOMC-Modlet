@@ -559,8 +559,6 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
-        final String logPrefix = this.getClass().getName();
-
         return new LSResourceResolver()
         {
 
