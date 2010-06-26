@@ -33,7 +33,10 @@
 package org.jomc.modlet;
 
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Enumeration;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -228,6 +231,7 @@ public class DefaultModletProvider implements ModletProvider
         try
         {
             Modlets modlets = null;
+            final long t0 = System.currentTimeMillis();
             final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
             final Unmarshaller u = ctx.createUnmarshaller();
             final Enumeration<URL> e = context.findResources( location );
@@ -265,6 +269,14 @@ public class DefaultModletProvider implements ModletProvider
                 }
             }
 
+            if ( context.isLoggable( Level.CONFIG ) )
+            {
+                context.log( Level.CONFIG, getMessage( "contextReport", this.getClass().getName(),
+                                                       modlets != null ? modlets.getModlet().size() : 0,
+                                                       location, System.currentTimeMillis() - t0 ), null );
+
+            }
+
             return modlets == null || modlets.getModlet().isEmpty() ? null : modlets;
         }
         catch ( final JAXBException e )
@@ -295,6 +307,13 @@ public class DefaultModletProvider implements ModletProvider
         }
 
         return this.isEnabled() ? this.findModlets( context, this.getModletLocation() ) : null;
+    }
+
+    private static String getMessage( final String key, final Object... arguments )
+    {
+        return MessageFormat.format( ResourceBundle.getBundle(
+            DefaultModletProvider.class.getName().replace( '.', '/' ) ).getString( key ), arguments );
+
     }
 
 }

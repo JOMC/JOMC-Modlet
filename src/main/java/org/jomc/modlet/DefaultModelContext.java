@@ -283,7 +283,6 @@ public class DefaultModelContext extends ModelContext
     {
         try
         {
-            final long t0 = System.currentTimeMillis();
             final Modlets modlets = new Modlets();
             final Collection<Class<? extends ModletProvider>> providers = this.loadProviders( ModletProvider.class );
 
@@ -293,43 +292,42 @@ public class DefaultModelContext extends ModelContext
                 final Modlets provided = modletProvider.findModlets( this );
                 if ( provided != null )
                 {
-                    if ( this.isLoggable( Level.CONFIG ) )
+                    if ( this.isLoggable( Level.FINE ) )
                     {
                         for ( Modlet m : provided.getModlet() )
                         {
-                            this.log( Level.CONFIG, getMessage(
-                                "modletInfo", this.getClass().getName(), modletProvider.getClass().getName(),
-                                m.getName(), m.getModel(),
-                                m.getVendor() != null ? m.getVendor() : getMessage( "noVendor" ),
-                                m.getVersion() != null ? m.getVersion() : getMessage( "noVersion" ) ), null );
+                            this.log( Level.FINE,
+                                      getMessage( "modletInfo", this.getClass().getName(),
+                                                  modletProvider.getClass().getName(),
+                                                  m.getName(), m.getModel(),
+                                                  m.getVendor() != null ? m.getVendor() : getMessage( "noVendor" ),
+                                                  m.getVersion() != null ? m.getVersion() : getMessage( "noVersion" ) ),
+                                      null );
 
-                            if ( this.isLoggable( Level.FINE ) )
+                            if ( m.getSchemas() != null )
                             {
-                                if ( m.getSchemas() != null )
+                                for ( Schema s : m.getSchemas().getSchema() )
                                 {
-                                    for ( Schema s : m.getSchemas().getSchema() )
-                                    {
-                                        this.log( Level.FINE, getMessage( "modletSchemaInfo", this.getClass().getName(),
-                                                                          m.getName(), s.getPublicId(), s.getSystemId(),
-                                                                          s.getContextId() != null
-                                                                          ? s.getContextId()
-                                                                          : getMessage( "noContext" ),
-                                                                          s.getClasspathId() != null
-                                                                          ? s.getClasspathId()
-                                                                          : getMessage( "noClasspathId" ) ), null );
+                                    this.log( Level.FINE, getMessage( "modletSchemaInfo", this.getClass().getName(),
+                                                                      m.getName(), s.getPublicId(), s.getSystemId(),
+                                                                      s.getContextId() != null
+                                                                      ? s.getContextId()
+                                                                      : getMessage( "noContext" ),
+                                                                      s.getClasspathId() != null
+                                                                      ? s.getClasspathId()
+                                                                      : getMessage( "noClasspathId" ) ), null );
 
-                                    }
                                 }
+                            }
 
-                                if ( m.getServices() != null )
+                            if ( m.getServices() != null )
+                            {
+                                for ( Service s : m.getServices().getService() )
                                 {
-                                    for ( Service s : m.getServices().getService() )
-                                    {
-                                        this.log( Level.FINE, getMessage( "modletServiceInfo", this.getClass().getName(),
-                                                                          m.getName(), s.getOrdinal(), s.getIdentifier(),
-                                                                          s.getClazz() ), null );
+                                    this.log( Level.FINE, getMessage( "modletServiceInfo", this.getClass().getName(),
+                                                                      m.getName(), s.getOrdinal(), s.getIdentifier(),
+                                                                      s.getClazz() ), null );
 
-                                    }
                                 }
                             }
                         }
@@ -337,13 +335,6 @@ public class DefaultModelContext extends ModelContext
 
                     modlets.getModlet().addAll( provided.getModlet() );
                 }
-            }
-
-            if ( this.isLoggable( Level.FINE ) )
-            {
-                this.log( Level.FINE, getMessage( "modletReport", this.getClass().getName(), modlets.getModlet().size(),
-                                                  System.currentTimeMillis() - t0 ), null );
-
             }
 
             return modlets;
@@ -1158,11 +1149,11 @@ public class DefaultModelContext extends ModelContext
 
                         }
 
-                        if ( this.isLoggable( Level.CONFIG ) )
+                        if ( this.isLoggable( Level.FINE ) )
                         {
-                            this.log( Level.CONFIG, getMessage( "providerInfo", this.getClass().getName(),
-                                                                platformProviders.getAbsolutePath(),
-                                                                providerClass.getName(), provider.getName() ), null );
+                            this.log( Level.FINE, getMessage( "providerInfo", this.getClass().getName(),
+                                                              platformProviders.getAbsolutePath(),
+                                                              providerClass.getName(), provider.getName() ), null );
 
                         }
 
@@ -1174,8 +1165,12 @@ public class DefaultModelContext extends ModelContext
             final Enumeration<URL> classpathProviders =
                 this.findResources( this.getProviderLocation() + '/' + providerClass.getName() );
 
+            int count = 0;
+            final long t0 = System.currentTimeMillis();
+
             while ( classpathProviders.hasMoreElements() )
             {
+                count++;
                 final URL url = classpathProviders.nextElement();
 
                 if ( this.isLoggable( Level.FINE ) )
@@ -1211,11 +1206,11 @@ public class DefaultModelContext extends ModelContext
 
                     }
 
-                    if ( this.isLoggable( Level.CONFIG ) )
+                    if ( this.isLoggable( Level.FINE ) )
                     {
-                        this.log( Level.CONFIG, getMessage( "providerInfo", this.getClass().getName(),
-                                                            url.toExternalForm(), providerClass.getName(),
-                                                            provider.getName() ), null );
+                        this.log( Level.FINE, getMessage( "providerInfo", this.getClass().getName(),
+                                                          url.toExternalForm(), providerClass.getName(),
+                                                          provider.getName() ), null );
 
                     }
 
@@ -1223,6 +1218,15 @@ public class DefaultModelContext extends ModelContext
                 }
 
                 reader.close();
+            }
+
+            if ( this.isLoggable( Level.CONFIG ) )
+            {
+                this.log( Level.CONFIG,
+                          getMessage( "contextReport", this.getClass().getName(), count,
+                                      this.getProviderLocation() + '/' + providerClass.getName(),
+                                      Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
+
             }
 
             return providers.values();
@@ -1288,11 +1292,11 @@ public class DefaultModelContext extends ModelContext
                 }
             }
 
-            if ( this.isLoggable( Level.FINE ) )
+            if ( this.isLoggable( Level.CONFIG ) )
             {
-                this.log( Level.FINE, getMessage( "contextReport", this.getClass().getName(), count,
-                                                  "META-INF/MANIFEST.MF",
-                                                  Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
+                this.log( Level.CONFIG,
+                          getMessage( "contextReport", this.getClass().getName(), count, "META-INF/MANIFEST.MF",
+                                      Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
 
             }
 
