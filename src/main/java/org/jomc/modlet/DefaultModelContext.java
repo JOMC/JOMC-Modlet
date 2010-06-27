@@ -695,10 +695,16 @@ public class DefaultModelContext extends ModelContext
                 }
                 catch ( final SAXException e )
                 {
+                    String message = e.getMessage();
+                    if ( message == null && e.getException() != null )
+                    {
+                        message = e.getException().getMessage();
+                    }
+
                     if ( isLoggable( Level.SEVERE ) )
                     {
-                        log( Level.SEVERE, getMessage( "failedResolving", resolvePublicId, resolveSystemId,
-                                                       e.getMessage() ), e );
+                        log( Level.SEVERE, getMessage( "failedResolving", resolvePublicId, resolveSystemId, message ),
+                             e );
 
                     }
                 }
@@ -794,7 +800,13 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final SAXException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            String message = e.getMessage();
+            if ( message == null && e.getException() != null )
+            {
+                message = e.getException().getMessage();
+            }
+
+            throw new ModelException( message, e );
         }
     }
 
@@ -832,14 +844,13 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final JAXBException e )
         {
-            if ( e.getLinkedException() != null )
+            String message = e.getMessage();
+            if ( message == null && e.getLinkedException() != null )
             {
-                throw new ModelException( e.getLinkedException().getMessage(), e.getLinkedException() );
+                message = e.getLinkedException().getMessage();
             }
-            else
-            {
-                throw new ModelException( e.getMessage(), e );
-            }
+
+            throw new ModelException( message, e );
         }
     }
 
@@ -894,14 +905,13 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final JAXBException e )
         {
-            if ( e.getLinkedException() != null )
+            String message = e.getMessage();
+            if ( message == null && e.getLinkedException() != null )
             {
-                throw new ModelException( e.getLinkedException().getMessage(), e.getLinkedException() );
+                message = e.getLinkedException().getMessage();
             }
-            else
-            {
-                throw new ModelException( e.getMessage(), e );
-            }
+
+            throw new ModelException( message, e );
         }
     }
 
@@ -919,14 +929,13 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final JAXBException e )
         {
-            if ( e.getLinkedException() != null )
+            String message = e.getMessage();
+            if ( message == null && e.getLinkedException() != null )
             {
-                throw new ModelException( e.getLinkedException().getMessage(), e.getLinkedException() );
+                message = e.getLinkedException().getMessage();
             }
-            else
-            {
-                throw new ModelException( e.getMessage(), e );
-            }
+
+            throw new ModelException( message, e );
         }
     }
 
@@ -1088,14 +1097,20 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final SAXException e )
         {
+            String message = e.getMessage();
+            if ( message == null && e.getException() != null )
+            {
+                message = e.getException().getMessage();
+            }
+
             if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINE, e.getMessage(), e );
+                this.log( Level.FINE, message, e );
             }
 
             if ( modelErrorHandler.getReport().isModelValid() )
             {
-                throw new ModelException( e.getMessage(), e );
+                throw new ModelException( message, e );
             }
         }
         catch ( final IOException e )
