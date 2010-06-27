@@ -104,8 +104,7 @@ public class DefaultModelContext extends ModelContext
      * @see #getDefaultPlatformProviderLocation()
      */
     private static final String DEFAULT_PLATFORM_PROVIDER_LOCATION =
-        new StringBuilder().append( System.getProperty( "java.home" ) ).
-        append( File.separator ).append( "jre" ).append( File.separator ).append( "lib" ).
+        new StringBuilder().append( System.getProperty( "java.home" ) ).append( File.separator ).append( "lib" ).
         append( File.separator ).append( "jomc.properties" ).toString();
 
     /** Default provider location. */
@@ -206,7 +205,7 @@ public class DefaultModelContext extends ModelContext
      * <p>The default platform provider location is controlled by system property
      * {@code org.jomc.modlet.DefaultModelContext.defaultPlatformProviderLocation} holding the location to
      * search for platform provider resources by default. If that property is not set, the
-     * {@code <java-home>/jre/lib/jomc.properties} default is returned.</p>
+     * {@code <java-home>/lib/jomc.properties} default is returned.</p>
      *
      * @return The location searched for platform provider resources by default.
      *
