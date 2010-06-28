@@ -73,6 +73,8 @@ import org.xml.sax.SAXException;
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
  * @version $Id$
+ *
+ * @see #createModelContext(java.lang.ClassLoader)
  */
 public abstract class ModelContext
 {
