@@ -345,7 +345,7 @@ public abstract class ModelContext
      * @see #getDefaultModletSchemaSystemId()
      * @see #setModletSchemaSystemId(java.lang.String)
      */
-    public String getModletSchemaSystemId()
+    public final String getModletSchemaSystemId()
     {
         if ( this.modletSchemaSystemId == null )
         {
@@ -365,7 +365,7 @@ public abstract class ModelContext
      *
      * @see #getModletSchemaSystemId()
      */
-    public void setModletSchemaSystemId( final String value )
+    public final void setModletSchemaSystemId( final String value )
     {
         this.modletSchemaSystemId = value;
     }
@@ -414,7 +414,7 @@ public abstract class ModelContext
      * @see #setLogLevel(java.util.logging.Level)
      * @see #isLoggable(java.util.logging.Level)
      */
-    public Level getLogLevel()
+    public final Level getLogLevel()
     {
         if ( this.logLevel == null )
         {
@@ -435,7 +435,7 @@ public abstract class ModelContext
      * @see #getLogLevel()
      * @see #isLoggable(java.util.logging.Level)
      */
-    public void setLogLevel( final Level value )
+    public final void setLogLevel( final Level value )
     {
         this.logLevel = value;
     }

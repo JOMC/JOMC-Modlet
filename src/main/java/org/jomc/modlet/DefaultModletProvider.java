@@ -118,7 +118,7 @@ public class DefaultModletProvider implements ModletProvider
      * @see #isDefaultEnabled()
      * @see #setEnabled(java.lang.Boolean)
      */
-    public boolean isEnabled()
+    public final boolean isEnabled()
     {
         if ( this.enabled == null )
         {
@@ -135,7 +135,7 @@ public class DefaultModletProvider implements ModletProvider
      *
      * @see #isEnabled()
      */
-    public void setEnabled( final Boolean value )
+    public final void setEnabled( final Boolean value )
     {
         this.enabled = value;
     }
@@ -183,7 +183,7 @@ public class DefaultModletProvider implements ModletProvider
      * @see #getDefaultModletLocation()
      * @see #setModletLocation(java.lang.String)
      */
-    public String getModletLocation()
+    public final String getModletLocation()
     {
         if ( this.modletLocation == null )
         {
@@ -200,7 +200,7 @@ public class DefaultModletProvider implements ModletProvider
      *
      * @see #getModletLocation()
      */
-    public void setModletLocation( final String value )
+    public final void setModletLocation( final String value )
     {
         this.modletLocation = value;
     }

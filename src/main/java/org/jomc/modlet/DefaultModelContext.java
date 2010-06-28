@@ -175,7 +175,7 @@ public class DefaultModelContext extends ModelContext
      * @see #getDefaultProviderLocation()
      * @see #setProviderLocation(java.lang.String)
      */
-    public String getProviderLocation()
+    public final String getProviderLocation()
     {
         if ( this.providerLocation == null )
         {
@@ -195,7 +195,7 @@ public class DefaultModelContext extends ModelContext
      *
      * @see #getProviderLocation()
      */
-    public void setProviderLocation( final String value )
+    public final void setProviderLocation( final String value )
     {
         this.providerLocation = value;
     }
@@ -244,7 +244,7 @@ public class DefaultModelContext extends ModelContext
      * @see #getDefaultPlatformProviderLocation()
      * @see #setPlatformProviderLocation(java.lang.String)
      */
-    public String getPlatformProviderLocation()
+    public final String getPlatformProviderLocation()
     {
         if ( this.platformProviderLocation == null )
         {
@@ -264,7 +264,7 @@ public class DefaultModelContext extends ModelContext
      *
      * @see #getPlatformProviderLocation()
      */
-    public void setPlatformProviderLocation( final String value )
+    public final void setPlatformProviderLocation( final String value )
     {
         this.platformProviderLocation = value;
     }
