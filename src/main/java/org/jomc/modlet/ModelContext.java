@@ -519,8 +519,8 @@ public abstract class ModelContext
                 final Schema schema = new Schema();
                 schema.setPublicId( ModletObject.MODEL_PUBLIC_ID );
                 schema.setSystemId( this.getModletSchemaSystemId() );
-                schema.setContextId( this.getClass().getPackage().getName() );
-                schema.setClasspathId( this.getClass().getPackage().getName().replace( '.', '/' )
+                schema.setContextId( ModletObject.class.getPackage().getName() );
+                schema.setClasspathId( ModletObject.class.getPackage().getName().replace( '.', '/' )
                                        + "/jomc-modlet-1.0.xsd" );
 
                 modlet.getSchemas().getSchema().add( schema );
