@@ -111,6 +111,28 @@ The 'Model' type defines attribute 'identifier' holding an identifier uniquely i
       <xsd:selector xpath="modlet:modlet"/>
       <xsd:field xpath="@name"/>
     </xsd:key>
+    <xsd:key name="schemas-system-id-key">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">System id key of a schema from the list of modlets.</xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
+      <xsd:field xpath="@system-id"/>
+    </xsd:key>
+    <xsd:key name="schemas-public-id-key">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">Public id key of a schema from the list of modlets.</xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
+      <xsd:field xpath="@public-id"/>
+    </xsd:key>
+    <xsd:key name="services-identifier-class-key">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">Identifier class key of a service from the list of modlets.</xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="modlet:modlet/modlet:services/modlet:service"/>
+      <xsd:field xpath="@identifier"/>
+      <xsd:field xpath="@class"/>
+    </xsd:key>
   </xsd:element>
   <xsd:complexType name="Modlets">
     <xsd:annotation>
@@ -207,9 +229,9 @@ schema. Attribute 'classpath-id' holds the Java classpath location of the refere
   </xsd:complexType>
   <!-- ************************************************************************************************************* -->
   <xsd:element name="services" type="modlet:Services">
-    <xsd:key name="service-key">
+    <xsd:key name="service-identifier-class-key">
       <xsd:annotation>
-        <xsd:documentation xml:lang="en">Key of a service.</xsd:documentation>
+        <xsd:documentation xml:lang="en">Identifier class key of a service.</xsd:documentation>
       </xsd:annotation>
       <xsd:selector xpath="modlet:service"/>
       <xsd:field xpath="@identifier"/>
