@@ -262,10 +262,7 @@ public class DefaultModletProvider implements ModletProvider
                         modlets = new Modlets();
                     }
 
-                    for ( Modlet m : ( (Modlets) content ).getModlet() )
-                    {
-                        modlets.getModlet().add( m );
-                    }
+                    modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
                 }
             }
 
