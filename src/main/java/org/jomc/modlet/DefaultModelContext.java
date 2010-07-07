@@ -1373,7 +1373,7 @@ class ModelErrorHandler extends DefaultHandler
      *
      * @param context The context of the instance.
      */
-    public ModelErrorHandler( final ModelContext context )
+    ModelErrorHandler( final ModelContext context )
     {
         this( context, null );
     }
@@ -1384,7 +1384,7 @@ class ModelErrorHandler extends DefaultHandler
      * @param context The context of the instance.
      * @param report A report to use for collecting validation events.
      */
-    public ModelErrorHandler( final ModelContext context, final ModelValidationReport report )
+    ModelErrorHandler( final ModelContext context, final ModelValidationReport report )
     {
         super();
         this.context = context;

@@ -77,7 +77,7 @@ public class ModelValidationReport implements Serializable
          * The JAXB element this detail is associated with.
          * @serial
          */
-        private JAXBElement element;
+        private JAXBElement<?> element;
 
         /**
          * Creates a new {@code Detail} taking an identifier, a level and a message.
@@ -87,7 +87,7 @@ public class ModelValidationReport implements Serializable
          * @param message The detail message.
          * @param element The detail element.
          */
-        public Detail( final String identifier, final Level level, final String message, final JAXBElement element )
+        public Detail( final String identifier, final Level level, final String message, final JAXBElement<?> element )
         {
             this.identifier = identifier;
             this.level = level;
@@ -130,7 +130,7 @@ public class ModelValidationReport implements Serializable
          *
          * @return The JAXB element of this detail or {@code null}.
          */
-        public JAXBElement getElement()
+        public JAXBElement<?> getElement()
         {
             return this.element;
         }
