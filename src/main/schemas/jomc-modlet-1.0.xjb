@@ -411,7 +411,14 @@
                         mergedModlet.setSchemas( new Schemas() );
                     }
 
-                    mergedModlet.getSchemas().getSchema().addAll( m.getSchemas().getSchema() );
+                    for ( Schema s : m.getSchemas().getSchema() )
+                    {
+                        if ( mergedModlet.getSchemas().getSchemaByPublicId( s.getPublicId() ) == null
+                             && mergedModlet.getSchemas().getSchemaBySystemId( s.getSystemId() ) == null )
+                        {
+                            mergedModlet.getSchemas().getSchema().add( s );
+                        }
+                    }
                 }
 
                 if ( m.getServices() != null )
@@ -421,7 +428,28 @@
                         mergedModlet.setServices( new Services() );
                     }
 
-                    mergedModlet.getServices().getService().addAll( m.getServices().getService() );
+                    for ( Service s : m.getServices().getService() )
+                    {
+                        boolean merged = false;
+
+                        for ( Service mergedService : mergedModlet.getServices().getServices( s.getIdentifier() ) )
+                        {
+                            if ( mergedService.getClazz().equals( s.getClazz() ) )
+                            {
+                                if ( mergedService.getOrdinal() < s.getOrdinal() )
+                                {
+                                    mergedService.setOrdinal( s.getOrdinal() );
+                                }
+
+                                merged = true;
+                            }
+                        }
+
+                        if ( !merged )
+                        {
+                            mergedModlet.getServices().getService().add( s );
+                        }
+                    }
                 }
             }
         }
