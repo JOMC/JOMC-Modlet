@@ -46,6 +46,10 @@
       <code>@XmlSchema</code> annotation of the <code>org.jomc.modlet</code> package. Added a <code>@XmlNs</code>
       annotation to the <code>@XmlSchema</code> annotation of the <code>org.jomc.modlet</code> package.]]>
       </action>
+      <action dev="schulte2005" type="add"><![CDATA[Added methods <code>getAnyElement</code> and
+      <code>getAnyElements</code> taking a type.
+      See the <a href="http://jomc.sourceforge.net/jomc/1.1.x/jomc-modlet/clirr-report.html">CLIRR report</a>.]]>
+      </action>
       <action dev="schulte2005" type="fix"><![CDATA[Corrected method <code>getModlets</code> of class
       <code>org.jomc.modlet.ModelContext</code> to correctly initialize the list of modlets for implementations in
       packages other than <code>org.jomc.modlet</code>.]]>
