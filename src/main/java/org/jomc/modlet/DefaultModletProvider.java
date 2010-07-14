@@ -84,6 +84,7 @@ public class DefaultModletProvider implements ModletProvider
      *
      * @return {@code true} if the provider is enabled by default; {@code false} if the provider is disabled by default.
      *
+     * @see #isEnabled()
      * @see #setDefaultEnabled(java.lang.Boolean)
      */
     public static boolean isDefaultEnabled()
