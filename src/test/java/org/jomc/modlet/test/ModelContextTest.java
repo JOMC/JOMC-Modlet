@@ -32,6 +32,11 @@
  */
 package org.jomc.modlet.test;
 
+import java.io.StringWriter;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.bind.JAXBElement;
+import org.jomc.modlet.Model;
 import org.jomc.modlet.ModletObject;
 import java.io.IOException;
 import java.util.Properties;
@@ -647,6 +652,29 @@ public class ModelContextTest
             assertNotNull( e.getMessage() );
             System.out.println( e.toString() );
         }
+
+        final Model invalidModel = new Model();
+        final Model validModel = new Model();
+        validModel.setIdentifier( ModletObject.MODEL_PUBLIC_ID );
+
+        final Marshaller m = this.getModelContext().createMarshaller( ModletObject.MODEL_PUBLIC_ID );
+        final JAXBElement<Model> invalid = new org.jomc.modlet.ObjectFactory().createModel( invalidModel );
+        final JAXBElement<Model> valid = new org.jomc.modlet.ObjectFactory().createModel( validModel );
+
+        StringWriter stringWriter = new StringWriter();
+        m.marshal( invalid, stringWriter );
+        System.out.println( stringWriter );
+
+        stringWriter = new StringWriter();
+        m.marshal( valid, stringWriter );
+        System.out.println( stringWriter );
+
+        assertFalse( this.getModelContext().validateModel( ModletObject.MODEL_PUBLIC_ID,
+                                                           new JAXBSource( m, invalid ) ).isModelValid() );
+
+        assertTrue( this.getModelContext().validateModel( ModletObject.MODEL_PUBLIC_ID,
+                                                          new JAXBSource( m, valid ) ).isModelValid() );
+
     }
 
 }
