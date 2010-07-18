@@ -272,7 +272,9 @@ public abstract class ModelContext
                 @Override
                 public String toString()
                 {
-                    return ModelContext.class.getName() + ".BootstrapClassLoader@" + System.identityHashCode( this );
+                    return ModelContext.class.getName() + ".BootstrapClassLoader@"
+                           + Integer.toHexString( this.hashCode() );
+
                 }
 
             };
@@ -350,9 +352,13 @@ public abstract class ModelContext
         if ( this.modletSchemaSystemId == null )
         {
             this.modletSchemaSystemId = getDefaultModletSchemaSystemId();
-            this.log( Level.CONFIG, getMessage( "defaultModletSchemaSystemIdInfo", this.getClass().getCanonicalName(),
-                                                this.modletSchemaSystemId ), null );
 
+            if ( this.isLoggable( Level.CONFIG ) )
+            {
+                this.log( Level.CONFIG,
+                          getMessage( "defaultModletSchemaSystemIdInfo", this.modletSchemaSystemId ), null );
+
+            }
         }
 
         return this.modletSchemaSystemId;
@@ -419,9 +425,11 @@ public abstract class ModelContext
         if ( this.logLevel == null )
         {
             this.logLevel = getDefaultLogLevel();
-            this.log( Level.CONFIG, getMessage( "defaultLogLevelInfo", this.getClass().getCanonicalName(),
-                                                this.logLevel.getLocalizedName() ), null );
 
+            if ( this.isLoggable( Level.CONFIG ) )
+            {
+                this.log( Level.CONFIG, getMessage( "defaultLogLevelInfo", this.logLevel.getLocalizedName() ), null );
+            }
         }
 
         return this.logLevel;

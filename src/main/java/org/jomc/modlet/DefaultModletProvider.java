@@ -267,11 +267,11 @@ public class DefaultModletProvider implements ModletProvider
                 }
             }
 
-            if ( context.isLoggable( Level.CONFIG ) )
+            if ( context.isLoggable( Level.FINE ) )
             {
-                context.log( Level.CONFIG, getMessage( "contextReport", this.getClass().getName(),
-                                                       modlets != null ? modlets.getModlet().size() : 0,
-                                                       location, System.currentTimeMillis() - t0 ), null );
+                context.log( Level.FINE, getMessage( "contextReport",
+                                                     modlets != null ? modlets.getModlet().size() : 0,
+                                                     location, System.currentTimeMillis() - t0 ), null );
 
             }
 

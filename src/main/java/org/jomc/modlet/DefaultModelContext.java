@@ -180,9 +180,11 @@ public class DefaultModelContext extends ModelContext
         if ( this.providerLocation == null )
         {
             this.providerLocation = getDefaultProviderLocation();
-            this.log( Level.CONFIG, getMessage( "defaultProviderLocationInfo", this.getClass().getName(),
-                                                this.providerLocation ), null );
 
+            if ( this.isLoggable( Level.CONFIG ) )
+            {
+                this.log( Level.CONFIG, getMessage( "defaultProviderLocationInfo", this.providerLocation ), null );
+            }
         }
 
         return this.providerLocation;
@@ -249,9 +251,13 @@ public class DefaultModelContext extends ModelContext
         if ( this.platformProviderLocation == null )
         {
             this.platformProviderLocation = getDefaultPlatformProviderLocation();
-            this.log( Level.CONFIG, getMessage( "defaultPlatformProviderLocationInfo", this.getClass().getName(),
-                                                this.platformProviderLocation ), null );
 
+            if ( this.isLoggable( Level.CONFIG ) )
+            {
+                this.log( Level.CONFIG,
+                          getMessage( "defaultPlatformProviderLocationInfo", this.platformProviderLocation ), null );
+
+            }
         }
 
         return this.platformProviderLocation;
@@ -289,17 +295,22 @@ public class DefaultModelContext extends ModelContext
             for ( Class<? extends ModletProvider> provider : providers )
             {
                 final ModletProvider modletProvider = provider.newInstance();
+
+                if ( this.isLoggable( Level.FINER ) )
+                {
+                    this.log( Level.FINER, getMessage( "creatingModlets", modletProvider.toString() ), null );
+                }
+
                 final Modlets provided = modletProvider.findModlets( this );
+
                 if ( provided != null )
                 {
-                    if ( this.isLoggable( Level.FINE ) )
+                    if ( this.isLoggable( Level.FINEST ) )
                     {
                         for ( Modlet m : provided.getModlet() )
                         {
-                            this.log( Level.FINE,
-                                      getMessage( "modletInfo", this.getClass().getName(),
-                                                  modletProvider.getClass().getName(),
-                                                  m.getName(), m.getModel(),
+                            this.log( Level.FINEST,
+                                      getMessage( "modletInfo", m.getName(), m.getModel(),
                                                   m.getVendor() != null ? m.getVendor() : getMessage( "noVendor" ),
                                                   m.getVersion() != null ? m.getVersion() : getMessage( "noVersion" ) ),
                                       null );
@@ -308,14 +319,11 @@ public class DefaultModelContext extends ModelContext
                             {
                                 for ( Schema s : m.getSchemas().getSchema() )
                                 {
-                                    this.log( Level.FINE, getMessage( "modletSchemaInfo", this.getClass().getName(),
-                                                                      m.getName(), s.getPublicId(), s.getSystemId(),
-                                                                      s.getContextId() != null
-                                                                      ? s.getContextId()
-                                                                      : getMessage( "noContext" ),
-                                                                      s.getClasspathId() != null
-                                                                      ? s.getClasspathId()
-                                                                      : getMessage( "noClasspathId" ) ), null );
+                                    this.log( Level.FINEST, getMessage(
+                                        "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
+                                        s.getContextId() != null ? s.getContextId() : getMessage( "noContext" ),
+                                        s.getClasspathId() != null
+                                        ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
 
                                 }
                             }
@@ -324,9 +332,9 @@ public class DefaultModelContext extends ModelContext
                             {
                                 for ( Service s : m.getServices().getService() )
                                 {
-                                    this.log( Level.FINE, getMessage( "modletServiceInfo", this.getClass().getName(),
-                                                                      m.getName(), s.getOrdinal(), s.getIdentifier(),
-                                                                      s.getClazz() ), null );
+                                    this.log( Level.FINEST, getMessage( "modletServiceInfo", m.getName(),
+                                                                        s.getOrdinal(), s.getIdentifier(),
+                                                                        s.getClazz() ), null );
 
                                 }
                             }
@@ -395,8 +403,16 @@ public class DefaultModelContext extends ModelContext
                     final Class<? extends ModelProvider> modelProviderClass = clazz.asSubclass( ModelProvider.class );
                     final ModelProvider modelProvider = modelProviderClass.newInstance();
                     final Model provided = modelProvider.findModel( this, m );
+
                     if ( provided != null )
                     {
+                        if ( this.isLoggable( Level.FINER ) )
+                        {
+                            this.log( Level.FINER,
+                                      getMessage( "creatingModel", model, modelProvider.toString() ), null );
+
+                        }
+
                         m = provided;
                     }
                 }
@@ -421,8 +437,6 @@ public class DefaultModelContext extends ModelContext
         {
             throw new NullPointerException( "model" );
         }
-
-        final String logPrefix = this.getClass().getName();
 
         return new DefaultHandler()
         {
@@ -475,11 +489,11 @@ public class DefaultModelContext extends ModelContext
                             }
                         }
 
-                        if ( isLoggable( Level.FINE ) )
+                        if ( isLoggable( Level.FINEST ) )
                         {
-                            log( Level.FINE, getMessage(
-                                "resolutionInfo", logPrefix, publicId + ", " + systemId,
-                                schemaSource.getPublicId() + ", " + schemaSource.getSystemId() ), null );
+                            log( Level.FINEST,
+                                 getMessage( "resolutionInfo", publicId + ", " + systemId,
+                                             schemaSource.getPublicId() + ", " + schemaSource.getSystemId() ), null );
 
                         }
                     }
@@ -504,11 +518,10 @@ public class DefaultModelContext extends ModelContext
                                     schemaSource.setPublicId( publicId );
                                     schemaSource.setSystemId( uri.toASCIIString() );
 
-                                    if ( isLoggable( Level.FINE ) )
+                                    if ( isLoggable( Level.FINEST ) )
                                     {
-                                        log( Level.FINE, getMessage( "resolutionInfo", logPrefix,
-                                                                     systemUri.toASCIIString(),
-                                                                     schemaSource.getSystemId() ), null );
+                                        log( Level.FINEST, getMessage( "resolutionInfo", systemUri.toASCIIString(),
+                                                                       schemaSource.getSystemId() ), null );
 
                                     }
 
@@ -587,10 +600,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setCharacterStream( final Reader characterStream )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setCharacterStream",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setCharacterStream",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                                 public InputStream getByteStream()
@@ -600,10 +616,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setByteStream( final InputStream byteStream )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setByteStream",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setByteStream",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                                 public String getStringData()
@@ -613,10 +632,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setStringData( final String stringData )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setStringData",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setStringData",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                                 public String getSystemId()
@@ -626,10 +648,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setSystemId( final String systemId )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setSystemId",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setSystemId",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                                 public String getPublicId()
@@ -639,10 +664,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setPublicId( final String publicId )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setPublicId",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setPublicId",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                                 public String getBaseURI()
@@ -652,10 +680,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setBaseURI( final String baseURI )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setBaseURI",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setBaseURI",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                                 public String getEncoding()
@@ -665,10 +696,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setEncoding( final String encoding )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setEncoding",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setEncoding",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                                 public boolean getCertifiedText()
@@ -678,10 +712,13 @@ public class DefaultModelContext extends ModelContext
 
                                 public void setCertifiedText( final boolean certifiedText )
                                 {
-                                    log( Level.WARNING, getMessage(
-                                        "unsupportedOperation", "setCertifiedText",
-                                        DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                            "unsupportedOperation", "setCertifiedText",
+                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
+                                    }
                                 }
 
                             };
@@ -703,8 +740,8 @@ public class DefaultModelContext extends ModelContext
 
                     if ( isLoggable( Level.SEVERE ) )
                     {
-                        log( Level.SEVERE, getMessage( "failedResolving", resolvePublicId, resolveSystemId, message ),
-                             e );
+                        log( Level.SEVERE,
+                             getMessage( "failedResolving", resolvePublicId, resolveSystemId, message ), e );
 
                     }
                 }
@@ -792,6 +829,18 @@ public class DefaultModelContext extends ModelContext
 
             } );
 
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                final StringBuilder schemaInfo = new StringBuilder();
+
+                for ( Source s : sources )
+                {
+                    schemaInfo.append( ", " ).append( s.getSystemId() );
+                }
+
+                this.log( Level.FINER, getMessage( "creatingSchema", schemaInfo.substring( 2 ) ), null );
+            }
+
             return f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
         }
         catch ( final IOException e )
@@ -840,7 +889,12 @@ public class DefaultModelContext extends ModelContext
                 throw new ModelException( getMessage( "missingSchemas", model ) );
             }
 
-            return JAXBContext.newInstance( packageNames.toString().substring( 1 ), this.getClassLoader() );
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                this.log( Level.FINER, getMessage( "creatingContext", packageNames.substring( 1 ) ), null );
+            }
+
+            return JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() );
         }
         catch ( final JAXBException e )
         {
@@ -893,12 +947,18 @@ public class DefaultModelContext extends ModelContext
             }
 
             final Marshaller m =
-                JAXBContext.newInstance( packageNames.toString().substring( 1 ), this.getClassLoader() ).
-                createMarshaller();
+                JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createMarshaller();
 
             if ( schemaLocation.length() != 0 )
             {
-                m.setProperty( Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.toString().substring( 1 ) );
+                m.setProperty( Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.substring( 1 ) );
+            }
+
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                this.log( Level.FINER, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
+                                                   schemaLocation.substring( 1 ) ), null );
+
             }
 
             return m;
@@ -925,7 +985,34 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
-            return this.createContext( model ).createUnmarshaller();
+            final StringBuilder packageNames = new StringBuilder();
+            final Schemas schemas = this.getModlets().getSchemas( model );
+
+            if ( schemas != null )
+            {
+                for ( final Iterator<Schema> s = schemas.getSchema().iterator(); s.hasNext(); )
+                {
+                    final Schema schema = s.next();
+                    if ( schema.getContextId() != null )
+                    {
+                        packageNames.append( ':' ).append( schema.getContextId() );
+                    }
+                }
+            }
+
+            if ( packageNames.length() == 0 )
+            {
+                throw new ModelException( getMessage( "missingSchemas", model ) );
+            }
+
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                this.log( Level.FINER,
+                          getMessage( "creatingUnmarshaller", packageNames.substring( 1 ) ), null );
+
+            }
+
+            return JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createUnmarshaller();
         }
         catch ( final JAXBException e )
         {
@@ -987,6 +1074,13 @@ public class DefaultModelContext extends ModelContext
                     final Model current = modelProcessor.processModel( this, processed );
                     if ( current != null )
                     {
+                        if ( this.isLoggable( Level.FINER ) )
+                        {
+                            this.log( Level.FINER, getMessage( "processingModel", model.getIdentifier(),
+                                                               modelProcessor.toString() ), null );
+
+                        }
+
                         processed = current;
                     }
                 }
@@ -1052,6 +1146,13 @@ public class DefaultModelContext extends ModelContext
                     final ModelValidationReport current = modelValidator.validateModel( this, model );
                     if ( current != null )
                     {
+                        if ( this.isLoggable( Level.FINER ) )
+                        {
+                            this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
+                                                               modelValidator.toString() ), null );
+
+                        }
+
                         report.getDetails().addAll( current.getDetails() );
                     }
                 }
@@ -1141,11 +1242,9 @@ public class DefaultModelContext extends ModelContext
 
             if ( platformProviders.exists() )
             {
-                if ( this.isLoggable( Level.FINE ) )
+                if ( this.isLoggable( Level.FINER ) )
                 {
-                    this.log( Level.FINE, getMessage( "processing", this.getClass().getName(),
-                                                      platformProviders.getAbsolutePath() ), null );
-
+                    this.log( Level.FINER, getMessage( "processing", platformProviders.getAbsolutePath() ), null );
                 }
 
                 InputStream in = null;
@@ -1186,11 +1285,10 @@ public class DefaultModelContext extends ModelContext
 
                         }
 
-                        if ( this.isLoggable( Level.FINE ) )
+                        if ( this.isLoggable( Level.FINEST ) )
                         {
-                            this.log( Level.FINE, getMessage( "providerInfo", this.getClass().getName(),
-                                                              platformProviders.getAbsolutePath(),
-                                                              providerClass.getName(), provider.getName() ), null );
+                            this.log( Level.FINEST, getMessage( "providerInfo", platformProviders.getAbsolutePath(),
+                                                                providerClass.getName(), provider.getName() ), null );
 
                         }
 
@@ -1210,11 +1308,9 @@ public class DefaultModelContext extends ModelContext
                 count++;
                 final URL url = classpathProviders.nextElement();
 
-                if ( this.isLoggable( Level.FINE ) )
+                if ( this.isLoggable( Level.FINER ) )
                 {
-                    this.log( Level.FINE, getMessage( "processing", this.getClass().getName(),
-                                                      url.toExternalForm() ), null );
-
+                    this.log( Level.FINER, getMessage( "processing", url.toExternalForm() ), null );
                 }
 
                 final BufferedReader reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
@@ -1243,11 +1339,10 @@ public class DefaultModelContext extends ModelContext
 
                     }
 
-                    if ( this.isLoggable( Level.FINE ) )
+                    if ( this.isLoggable( Level.FINEST ) )
                     {
-                        this.log( Level.FINE, getMessage( "providerInfo", this.getClass().getName(),
-                                                          url.toExternalForm(), providerClass.getName(),
-                                                          provider.getName() ), null );
+                        this.log( Level.FINEST, getMessage( "providerInfo", url.toExternalForm(),
+                                                            providerClass.getName(), provider.getName() ), null );
 
                     }
 
@@ -1257,12 +1352,11 @@ public class DefaultModelContext extends ModelContext
                 reader.close();
             }
 
-            if ( this.isLoggable( Level.CONFIG ) )
+            if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.CONFIG,
-                          getMessage( "contextReport", this.getClass().getName(), count,
-                                      this.getProviderLocation() + '/' + providerClass.getName(),
-                                      Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
+                this.log( Level.FINE, getMessage( "contextReport", count,
+                                                  this.getProviderLocation() + '/' + providerClass.getName(),
+                                                  Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
 
             }
 
@@ -1304,9 +1398,9 @@ public class DefaultModelContext extends ModelContext
                 final Manifest mf = new Manifest( manifestStream );
                 manifestStream.close();
 
-                if ( this.isLoggable( Level.FINE ) )
+                if ( this.isLoggable( Level.FINER ) )
                 {
-                    this.log( Level.FINE, getMessage( "processing", this.getClass().getName(), externalForm ), null );
+                    this.log( Level.FINER, getMessage( "processing", externalForm ), null );
                 }
 
                 for ( Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
@@ -1318,9 +1412,9 @@ public class DefaultModelContext extends ModelContext
                             final URL schemaUrl = new URL( baseUrl + entry.getKey() );
                             resources.add( schemaUrl.toURI() );
 
-                            if ( this.isLoggable( Level.CONFIG ) )
+                            if ( this.isLoggable( Level.FINEST ) )
                             {
-                                this.log( Level.CONFIG, getMessage( "foundSchemaCandidate", this.getClass().getName(),
+                                this.log( Level.FINEST, getMessage( "foundSchemaCandidate",
                                                                     schemaUrl.toExternalForm() ), null );
 
                             }
@@ -1329,11 +1423,10 @@ public class DefaultModelContext extends ModelContext
                 }
             }
 
-            if ( this.isLoggable( Level.CONFIG ) )
+            if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.CONFIG,
-                          getMessage( "contextReport", this.getClass().getName(), count, "META-INF/MANIFEST.MF",
-                                      Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
+                this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF",
+                                                  Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
 
             }
 
