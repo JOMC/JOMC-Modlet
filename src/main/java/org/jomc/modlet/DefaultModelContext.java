@@ -402,17 +402,16 @@ public class DefaultModelContext extends ModelContext
 
                     final Class<? extends ModelProvider> modelProviderClass = clazz.asSubclass( ModelProvider.class );
                     final ModelProvider modelProvider = modelProviderClass.newInstance();
+
+                    if ( this.isLoggable( Level.FINER ) )
+                    {
+                        this.log( Level.FINER, getMessage( "creatingModel", model, modelProvider.toString() ), null );
+                    }
+
                     final Model provided = modelProvider.findModel( this, m );
 
                     if ( provided != null )
                     {
-                        if ( this.isLoggable( Level.FINER ) )
-                        {
-                            this.log( Level.FINER,
-                                      getMessage( "creatingModel", model, modelProvider.toString() ), null );
-
-                        }
-
                         m = provided;
                     }
                 }
@@ -1071,16 +1070,17 @@ public class DefaultModelContext extends ModelContext
 
                     final Class<? extends ModelProcessor> modelProcessorClass = clazz.asSubclass( ModelProcessor.class );
                     final ModelProcessor modelProcessor = modelProcessorClass.newInstance();
+
+                    if ( this.isLoggable( Level.FINER ) )
+                    {
+                        this.log( Level.FINER, getMessage( "processingModel", model.getIdentifier(),
+                                                           modelProcessor.toString() ), null );
+
+                    }
+
                     final Model current = modelProcessor.processModel( this, processed );
                     if ( current != null )
                     {
-                        if ( this.isLoggable( Level.FINER ) )
-                        {
-                            this.log( Level.FINER, getMessage( "processingModel", model.getIdentifier(),
-                                                               modelProcessor.toString() ), null );
-
-                        }
-
                         processed = current;
                     }
                 }
@@ -1143,16 +1143,17 @@ public class DefaultModelContext extends ModelContext
 
                     final Class<? extends ModelValidator> modelValidatorClass = clazz.asSubclass( ModelValidator.class );
                     final ModelValidator modelValidator = modelValidatorClass.newInstance();
+
+                    if ( this.isLoggable( Level.FINER ) )
+                    {
+                        this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
+                                                           modelValidator.toString() ), null );
+
+                    }
+
                     final ModelValidationReport current = modelValidator.validateModel( this, model );
                     if ( current != null )
                     {
-                        if ( this.isLoggable( Level.FINER ) )
-                        {
-                            this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
-                                                               modelValidator.toString() ), null );
-
-                        }
-
                         report.getDetails().addAll( current.getDetails() );
                     }
                 }
