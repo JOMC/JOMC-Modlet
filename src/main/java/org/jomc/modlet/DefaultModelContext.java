@@ -488,9 +488,9 @@ public class DefaultModelContext extends ModelContext
                             }
                         }
 
-                        if ( isLoggable( Level.FINEST ) )
+                        if ( isLoggable( Level.FINER ) )
                         {
-                            log( Level.FINEST,
+                            log( Level.FINER,
                                  getMessage( "resolutionInfo", publicId + ", " + systemId,
                                              schemaSource.getPublicId() + ", " + schemaSource.getSystemId() ), null );
 
@@ -517,10 +517,10 @@ public class DefaultModelContext extends ModelContext
                                     schemaSource.setPublicId( publicId );
                                     schemaSource.setSystemId( uri.toASCIIString() );
 
-                                    if ( isLoggable( Level.FINEST ) )
+                                    if ( isLoggable( Level.FINER ) )
                                     {
-                                        log( Level.FINEST, getMessage( "resolutionInfo", systemUri.toASCIIString(),
-                                                                       schemaSource.getSystemId() ), null );
+                                        log( Level.FINER, getMessage( "resolutionInfo", systemUri.toASCIIString(),
+                                                                      schemaSource.getSystemId() ), null );
 
                                     }
 
