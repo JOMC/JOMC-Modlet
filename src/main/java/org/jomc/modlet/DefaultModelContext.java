@@ -488,9 +488,9 @@ public class DefaultModelContext extends ModelContext
                             }
                         }
 
-                        if ( isLoggable( Level.FINER ) )
+                        if ( isLoggable( Level.FINEST ) )
                         {
-                            log( Level.FINER,
+                            log( Level.FINEST,
                                  getMessage( "resolutionInfo", publicId + ", " + systemId,
                                              schemaSource.getPublicId() + ", " + schemaSource.getSystemId() ), null );
 
@@ -517,10 +517,10 @@ public class DefaultModelContext extends ModelContext
                                     schemaSource.setPublicId( publicId );
                                     schemaSource.setSystemId( uri.toASCIIString() );
 
-                                    if ( isLoggable( Level.FINER ) )
+                                    if ( isLoggable( Level.FINEST ) )
                                     {
-                                        log( Level.FINER, getMessage( "resolutionInfo", systemUri.toASCIIString(),
-                                                                      schemaSource.getSystemId() ), null );
+                                        log( Level.FINEST, getMessage( "resolutionInfo", systemUri.toASCIIString(),
+                                                                       schemaSource.getSystemId() ), null );
 
                                     }
 
@@ -828,7 +828,7 @@ public class DefaultModelContext extends ModelContext
 
             } );
 
-            if ( this.isLoggable( Level.FINER ) )
+            if ( this.isLoggable( Level.FINEST ) )
             {
                 final StringBuilder schemaInfo = new StringBuilder();
 
@@ -837,7 +837,7 @@ public class DefaultModelContext extends ModelContext
                     schemaInfo.append( ", " ).append( s.getSystemId() );
                 }
 
-                this.log( Level.FINER, getMessage( "creatingSchema", schemaInfo.substring( 2 ) ), null );
+                this.log( Level.FINEST, getMessage( "creatingSchema", schemaInfo.substring( 2 ) ), null );
             }
 
             return f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
@@ -888,9 +888,9 @@ public class DefaultModelContext extends ModelContext
                 throw new ModelException( getMessage( "missingSchemas", model ) );
             }
 
-            if ( this.isLoggable( Level.FINER ) )
+            if ( this.isLoggable( Level.FINEST ) )
             {
-                this.log( Level.FINER, getMessage( "creatingContext", packageNames.substring( 1 ) ), null );
+                this.log( Level.FINEST, getMessage( "creatingContext", packageNames.substring( 1 ) ), null );
             }
 
             return JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() );
@@ -953,10 +953,10 @@ public class DefaultModelContext extends ModelContext
                 m.setProperty( Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.substring( 1 ) );
             }
 
-            if ( this.isLoggable( Level.FINER ) )
+            if ( this.isLoggable( Level.FINEST ) )
             {
-                this.log( Level.FINER, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
-                                                   schemaLocation.substring( 1 ) ), null );
+                this.log( Level.FINEST, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
+                                                    schemaLocation.substring( 1 ) ), null );
 
             }
 
@@ -1004,9 +1004,9 @@ public class DefaultModelContext extends ModelContext
                 throw new ModelException( getMessage( "missingSchemas", model ) );
             }
 
-            if ( this.isLoggable( Level.FINER ) )
+            if ( this.isLoggable( Level.FINEST ) )
             {
-                this.log( Level.FINER,
+                this.log( Level.FINEST,
                           getMessage( "creatingUnmarshaller", packageNames.substring( 1 ) ), null );
 
             }
@@ -1243,9 +1243,9 @@ public class DefaultModelContext extends ModelContext
 
             if ( platformProviders.exists() )
             {
-                if ( this.isLoggable( Level.FINER ) )
+                if ( this.isLoggable( Level.FINEST ) )
                 {
-                    this.log( Level.FINER, getMessage( "processing", platformProviders.getAbsolutePath() ), null );
+                    this.log( Level.FINEST, getMessage( "processing", platformProviders.getAbsolutePath() ), null );
                 }
 
                 InputStream in = null;
@@ -1309,9 +1309,9 @@ public class DefaultModelContext extends ModelContext
                 count++;
                 final URL url = classpathProviders.nextElement();
 
-                if ( this.isLoggable( Level.FINER ) )
+                if ( this.isLoggable( Level.FINEST ) )
                 {
-                    this.log( Level.FINER, getMessage( "processing", url.toExternalForm() ), null );
+                    this.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
                 }
 
                 final BufferedReader reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
@@ -1399,9 +1399,9 @@ public class DefaultModelContext extends ModelContext
                 final Manifest mf = new Manifest( manifestStream );
                 manifestStream.close();
 
-                if ( this.isLoggable( Level.FINER ) )
+                if ( this.isLoggable( Level.FINEST ) )
                 {
-                    this.log( Level.FINER, getMessage( "processing", externalForm ), null );
+                    this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
                 }
 
                 for ( Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
