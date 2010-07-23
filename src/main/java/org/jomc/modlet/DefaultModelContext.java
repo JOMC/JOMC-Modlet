@@ -349,11 +349,11 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final InstantiationException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final IllegalAccessException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -421,11 +421,11 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final InstantiationException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final IllegalAccessException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -545,7 +545,9 @@ public class DefaultModelContext extends ModelContext
                 {
                     if ( isLoggable( Level.WARNING ) )
                     {
-                        log( Level.WARNING, getMessage( "unsupportedSystemIdUri", systemId, e.getMessage() ), null );
+                        log( Level.WARNING,
+                             getMessage( "unsupportedSystemIdUri", systemId, getMessage( e ) ), null );
+
                     }
 
                     schemaSource = null;
@@ -553,7 +555,7 @@ public class DefaultModelContext extends ModelContext
                 catch ( final ModelException e )
                 {
                     throw (IOException) new IOException( getMessage(
-                        "failedResolving", publicId, systemId, e.getMessage() ) ).initCause( e );
+                        "failedResolving", publicId, systemId, getMessage( e ) ) ).initCause( e );
 
                 }
 
@@ -731,10 +733,10 @@ public class DefaultModelContext extends ModelContext
                 }
                 catch ( final SAXException e )
                 {
-                    String message = e.getMessage();
+                    String message = getMessage( e );
                     if ( message == null && e.getException() != null )
                     {
-                        message = e.getException().getMessage();
+                        message = getMessage( e.getException() );
                     }
 
                     if ( isLoggable( Level.SEVERE ) )
@@ -749,7 +751,7 @@ public class DefaultModelContext extends ModelContext
                     if ( isLoggable( Level.SEVERE ) )
                     {
                         log( Level.SEVERE, getMessage( "failedResolving", resolvePublicId, resolveSystemId,
-                                                       e.getMessage() ), e );
+                                                       getMessage( e ) ), e );
 
                     }
                 }
@@ -758,7 +760,7 @@ public class DefaultModelContext extends ModelContext
                     if ( isLoggable( Level.SEVERE ) )
                     {
                         log( Level.SEVERE, getMessage( "failedResolving", resolvePublicId, resolveSystemId,
-                                                       e.getMessage() ), e );
+                                                       getMessage( e ) ), e );
 
                     }
                 }
@@ -844,14 +846,14 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final IOException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final SAXException e )
         {
-            String message = e.getMessage();
+            String message = getMessage( e );
             if ( message == null && e.getException() != null )
             {
-                message = e.getException().getMessage();
+                message = getMessage( e.getException() );
             }
 
             throw new ModelException( message, e );
@@ -897,10 +899,10 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final JAXBException e )
         {
-            String message = e.getMessage();
+            String message = getMessage( e );
             if ( message == null && e.getLinkedException() != null )
             {
-                message = e.getLinkedException().getMessage();
+                message = getMessage( e.getLinkedException() );
             }
 
             throw new ModelException( message, e );
@@ -964,10 +966,10 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final JAXBException e )
         {
-            String message = e.getMessage();
+            String message = getMessage( e );
             if ( message == null && e.getLinkedException() != null )
             {
-                message = e.getLinkedException().getMessage();
+                message = getMessage( e.getLinkedException() );
             }
 
             throw new ModelException( message, e );
@@ -1015,10 +1017,10 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final JAXBException e )
         {
-            String message = e.getMessage();
+            String message = getMessage( e );
             if ( message == null && e.getLinkedException() != null )
             {
-                message = e.getLinkedException().getMessage();
+                message = getMessage( e.getLinkedException() );
             }
 
             throw new ModelException( message, e );
@@ -1090,11 +1092,11 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final InstantiationException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final IllegalAccessException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -1163,11 +1165,11 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final InstantiationException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final IllegalAccessException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -1199,10 +1201,10 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final SAXException e )
         {
-            String message = e.getMessage();
+            String message = getMessage( e );
             if ( message == null && e.getException() != null )
             {
-                message = e.getException().getMessage();
+                message = getMessage( e.getException() );
             }
 
             if ( this.isLoggable( Level.FINE ) )
@@ -1217,7 +1219,7 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final IOException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
 
         return modelErrorHandler.getReport();
@@ -1365,7 +1367,7 @@ public class DefaultModelContext extends ModelContext
         }
         catch ( final IOException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -1444,6 +1446,11 @@ public class DefaultModelContext extends ModelContext
 
     }
 
+    private static String getMessage( final Throwable t )
+    {
+        return t != null ? t.getMessage() != null ? t.getMessage() : getMessage( t.getCause() ) : null;
+    }
+
     // SECTION-END
 }
 
@@ -1503,15 +1510,15 @@ class ModelErrorHandler extends DefaultHandler
     @Override
     public void warning( final SAXParseException exception ) throws SAXException
     {
-        if ( this.context != null && this.context.isLoggable( Level.FINE ) )
-        {
-            this.context.log( Level.FINE, exception.getMessage(), exception );
-        }
-
-        String message = exception.getMessage();
+        String message = getMessage( exception );
         if ( message == null && exception.getException() != null )
         {
-            message = exception.getException().getMessage();
+            message = getMessage( exception.getException() );
+        }
+
+        if ( this.context != null && this.context.isLoggable( Level.FINE ) )
+        {
+            this.context.log( Level.FINE, message, exception );
         }
 
         this.getReport().getDetails().add( new ModelValidationReport.Detail(
@@ -1522,15 +1529,15 @@ class ModelErrorHandler extends DefaultHandler
     @Override
     public void error( final SAXParseException exception ) throws SAXException
     {
-        if ( this.context != null && this.context.isLoggable( Level.FINE ) )
-        {
-            this.context.log( Level.FINE, exception.getMessage(), exception );
-        }
-
-        String message = exception.getMessage();
+        String message = getMessage( exception );
         if ( message == null && exception.getException() != null )
         {
-            message = exception.getException().getMessage();
+            message = getMessage( exception.getException() );
+        }
+
+        if ( this.context != null && this.context.isLoggable( Level.FINE ) )
+        {
+            this.context.log( Level.FINE, message, exception );
         }
 
         this.getReport().getDetails().add( new ModelValidationReport.Detail(
@@ -1541,20 +1548,25 @@ class ModelErrorHandler extends DefaultHandler
     @Override
     public void fatalError( final SAXParseException exception ) throws SAXException
     {
-        if ( this.context != null && this.context.isLoggable( Level.FINE ) )
-        {
-            this.context.log( Level.FINE, exception.getMessage(), exception );
-        }
-
-        String message = exception.getMessage();
+        String message = getMessage( exception );
         if ( message == null && exception.getException() != null )
         {
-            message = exception.getException().getMessage();
+            message = getMessage( exception.getException() );
+        }
+
+        if ( this.context != null && this.context.isLoggable( Level.FINE ) )
+        {
+            this.context.log( Level.FINE, message, exception );
         }
 
         this.getReport().getDetails().add( new ModelValidationReport.Detail(
             "W3C XML 1.0 Recommendation - Section 1.2 - Fatal Error", Level.SEVERE, message, null ) );
 
+    }
+
+    private static String getMessage( final Throwable t )
+    {
+        return t != null ? t.getMessage() != null ? t.getMessage() : getMessage( t.getCause() ) : null;
     }
 
 }

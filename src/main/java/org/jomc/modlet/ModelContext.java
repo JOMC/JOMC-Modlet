@@ -557,24 +557,24 @@ public abstract class ModelContext
         }
         catch ( final IOException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final JAXBException e )
         {
-            String message = e.getMessage();
+            String message = getMessage( e );
             if ( message == null && e.getLinkedException() != null )
             {
-                message = e.getLinkedException().getMessage();
+                message = getMessage( e.getLinkedException() );
             }
 
             throw new ModelException( message, e );
         }
         catch ( final SAXException e )
         {
-            String message = e.getMessage();
+            String message = getMessage( e );
             if ( message == null && e.getException() != null )
             {
-                message = e.getException().getMessage();
+                message = getMessage( e.getException() );
             }
 
             throw new ModelException( message, e );
@@ -655,7 +655,7 @@ public abstract class ModelContext
         {
             if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINE, e.getMessage(), e );
+                this.log( Level.FINE, getMessage( e ), e );
             }
 
             return null;
@@ -710,7 +710,7 @@ public abstract class ModelContext
         }
         catch ( final IOException e )
         {
-            throw new ModelException( e.getMessage(), e );
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -762,22 +762,24 @@ public abstract class ModelContext
         }
         catch ( final InstantiationException e )
         {
+            final String message = getMessage( e );
             throw new ModelException( getMessage( "contextInstantiationException", getModelContextClassName(),
-                                                  e.getMessage() != null ? " " + e.getMessage() : "" ), e );
+                                                  message != null ? " " + message : "" ), e );
 
         }
         catch ( final IllegalAccessException e )
         {
+            final String message = getMessage( e );
             throw new ModelException( getMessage( "contextConstructorAccessDenied", getModelContextClassName(),
-                                                  e.getMessage() != null ? " " + e.getMessage() : "" ), e );
+                                                  message != null ? " " + message : "" ), e );
 
         }
         catch ( final InvocationTargetException e )
         {
-            String message = e.getMessage();
-            if ( e.getTargetException() != null && e.getMessage() != null )
+            String message = getMessage( e );
+            if ( message == null && e.getTargetException() != null )
             {
-                message = e.getTargetException().getMessage();
+                message = getMessage( e.getTargetException() );
             }
 
             throw new ModelException( getMessage( "contextConstructorException", getModelContextClassName(),
@@ -945,9 +947,14 @@ public abstract class ModelContext
 
     private static String getMessage( final String key, final Object... args )
     {
-        return MessageFormat.format( ResourceBundle.getBundle( ModelContext.class.getName().replace( '.', '/' ),
-                                                               Locale.getDefault() ).getString( key ), args );
+        return MessageFormat.format( ResourceBundle.getBundle(
+            ModelContext.class.getName().replace( '.', '/' ), Locale.getDefault() ).getString( key ), args );
 
+    }
+
+    private static String getMessage( final Throwable t )
+    {
+        return t != null ? t.getMessage() != null ? t.getMessage() : getMessage( t.getCause() ) : null;
     }
 
 }
