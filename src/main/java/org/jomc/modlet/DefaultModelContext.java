@@ -1266,7 +1266,7 @@ public class DefaultModelContext extends ModelContext
                     }
                 }
 
-                for ( Map.Entry e : p.entrySet() )
+                for ( Map.Entry<Object, Object> e : p.entrySet() )
                 {
                     if ( e.getKey().toString().startsWith( providerNamePrefix ) )
                     {
