@@ -812,9 +812,15 @@ public class DefaultModelContext extends ModelContext
 
                 public void warning( final SAXParseException e ) throws SAXException
                 {
+                    String message = getMessage( e );
+                    if ( message == null && e.getException() != null )
+                    {
+                        message = getMessage( e.getException() );
+                    }
+
                     if ( isLoggable( Level.WARNING ) )
                     {
-                        log( Level.WARNING, e.getMessage(), e );
+                        log( Level.WARNING, message, e );
                     }
                 }
 
