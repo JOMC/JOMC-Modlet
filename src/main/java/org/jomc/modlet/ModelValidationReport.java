@@ -142,7 +142,7 @@ public class ModelValidationReport implements Serializable
          */
         private String toStringInternal()
         {
-            return new StringBuilder().append( '{' ).
+            return new StringBuilder( 200 ).append( '{' ).
                 append( "identifier=" ).append( this.getIdentifier() ).
                 append( ", level=" ).append( this.getLevel().getLocalizedName() ).
                 append( ", message=" ).append( this.getMessage() ).

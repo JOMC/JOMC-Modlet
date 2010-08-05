@@ -50,7 +50,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -838,7 +837,7 @@ public class DefaultModelContext extends ModelContext
 
             if ( this.isLoggable( Level.FINEST ) )
             {
-                final StringBuilder schemaInfo = new StringBuilder();
+                final StringBuilder schemaInfo = new StringBuilder( sources.size() * 50 );
 
                 for ( Source s : sources )
                 {
@@ -876,14 +875,15 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
-            final StringBuilder packageNames = new StringBuilder();
             final Schemas schemas = this.getModlets().getSchemas( model );
+            StringBuilder packageNames = null;
 
             if ( schemas != null )
             {
-                for ( final Iterator<Schema> s = schemas.getSchema().iterator(); s.hasNext(); )
+                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
+
+                for ( Schema schema : schemas.getSchema() )
                 {
-                    final Schema schema = s.next();
                     if ( schema.getContextId() != null )
                     {
                         packageNames.append( ':' ).append( schema.getContextId() );
@@ -891,7 +891,7 @@ public class DefaultModelContext extends ModelContext
                 }
             }
 
-            if ( packageNames.length() == 0 )
+            if ( packageNames == null || packageNames.length() == 0 )
             {
                 throw new ModelException( getMessage( "missingSchemas", model ) );
             }
@@ -925,16 +925,17 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
-            final StringBuilder packageNames = new StringBuilder();
-            final StringBuilder schemaLocation = new StringBuilder();
+            StringBuilder packageNames = null;
+            StringBuilder schemaLocation = null;
             final Schemas schemas = this.getModlets().getSchemas( model );
 
             if ( schemas != null )
             {
-                for ( final Iterator<Schema> s = schemas.getSchema().iterator(); s.hasNext(); )
-                {
-                    final Schema schema = s.next();
+                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
+                schemaLocation = new StringBuilder( schemas.getSchema().size() * 50 );
 
+                for ( Schema schema : schemas.getSchema() )
+                {
                     if ( schema.getContextId() != null )
                     {
                         packageNames.append( ':' ).append( schema.getContextId() );
@@ -948,7 +949,7 @@ public class DefaultModelContext extends ModelContext
                 }
             }
 
-            if ( packageNames.length() == 0 )
+            if ( packageNames == null || packageNames.length() == 0 )
             {
                 throw new ModelException( getMessage( "missingSchemas", model ) );
             }
@@ -956,7 +957,7 @@ public class DefaultModelContext extends ModelContext
             final Marshaller m =
                 JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createMarshaller();
 
-            if ( schemaLocation.length() != 0 )
+            if ( schemaLocation != null && schemaLocation.length() != 0 )
             {
                 m.setProperty( Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.substring( 1 ) );
             }
@@ -992,14 +993,15 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
-            final StringBuilder packageNames = new StringBuilder();
+            StringBuilder packageNames = null;
             final Schemas schemas = this.getModlets().getSchemas( model );
 
             if ( schemas != null )
             {
-                for ( final Iterator<Schema> s = schemas.getSchema().iterator(); s.hasNext(); )
+                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
+
+                for ( Schema schema : schemas.getSchema() )
                 {
-                    final Schema schema = s.next();
                     if ( schema.getContextId() != null )
                     {
                         packageNames.append( ':' ).append( schema.getContextId() );
@@ -1007,7 +1009,7 @@ public class DefaultModelContext extends ModelContext
                 }
             }
 
-            if ( packageNames.length() == 0 )
+            if ( packageNames == null || packageNames.length() == 0 )
             {
                 throw new ModelException( getMessage( "missingSchemas", model ) );
             }
