@@ -64,25 +64,25 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 public class ModelContextTest
 {
 
-    private ModelContext modletContext;
+    private ModelContext modelContext;
 
     public ModelContextTest()
     {
         this( null );
     }
 
-    public ModelContextTest( final ModelContext modletContext )
+    public ModelContextTest( final ModelContext modelContext )
     {
         super();
-        this.modletContext = modletContext;
+        this.modelContext = modelContext;
     }
 
     public ModelContext getModelContext() throws ModelException
     {
-        if ( this.modletContext == null )
+        if ( this.modelContext == null )
         {
-            this.modletContext = ModelContext.createModelContext( this.getClass().getClassLoader() );
-            this.modletContext.getListeners().add( new ModelContext.Listener()
+            this.modelContext = ModelContext.createModelContext( this.getClass().getClassLoader() );
+            this.modelContext.getListeners().add( new ModelContext.Listener()
             {
 
                 @Override
@@ -95,7 +95,7 @@ public class ModelContextTest
 
         }
 
-        return this.modletContext;
+        return this.modelContext;
     }
 
     public Properties getModelContextTestProperties() throws IOException
