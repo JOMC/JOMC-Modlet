@@ -32,11 +32,12 @@
  */
 package org.jomc.modlet.test;
 
+import org.junit.Test;
 import org.jomc.modlet.Service;
 import org.jomc.modlet.Services;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.fail;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Test cases for class {@code org.jomc.modlet.Services}.
@@ -47,12 +48,14 @@ import static junit.framework.Assert.assertNotNull;
 public class ServicesTest
 {
 
+    /** Creates a new {@code ServicesTest} instance. */
     public ServicesTest()
     {
         super();
     }
 
-    public void testGetServices() throws Exception
+    @Test
+    public final void testGetServices() throws Exception
     {
         final Services services = new Services();
 

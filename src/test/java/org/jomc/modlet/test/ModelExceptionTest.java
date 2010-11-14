@@ -32,10 +32,11 @@
  */
 package org.jomc.modlet.test;
 
+import org.junit.Test;
 import java.io.ObjectInputStream;
 import org.jomc.modlet.ModelException;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Test cases for class {@code org.jomc.modlet.ModelException}.
@@ -46,12 +47,14 @@ import static junit.framework.Assert.assertNotNull;
 public class ModelExceptionTest
 {
 
+    /** Creates a new {@code ModelExceptionTest} instance. */
     public ModelExceptionTest()
     {
         super();
     }
 
-    public void testModletException() throws Exception
+    @Test
+    public final void testModletException() throws Exception
     {
         final ObjectInputStream in =
             new ObjectInputStream( this.getClass().getResourceAsStream( "ModelException.ser" ) );

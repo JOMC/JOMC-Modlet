@@ -56,7 +56,7 @@ public class InvocationTargetExceptionModelContext extends ModelContext
 
     public InvocationTargetExceptionModelContext( final ClassLoader classLoader )
     {
-        super( null );
+        super( classLoader );
         throw new UnsupportedOperationException();
     }
 

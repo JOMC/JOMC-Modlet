@@ -38,7 +38,7 @@ import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 
 /**
- * {@code ModelProvider} test implementation.
+ * {@code ModelProvider} test implementation returning {@code null}.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$

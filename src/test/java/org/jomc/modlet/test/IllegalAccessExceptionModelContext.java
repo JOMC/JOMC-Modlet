@@ -56,7 +56,7 @@ public class IllegalAccessExceptionModelContext extends ModelContext
 
     private IllegalAccessExceptionModelContext( final ClassLoader classLoader )
     {
-        super( null );
+        super( classLoader );
     }
 
     @Override

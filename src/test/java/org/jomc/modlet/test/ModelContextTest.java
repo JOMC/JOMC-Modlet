@@ -32,6 +32,9 @@
  */
 package org.jomc.modlet.test;
 
+import org.jomc.modlet.DefaultModletProvider;
+import java.io.InputStream;
+import org.junit.Test;
 import java.io.StringWriter;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
@@ -47,12 +50,12 @@ import java.util.logging.Level;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 import org.xml.sax.EntityResolver;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.fail;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
 /**
@@ -64,24 +67,56 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 public class ModelContextTest
 {
 
+    /** Constant for the name of a modlet provided without {@code ModletProvider}. */
+    public static final String DEFAULT_MODLET_NAME;
+
+    /** Constant for the absolute location of an existing test resource. */
+    public static final String TEST_RESOURCE_LOCATION =
+        ModelContextTest.class.getName().replace( '.', '/' ) + ".properties";
+
+    static
+    {
+        try
+        {
+            final Properties p = new Properties();
+            final InputStream in = ModelContextTest.class.getResourceAsStream( "/" + TEST_RESOURCE_LOCATION );
+            assert in != null : "Expected '" + TEST_RESOURCE_LOCATION + "' not found.";
+            p.load( in );
+            in.close();
+
+            final String defaultModletName = p.getProperty( "defaultModletName" );
+            assert defaultModletName != null : "Expected 'defaultModletName' property not found.";
+            DEFAULT_MODLET_NAME = defaultModletName;
+        }
+        catch ( final IOException e )
+        {
+            throw new AssertionError( e );
+        }
+    }
+
+    /** The {@code ModelContext} instance tests are performed with. */
     private ModelContext modelContext;
 
+    /** Creates a new {@code ModelContextTest} instance. */
     public ModelContextTest()
     {
-        this( null );
-    }
-
-    public ModelContextTest( final ModelContext modelContext )
-    {
         super();
-        this.modelContext = modelContext;
     }
 
+    /**
+     * Gets the {@code ModelContext} instance tests are performed with.
+     *
+     * @return The {@code ModelContext} instance tests are performed with.
+     *
+     * @throws ModelException if creating a new instance fails.
+     *
+     * @see #newModelContext()
+     */
     public ModelContext getModelContext() throws ModelException
     {
         if ( this.modelContext == null )
         {
-            this.modelContext = ModelContext.createModelContext( this.getClass().getClassLoader() );
+            this.modelContext = this.newModelContext();
             this.modelContext.getListeners().add( new ModelContext.Listener()
             {
 
@@ -98,14 +133,22 @@ public class ModelContextTest
         return this.modelContext;
     }
 
-    public Properties getModelContextTestProperties() throws IOException
+    /**
+     * Creates a new {@code ModelContext} instance to test.
+     *
+     * @return A new {@code ModelContext} instance to test.
+     *
+     * @throws ModelException if creating a new instance fails.
+     *
+     * @see #getModelContext()
+     */
+    protected ModelContext newModelContext() throws ModelException
     {
-        final Properties p = new Properties();
-        p.load( this.getClass().getResourceAsStream( "ModelContextTest.properties" ) );
-        return p;
+        return ModelContext.createModelContext( this.getClass().getClassLoader() );
     }
 
-    public void testAttributes() throws Exception
+    @Test
+    public final void testAttributes() throws Exception
     {
         try
         {
@@ -173,7 +216,8 @@ public class ModelContextTest
         assertEquals( "TEST", this.getModelContext().getAttribute( "ATTRIBUTE", "TEST" ) );
     }
 
-    public void testFindClass() throws Exception
+    @Test
+    public final void testFindClass() throws Exception
     {
         try
         {
@@ -190,7 +234,8 @@ public class ModelContextTest
         assertNull( this.getModelContext().findClass( "DOES_NOT_EXIST" ) );
     }
 
-    public void testFindResource() throws Exception
+    @Test
+    public final void testFindResource() throws Exception
     {
         try
         {
@@ -203,12 +248,11 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        assertNotNull( this.getModelContext().findResource(
-            ModelContextTest.class.getName().replace( '.', '/' ) + ".properties" ) );
-
+        assertNotNull( this.getModelContext().findResource( TEST_RESOURCE_LOCATION ) );
     }
 
-    public void testFindResources() throws Exception
+    @Test
+    public final void testFindResources() throws Exception
     {
         try
         {
@@ -221,20 +265,22 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        assertTrue( this.getModelContext().findResources(
-            ModelContextTest.class.getName().replace( '.', '/' ) + ".properties" ).hasMoreElements() );
-
+        assertTrue( this.getModelContext().findResources( TEST_RESOURCE_LOCATION ).hasMoreElements() );
     }
 
-    public void testGetModlets() throws Exception
+    @Test
+    public final void testGetModlets() throws Exception
     {
         this.getModelContext().setModlets( null );
+        DefaultModletProvider.setDefaultEnabled( Boolean.FALSE );
         final Modlets modlets = this.getModelContext().getModlets();
         assertNotNull( modlets );
-        assertNotNull( modlets.getModlet( this.getModelContextTestProperties().getProperty( "projectName" ) ) );
+        assertNotNull( modlets.getModlet( DEFAULT_MODLET_NAME ) );
+        DefaultModletProvider.setDefaultEnabled( null );
     }
 
-    public void testCreateModelContext() throws Exception
+    @Test
+    public final void testCreateModelContext() throws Exception
     {
         ModelContext.setModelContextClassName( null );
         assertNotNull( ModelContext.createModelContext( null ) );
@@ -264,7 +310,7 @@ public class ModelContextTest
             System.out.println( e );
         }
 
-        ModelContext.setModelContextClassName( "org.jomc.modlet.test.InstantiationExceptionModelContext" );
+        ModelContext.setModelContextClassName( InstantiationExceptionModelContext.class.getName() );
 
         try
         {
@@ -277,7 +323,7 @@ public class ModelContextTest
             System.out.println( e );
         }
 
-        ModelContext.setModelContextClassName( "org.jomc.modlet.test.IllegalAccessExceptionModelContext" );
+        ModelContext.setModelContextClassName( IllegalAccessExceptionModelContext.class.getName() );
 
         try
         {
@@ -290,7 +336,7 @@ public class ModelContextTest
             System.out.println( e );
         }
 
-        ModelContext.setModelContextClassName( "org.jomc.modlet.test.ClassCastExceptionModelContext" );
+        ModelContext.setModelContextClassName( ClassCastExceptionModelContext.class.getName() );
 
         try
         {
@@ -303,7 +349,7 @@ public class ModelContextTest
             System.out.println( e );
         }
 
-        ModelContext.setModelContextClassName( "org.jomc.modlet.test.NoSuchMethodExceptionModelContext" );
+        ModelContext.setModelContextClassName( NoSuchMethodExceptionModelContext.class.getName() );
 
         try
         {
@@ -316,7 +362,7 @@ public class ModelContextTest
             System.out.println( e );
         }
 
-        ModelContext.setModelContextClassName( "org.jomc.modlet.test.InvocationTargetExceptionModelContext" );
+        ModelContext.setModelContextClassName( InvocationTargetExceptionModelContext.class.getName() );
 
         try
         {
@@ -332,7 +378,8 @@ public class ModelContextTest
         ModelContext.setModelContextClassName( null );
     }
 
-    public void testCreateEntityResolver() throws Exception
+    @Test
+    public final void testCreateEntityResolver() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -365,7 +412,8 @@ public class ModelContextTest
         assertNotNull( r.resolveEntity( "http://jomc.org/modlet", "DOES_NOT_EXIST" ) );
     }
 
-    public void testCreateResourceResolver() throws Exception
+    @Test
+    public final void testCreateResourceResolver() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -413,7 +461,8 @@ public class ModelContextTest
         input.setSystemId( null );
     }
 
-    public void testCreateContext() throws Exception
+    @Test
+    public final void testCreateContext() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -428,10 +477,26 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
+        this.getModelContext().setModlets( new Modlets() );
+
+        try
+        {
+            this.getModelContext().createContext( "" );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+
         assertNotNull( this.getModelContext().createContext( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
-    public void testCreateMarshaller() throws Exception
+    @Test
+    public final void testCreateMarshaller() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -446,10 +511,26 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
+        this.getModelContext().setModlets( new Modlets() );
+
+        try
+        {
+            this.getModelContext().createMarshaller( "" );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+
         assertNotNull( this.getModelContext().createMarshaller( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
-    public void testCreateUnmarshaller() throws Exception
+    @Test
+    public final void testCreateUnmarshaller() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -464,10 +545,26 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
+        this.getModelContext().setModlets( new Modlets() );
+
+        try
+        {
+            this.getModelContext().createUnmarshaller( "" );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+
         assertNotNull( this.getModelContext().createUnmarshaller( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
-    public void testCreateSchema() throws Exception
+    @Test
+    public final void testCreateSchema() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -482,20 +579,39 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
+        this.getModelContext().setModlets( new Modlets() );
+
+        try
+        {
+            this.getModelContext().createSchema( "" );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+
         assertNotNull( this.getModelContext().createSchema( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
-    public void testClassLoader() throws Exception
+    @Test
+    public final void testClassLoader() throws Exception
     {
         final ModelContext context = ModelContext.createModelContext( null );
         assertNotNull( context.getClassLoader() );
         System.out.println( context.getClassLoader().toString() );
     }
 
-    public void testDefaultLogLevel() throws Exception
+    @Test
+    public final void testDefaultLogLevel() throws Exception
     {
         final String testLogLevel = System.getProperty( "org.jomc.modlet.ModelContext.defaultLogLevel" );
 
+        System.clearProperty( "org.jomc.modlet.ModelContext.defaulLogLevel" );
+        ModelContext.setDefaultLogLevel( null );
         assertNotNull( ModelContext.getDefaultLogLevel() );
         ModelContext.setDefaultLogLevel( null );
         System.setProperty( "org.jomc.modlet.ModelContext.defaultLogLevel", "OFF" );
@@ -513,17 +629,22 @@ public class ModelContextTest
         ModelContext.setDefaultLogLevel( null );
     }
 
-    public void testDefaultModletSchemaSystemId() throws Exception
+    @Test
+    public final void testDefaultModletSchemaSystemId() throws Exception
     {
+        System.clearProperty( "org.jomc.modlet.ModelContext.defaulModletSchemaSystemId" );
+        ModelContext.setDefaultModletSchemaSystemId( null );
         assertNotNull( ModelContext.getDefaultModletSchemaSystemId() );
         ModelContext.setDefaultModletSchemaSystemId( null );
         System.setProperty( "org.jomc.modlet.ModelContext.defaultModletSchemaSystemId", "TEST" );
         assertEquals( "TEST", ModelContext.getDefaultModletSchemaSystemId() );
         System.clearProperty( "org.jomc.modlet.ModelContext.defaulModletSchemaSystemId" );
         ModelContext.setDefaultModletSchemaSystemId( null );
+        assertNotNull( ModelContext.getDefaultModletSchemaSystemId() );
     }
 
-    public void testLogLevel() throws Exception
+    @Test
+    public final void testLogLevel() throws Exception
     {
         ModelContext.setDefaultLogLevel( null );
         this.getModelContext().setLogLevel( null );
@@ -537,7 +658,8 @@ public class ModelContextTest
         this.getModelContext().setLogLevel( null );
     }
 
-    public void testLogging() throws Exception
+    @Test
+    public final void testLogging() throws Exception
     {
         try
         {
@@ -568,7 +690,8 @@ public class ModelContextTest
         this.getModelContext().setLogLevel( null );
     }
 
-    public void testModletSchemaSystemId() throws Exception
+    @Test
+    public final void testModletSchemaSystemId() throws Exception
     {
         ModelContext.setDefaultModletSchemaSystemId( null );
         this.getModelContext().setModletSchemaSystemId( null );
@@ -582,7 +705,8 @@ public class ModelContextTest
         this.getModelContext().setModletSchemaSystemId( null );
     }
 
-    public void testFindModel() throws Exception
+    @Test
+    public final void testFindModel() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -600,7 +724,8 @@ public class ModelContextTest
         assertNotNull( this.getModelContext().findModel( ModletObject.MODEL_PUBLIC_ID ) );
     }
 
-    public void testProcessModel() throws Exception
+    @Test
+    public final void testProcessModel() throws Exception
     {
         this.getModelContext().setModlets( null );
 
@@ -616,7 +741,8 @@ public class ModelContextTest
         }
     }
 
-    public void testValidateModel() throws Exception
+    @Test
+    public final void testValidateModel() throws Exception
     {
         this.getModelContext().setModlets( null );
 

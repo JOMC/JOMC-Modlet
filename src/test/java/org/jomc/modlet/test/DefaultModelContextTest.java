@@ -32,20 +32,19 @@
  */
 package org.jomc.modlet.test;
 
+import org.junit.Test;
 import org.jomc.modlet.Modlets;
 import org.jomc.modlet.Model;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Properties;
-import java.util.logging.Level;
 import org.jomc.modlet.DefaultModelContext;
-import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test cases for class {@code org.jomc.modlet.DefaultModelContext}.
@@ -58,120 +57,32 @@ public class DefaultModelContextTest extends ModelContextTest
 
     private static final String MODLET_TEST_NS = "http://jomc.org/modlet/test";
 
-    private DefaultModelContext defaultModelContext;
-
+    /** Creates a new {@code DefaultModelContextTest} instance. */
     public DefaultModelContextTest()
     {
-        this( null );
+        super();
     }
 
-    public DefaultModelContextTest( final DefaultModelContext defaultModelContext )
-    {
-        super( defaultModelContext );
-        this.defaultModelContext = defaultModelContext;
-    }
-
+    /** {@inheritDoc} */
     @Override
     public DefaultModelContext getModelContext() throws ModelException
     {
-        if ( this.defaultModelContext == null )
-        {
-            this.defaultModelContext = new DefaultModelContext( this.getClass().getClassLoader() );
-            this.defaultModelContext.getListeners().add( new ModelContext.Listener()
-            {
-
-                @Override
-                public void onLog( final Level level, final String message, final Throwable t )
-                {
-                    System.out.println( "[" + level.getLocalizedName() + "] " + message );
-                }
-
-            } );
-
-        }
-
-        return this.defaultModelContext;
+        return (DefaultModelContext) super.getModelContext();
     }
 
+    /** {@inheritDoc} */
     @Override
-    public void testCreateContext() throws Exception
+    protected DefaultModelContext newModelContext() throws ModelException
     {
-        super.testCreateContext();
-
-        this.getModelContext().setModlets( new Modlets() );
-
-        try
-        {
-            this.getModelContext().createContext( "" );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        return new DefaultModelContext( this.getClass().getClassLoader() );
     }
 
-    @Override
-    public void testCreateMarshaller() throws Exception
-    {
-        super.testCreateMarshaller();
-
-        this.getModelContext().setModlets( new Modlets() );
-
-        try
-        {
-            this.getModelContext().createMarshaller( "" );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-    }
-
-    @Override
-    public void testCreateUnmarshaller() throws Exception
-    {
-        super.testCreateUnmarshaller();
-
-        this.getModelContext().setModlets( new Modlets() );
-
-        try
-        {
-            this.getModelContext().createUnmarshaller( "" );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-    }
-
-    @Override
-    public void testCreateSchema() throws Exception
-    {
-        super.testCreateSchema();
-
-        this.getModelContext().setModlets( new Modlets() );
-
-        try
-        {
-            this.getModelContext().createSchema( "" );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-    }
-
-    public void testFindModlets() throws Exception
+    @Test
+    public final void testFindModlets() throws Exception
     {
         final File tmpFile = File.createTempFile( this.getClass().getName(), ".properties" );
+        tmpFile.deleteOnExit();
+
         final Properties properties = new Properties();
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", "DOES_NOT_EXIST" );
 
@@ -354,27 +265,36 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
     }
 
-    public void testGetDefaultProviderLocation() throws Exception
+    @Test
+    public final void testGetDefaultProviderLocation() throws Exception
     {
-        assertNotNull( DefaultModelContext.getDefaultProviderLocation() );
+        System.clearProperty( "org.jomc.modlet.DefaultModelContext.defaultProviderLocation" );
+        DefaultModelContext.setDefaultProviderLocation( null );
+        assertEquals( "META-INF/services", DefaultModelContext.getDefaultProviderLocation() );
         DefaultModelContext.setDefaultProviderLocation( null );
         System.setProperty( "org.jomc.modlet.DefaultModelContext.defaultProviderLocation", "TEST" );
         assertEquals( "TEST", DefaultModelContext.getDefaultProviderLocation() );
         System.clearProperty( "org.jomc.modlet.DefaultModelContext.defaultProviderLocation" );
         DefaultModelContext.setDefaultProviderLocation( null );
+        assertEquals( "META-INF/services", DefaultModelContext.getDefaultProviderLocation() );
     }
 
-    public void testGetDefaultPlatformProviderLocation() throws Exception
+    @Test
+    public final void testGetDefaultPlatformProviderLocation() throws Exception
     {
+        System.clearProperty( "org.jomc.modlet.DefaultModelContext.defaultPlatformProviderLocation" );
+        DefaultModelContext.setDefaultPlatformProviderLocation( null );
         assertNotNull( DefaultModelContext.getDefaultPlatformProviderLocation() );
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         System.setProperty( "org.jomc.modlet.DefaultModelContext.defaultPlatformProviderLocation", "TEST" );
         assertEquals( "TEST", DefaultModelContext.getDefaultPlatformProviderLocation() );
         System.clearProperty( "org.jomc.modlet.DefaultModelContext.defaultPlatformProviderLocation" );
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
+        assertNotNull( DefaultModelContext.getDefaultPlatformProviderLocation() );
     }
 
-    public void testGetProviderLocation() throws Exception
+    @Test
+    public final void testGetProviderLocation() throws Exception
     {
         DefaultModelContext.setDefaultProviderLocation( null );
         this.getModelContext().setProviderLocation( null );
@@ -388,7 +308,8 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
     }
 
-    public void testGetPlatformProviderLocation() throws Exception
+    @Test
+    public final void testGetPlatformProviderLocation() throws Exception
     {
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         this.getModelContext().setPlatformProviderLocation( null );
@@ -402,11 +323,9 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setPlatformProviderLocation( null );
     }
 
-    @Override
-    public void testFindModel() throws Exception
+    @Test
+    public final void testFindTestModel() throws Exception
     {
-        super.testFindModel();
-
         final Model model = this.getModelContext().findModel( MODLET_TEST_NS );
 
         assertNotNull( model );
@@ -415,11 +334,9 @@ public class DefaultModelContextTest extends ModelContextTest
         assertNotNull( model.getAnyObject( TestComplexType.class ) );
     }
 
-    @Override
-    public void testProcessModel() throws Exception
+    @Test
+    public final void testProcessTestModel() throws Exception
     {
-        super.testProcessModel();
-
         Model model = this.getModelContext().findModel( MODLET_TEST_NS );
 
         assertNotNull( model );
@@ -431,11 +348,9 @@ public class DefaultModelContextTest extends ModelContextTest
         assertFalse( model.getAnyObject( TestComplexType.class ).getAny().isEmpty() );
     }
 
-    @Override
-    public void testValidateModel() throws Exception
+    @Test
+    public final void testValidateTestModel() throws Exception
     {
-        super.testValidateModel();
-
         final Model model = this.getModelContext().findModel( MODLET_TEST_NS );
         assertNotNull( model );
         assertEquals( MODLET_TEST_NS, model.getIdentifier() );
@@ -444,7 +359,8 @@ public class DefaultModelContextTest extends ModelContextTest
         assertNotNull( this.getModelContext().getAttribute( TestModelValidator.class.getName() ) );
     }
 
-    public void testModel() throws Exception
+    @Test
+    public final void testTestModel() throws Exception
     {
         this.getModelContext().setModlets( null );
 

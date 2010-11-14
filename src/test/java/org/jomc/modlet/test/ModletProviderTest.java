@@ -32,10 +32,11 @@
  */
 package org.jomc.modlet.test;
 
+import org.junit.Test;
 import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.ModletProvider;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test cases for {@code org.jomc.modlet.ModletProvider} implementations.
@@ -46,30 +47,44 @@ import static junit.framework.Assert.fail;
 public class ModletProviderTest
 {
 
+    /** The {@code ModletProvider} instance tests are performed with. */
     private ModletProvider modletProvider;
 
+    /** Creates a new {@code ModletProviderTest} instance. */
     public ModletProviderTest()
     {
         super();
     }
 
-    public ModletProviderTest( final ModletProvider modletProvider )
-    {
-        super();
-        this.modletProvider = modletProvider;
-    }
-
+    /**
+     * Gets the {@code ModletProvider} instance tests are performed with.
+     *
+     * @return The {@code ModletProvider} instance tests are performed with.
+     *
+     * @see #newModletProvider()
+     */
     public ModletProvider getModletProvider()
     {
         if ( this.modletProvider == null )
         {
-            this.modletProvider = new DefaultModletProvider();
+            this.modletProvider = this.newModletProvider();
         }
 
         return this.modletProvider;
     }
 
-    public void testFindModlets() throws Exception
+    /**
+     * Creates a new {@code ModletProvider} instance to test.
+     *
+     * @return A new {@code ModletProvider} instance to test.
+     */
+    public ModletProvider newModletProvider()
+    {
+        return new DefaultModletProvider();
+    }
+
+    @Test
+    public final void testFindModlets() throws Exception
     {
         try
         {

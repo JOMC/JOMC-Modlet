@@ -46,7 +46,7 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 
 /**
- * Test {@code ModelContext} implementation throwing an exception.
+ * Test {@code ModelContext} implementation declared abstract.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
@@ -56,7 +56,7 @@ public abstract class InstantiationExceptionModelContext extends ModelContext
 
     public InstantiationExceptionModelContext( final ClassLoader classLoader )
     {
-        super( null );
+        super( classLoader );
     }
 
     @Override

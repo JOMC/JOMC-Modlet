@@ -32,11 +32,12 @@
  */
 package org.jomc.modlet.test;
 
+import org.junit.Test;
 import java.io.ObjectInputStream;
 import java.util.logging.Level;
 import org.jomc.modlet.ModelValidationReport;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test cases for class {@code org.jomc.modlet.ModelValidationReport}.
@@ -47,12 +48,14 @@ import static junit.framework.Assert.assertNull;
 public class ModelValidationReportTest
 {
 
+    /** Creates a new {@code ModelValidationReportTest} instance. */
     public ModelValidationReportTest()
     {
         super();
     }
 
-    public void testSerializabe() throws Exception
+    @Test
+    public final void testSerializabe() throws Exception
     {
         final ObjectInputStream reportStream =
             new ObjectInputStream( this.getClass().getResourceAsStream( "ModelValidationReport.ser" ) );

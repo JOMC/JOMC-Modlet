@@ -36,7 +36,7 @@ import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelProcessor;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * {@code ModelProcessor} test implementation.

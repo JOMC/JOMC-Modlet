@@ -32,13 +32,14 @@
  */
 package org.jomc.modlet.test;
 
+import org.junit.Test;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.DefaultModletProvider;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test cases for class {@code org.jomc.modlet.DefaultModletProvider}.
@@ -49,35 +50,29 @@ import static junit.framework.Assert.fail;
 public class DefaultModletProviderTest extends ModletProviderTest
 {
 
-    private DefaultModletProvider defaultModletProvider;
-
+    /** Creates a new {@code DefaultModletProviderTest} instance. */
     public DefaultModletProviderTest()
     {
         super();
     }
 
-    public DefaultModletProviderTest( final DefaultModletProvider defaultModletProvider )
-    {
-        super( defaultModletProvider );
-        this.defaultModletProvider = defaultModletProvider;
-    }
-
+    /** {@inheritDoc} */
     @Override
     public DefaultModletProvider getModletProvider()
     {
-        if ( this.defaultModletProvider == null )
-        {
-            this.defaultModletProvider = new DefaultModletProvider();
-        }
-
-        return this.defaultModletProvider;
+        return (DefaultModletProvider) super.getModletProvider();
     }
 
+    /** {@inheritDoc} */
     @Override
-    public void testFindModlets() throws Exception
+    public DefaultModletProvider newModletProvider()
     {
-        super.testFindModlets();
+        return new DefaultModletProvider();
+    }
 
+    @Test
+    public final void testFindModletsAtLocation() throws Exception
+    {
         try
         {
             this.getModletProvider().findModlets( null, "TEST" );
@@ -103,8 +98,10 @@ public class DefaultModletProviderTest extends ModletProviderTest
         }
     }
 
-    public void testDefaultEnabled() throws Exception
+    @Test
+    public final void testDefaultEnabled() throws Exception
     {
+        System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultEnabled" );
         DefaultModletProvider.setDefaultEnabled( null );
         assertTrue( DefaultModletProvider.isDefaultEnabled() );
         DefaultModletProvider.setDefaultEnabled( null );
@@ -112,19 +109,25 @@ public class DefaultModletProviderTest extends ModletProviderTest
         assertFalse( DefaultModletProvider.isDefaultEnabled() );
         System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultEnabled" );
         DefaultModletProvider.setDefaultEnabled( null );
+        assertTrue( DefaultModletProvider.isDefaultEnabled() );
     }
 
-    public void testDefaultModletLocation() throws Exception
+    @Test
+    public final void testDefaultModletLocation() throws Exception
     {
-        assertNotNull( DefaultModletProvider.getDefaultModletLocation() );
+        System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultModletLocation" );
+        DefaultModletProvider.setDefaultModletLocation( null );
+        assertEquals( "META-INF/jomc-modlet.xml", DefaultModletProvider.getDefaultModletLocation() );
         DefaultModletProvider.setDefaultModletLocation( null );
         System.setProperty( "org.jomc.modlet.DefaultModletProvider.defaultModletLocation", "TEST" );
         assertEquals( "TEST", DefaultModletProvider.getDefaultModletLocation() );
         System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultModletLocation" );
         DefaultModletProvider.setDefaultModletLocation( null );
+        assertEquals( "META-INF/jomc-modlet.xml", DefaultModletProvider.getDefaultModletLocation() );
     }
 
-    public void testModletLocation() throws Exception
+    @Test
+    public final void testModletLocation() throws Exception
     {
         DefaultModletProvider.setDefaultModletLocation( null );
         this.getModletProvider().setModletLocation( null );
@@ -138,7 +141,8 @@ public class DefaultModletProviderTest extends ModletProviderTest
         this.getModletProvider().setModletLocation( null );
     }
 
-    public void testEnabled() throws Exception
+    @Test
+    public final void testEnabled() throws Exception
     {
         DefaultModletProvider.setDefaultEnabled( null );
         this.getModletProvider().setEnabled( null );
