@@ -62,5 +62,11 @@
       <code>org.jomc.modlet.Modlets</code> to correctly merge duplicate schemas and services.]]>
       </action>
     </release>
+    <!-- *********************************************************************************************************** -->
+    <release version="1.2">
+      <action dev="schulte2005" type="fix"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
+      to close open streams when reading provider resources or manifest files fails.]]>
+      </action>
+    </release>
   </body>
 </document>

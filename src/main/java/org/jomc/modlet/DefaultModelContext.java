@@ -1324,43 +1324,53 @@ public class DefaultModelContext extends ModelContext
                     this.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
                 }
 
-                final BufferedReader reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
+                BufferedReader reader = null;
 
-                String line = null;
-                while ( ( line = reader.readLine() ) != null )
+                try
                 {
-                    if ( line.contains( "#" ) )
+                    reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
+
+                    String line = null;
+                    while ( ( line = reader.readLine() ) != null )
                     {
-                        continue;
+                        if ( line.contains( "#" ) )
+                        {
+                            continue;
+                        }
+
+                        final Class<?> provider = this.findClass( line );
+
+                        if ( provider == null )
+                        {
+                            throw new ModelException( getMessage(
+                                "implementationNotFound", providerClass.getName(), line, url.toExternalForm() ) );
+
+                        }
+
+                        if ( !providerClass.isAssignableFrom( provider ) )
+                        {
+                            throw new ModelException( getMessage(
+                                "illegalImplementation", providerClass.getName(), line, url.toExternalForm() ) );
+
+                        }
+
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, getMessage( "providerInfo", url.toExternalForm(),
+                                                                providerClass.getName(), provider.getName() ), null );
+
+                        }
+
+                        providers.put( providerNamePrefix + providers.size(), provider.asSubclass( providerClass ) );
                     }
-
-                    final Class<?> provider = this.findClass( line );
-
-                    if ( provider == null )
-                    {
-                        throw new ModelException( getMessage(
-                            "implementationNotFound", providerClass.getName(), line, url.toExternalForm() ) );
-
-                    }
-
-                    if ( !providerClass.isAssignableFrom( provider ) )
-                    {
-                        throw new ModelException( getMessage(
-                            "illegalImplementation", providerClass.getName(), line, url.toExternalForm() ) );
-
-                    }
-
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, getMessage( "providerInfo", url.toExternalForm(),
-                                                            providerClass.getName(), provider.getName() ), null );
-
-                    }
-
-                    providers.put( providerNamePrefix + providers.size(), provider.asSubclass( providerClass ) );
                 }
-
-                reader.close();
+                finally
+                {
+                    if ( reader != null )
+                    {
+                        reader.close();
+                    }
+                }
             }
 
             if ( this.isLoggable( Level.FINE ) )
@@ -1401,35 +1411,46 @@ public class DefaultModelContext extends ModelContext
             for ( final Enumeration<URL> e = this.getClassLoader().getResources( "META-INF/MANIFEST.MF" );
                   e.hasMoreElements(); )
             {
-                count++;
-                final URL manifestUrl = e.nextElement();
-                final String externalForm = manifestUrl.toExternalForm();
-                final String baseUrl = externalForm.substring( 0, externalForm.indexOf( "META-INF" ) );
-                final InputStream manifestStream = manifestUrl.openStream();
-                final Manifest mf = new Manifest( manifestStream );
-                manifestStream.close();
+                InputStream manifestStream = null;
 
-                if ( this.isLoggable( Level.FINEST ) )
+                try
                 {
-                    this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
-                }
+                    count++;
+                    final URL manifestUrl = e.nextElement();
+                    final String externalForm = manifestUrl.toExternalForm();
+                    final String baseUrl = externalForm.substring( 0, externalForm.indexOf( "META-INF" ) );
+                    manifestStream = manifestUrl.openStream();
+                    final Manifest mf = new Manifest( manifestStream );
 
-                for ( Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
-                {
-                    for ( int i = SCHEMA_EXTENSIONS.length - 1; i >= 0; i-- )
+                    if ( this.isLoggable( Level.FINEST ) )
                     {
-                        if ( entry.getKey().toLowerCase().endsWith( '.' + SCHEMA_EXTENSIONS[i].toLowerCase() ) )
+                        this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
+                    }
+
+                    for ( Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
+                    {
+                        for ( int i = SCHEMA_EXTENSIONS.length - 1; i >= 0; i-- )
                         {
-                            final URL schemaUrl = new URL( baseUrl + entry.getKey() );
-                            resources.add( schemaUrl.toURI() );
-
-                            if ( this.isLoggable( Level.FINEST ) )
+                            if ( entry.getKey().toLowerCase().endsWith( '.' + SCHEMA_EXTENSIONS[i].toLowerCase() ) )
                             {
-                                this.log( Level.FINEST, getMessage( "foundSchemaCandidate",
-                                                                    schemaUrl.toExternalForm() ), null );
+                                final URL schemaUrl = new URL( baseUrl + entry.getKey() );
+                                resources.add( schemaUrl.toURI() );
 
+                                if ( this.isLoggable( Level.FINEST ) )
+                                {
+                                    this.log( Level.FINEST, getMessage( "foundSchemaCandidate",
+                                                                        schemaUrl.toExternalForm() ), null );
+
+                                }
                             }
                         }
+                    }
+                }
+                finally
+                {
+                    if ( manifestStream != null )
+                    {
+                        manifestStream.close();
                     }
                 }
             }
