@@ -48,6 +48,9 @@ import static org.junit.Assert.assertNull;
 public class ModelValidationReportTest
 {
 
+    /** Constant to prefix relative resource names with. */
+    private static final String ABSOLUTE_RESOURCE_NAME_PREFIX = "/org/jomc/modlet/test/";
+
     /** Creates a new {@code ModelValidationReportTest} instance. */
     public ModelValidationReportTest()
     {
@@ -57,11 +60,11 @@ public class ModelValidationReportTest
     @Test
     public final void testSerializabe() throws Exception
     {
-        final ObjectInputStream reportStream =
-            new ObjectInputStream( this.getClass().getResourceAsStream( "ModelValidationReport.ser" ) );
+        final ObjectInputStream reportStream = new ObjectInputStream( this.getClass().getResourceAsStream(
+            ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelValidationReport.ser" ) );
 
-        final ObjectInputStream detailStream =
-            new ObjectInputStream( this.getClass().getResourceAsStream( "ModelValidationReportDetail.ser" ) );
+        final ObjectInputStream detailStream = new ObjectInputStream( this.getClass().getResourceAsStream(
+            ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelValidationReportDetail.ser" ) );
 
         final ModelValidationReport report = (ModelValidationReport) reportStream.readObject();
         final ModelValidationReport.Detail detail = (ModelValidationReport.Detail) detailStream.readObject();

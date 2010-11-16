@@ -47,6 +47,9 @@ import static org.junit.Assert.assertNotNull;
 public class ModelExceptionTest
 {
 
+    /** Constant to prefix relative resource names with. */
+    private static final String ABSOLUTE_RESOURCE_NAME_PREFIX = "/org/jomc/modlet/test/";
+
     /** Creates a new {@code ModelExceptionTest} instance. */
     public ModelExceptionTest()
     {
@@ -56,8 +59,8 @@ public class ModelExceptionTest
     @Test
     public final void testModelException() throws Exception
     {
-        final ObjectInputStream in =
-            new ObjectInputStream( this.getClass().getResourceAsStream( "ModelException.ser" ) );
+        final ObjectInputStream in = new ObjectInputStream( this.getClass().getResourceAsStream(
+            ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelException.ser" ) );
 
         final ModelException e = (ModelException) in.readObject();
         in.close();
