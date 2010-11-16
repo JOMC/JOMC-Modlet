@@ -54,7 +54,7 @@ public class ModelExceptionTest
     }
 
     @Test
-    public final void testModletException() throws Exception
+    public final void testModelException() throws Exception
     {
         final ObjectInputStream in =
             new ObjectInputStream( this.getClass().getResourceAsStream( "ModelException.ser" ) );

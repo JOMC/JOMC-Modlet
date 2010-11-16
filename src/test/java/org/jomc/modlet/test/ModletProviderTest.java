@@ -77,8 +77,10 @@ public class ModletProviderTest
      * Creates a new {@code ModletProvider} instance to test.
      *
      * @return A new {@code ModletProvider} instance to test.
+     *
+     * @see #getModletProvider()
      */
-    public ModletProvider newModletProvider()
+    protected ModletProvider newModletProvider()
     {
         return new DefaultModletProvider();
     }
