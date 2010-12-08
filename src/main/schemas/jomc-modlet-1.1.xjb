@@ -59,7 +59,7 @@
      * @throws NullPointerException if {@code any}, {@code namespaceURI} or {@code localPart} is {@code null}.
      * @throws IllegalStateException if {@code any} contains more than one matching element.
      *
-     * @deprecated Please use method {@link #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     protected javax.xml.bind.JAXBElement getAnyElement( final java.util.List<Object> any, final String namespaceURI,
@@ -119,7 +119,7 @@
      *
      * @throws NullPointerException if {@code any}, {@code namespaceURI} or {@code localPart} is {@code null}.
      *
-     * @deprecated Please use method {@link #getAnyElements(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     protected java.util.List<javax.xml.bind.JAXBElement> getAnyElements( final java.util.List<Object> any,
@@ -424,7 +424,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public javax.xml.bind.JAXBElement getAnyElement( final String namespaceURI, final String localPart )
@@ -446,7 +446,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public java.util.List<javax.xml.bind.JAXBElement> getAnyElements( final String namespaceURI,
@@ -770,7 +770,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public javax.xml.bind.JAXBElement getAnyElement( final String namespaceURI, final String localPart )
@@ -792,7 +792,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public java.util.List<javax.xml.bind.JAXBElement> getAnyElements( final String namespaceURI,
@@ -992,7 +992,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public javax.xml.bind.JAXBElement getAnyElement( final String namespaceURI, final String localPart )
@@ -1014,7 +1014,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public java.util.List<javax.xml.bind.JAXBElement> getAnyElements( final String namespaceURI,
@@ -1213,7 +1213,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public javax.xml.bind.JAXBElement getAnyElement( final String namespaceURI, final String localPart )
@@ -1235,7 +1235,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated Please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      */
     @Deprecated
     public java.util.List<javax.xml.bind.JAXBElement> getAnyElements( final String namespaceURI,
