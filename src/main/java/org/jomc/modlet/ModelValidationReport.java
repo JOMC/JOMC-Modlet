@@ -208,8 +208,9 @@ public class ModelValidationReport implements Serializable
     {
         final List<Detail> list = new ArrayList<Detail>( this.getDetails().size() );
 
-        for ( Detail d : this.getDetails() )
+        for ( int i = this.getDetails().size() - 1; i >= 0; i-- )
         {
+            final Detail d = this.getDetails().get( i );
             if ( identifier == null && d.getIdentifier() == null )
             {
                 list.add( d );
@@ -231,8 +232,9 @@ public class ModelValidationReport implements Serializable
      */
     public boolean isModelValid()
     {
-        for ( Detail d : this.getDetails() )
+        for ( int i = this.getDetails().size() - 1; i >= 0; i-- )
         {
+            final Detail d = this.getDetails().get( i );
             if ( d.getLevel() != null && d.getLevel().intValue() > Level.WARNING.intValue() )
             {
                 return false;
