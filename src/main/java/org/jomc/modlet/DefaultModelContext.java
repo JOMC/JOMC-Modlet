@@ -807,7 +807,7 @@ public class DefaultModelContext extends ModelContext
             f.setResourceResolver( this.createResourceResolver( model ) );
             f.setErrorHandler( new ErrorHandler()
             {
-                // See https://jaxp.dev.java.net/issues/show_bug.cgi?id=66
+                // See http://java.net/jira/browse/JAXP-66
 
                 public void warning( final SAXParseException e ) throws SAXException
                 {
