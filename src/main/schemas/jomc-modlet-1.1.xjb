@@ -80,7 +80,7 @@
 
         javax.xml.bind.JAXBElement<?> anyElement = null;
 
-        for ( int i = any.size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = any.size(); i < s0; i++ )
         {
             final Object o = any.get( i );
 
@@ -144,7 +144,7 @@
         final java.util.List<javax.xml.bind.JAXBElement> anyElements =
             new java.util.ArrayList<javax.xml.bind.JAXBElement>( any.size() );
 
-        for ( int i = any.size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = any.size(); i < s0; i++ )
         {
             final Object o = any.get( i );
 
@@ -205,7 +205,7 @@
 
         javax.xml.bind.JAXBElement<?> anyElement = null;
 
-        for ( int i = any.size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = any.size(); i < s0; i++ )
         {
             final Object o = any.get( i );
 
@@ -284,7 +284,7 @@
         final java.util.List<javax.xml.bind.JAXBElement<T>> anyElements =
             new java.util.ArrayList<javax.xml.bind.JAXBElement<T>>( any.size() );
 
-        for ( int i = any.size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = any.size(); i < s0; i++ )
         {
             final Object o = any.get( i );
 
@@ -332,7 +332,7 @@
 
         T anyObject = null;
 
-        for ( int i = any.size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = any.size(); i < s0; i++ )
         {
             Object o = any.get( i );
 
@@ -385,7 +385,7 @@
 
         final java.util.List<T> anyElements = new java.util.ArrayList<T>( any.size() );
 
-        for ( int i = any.size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = any.size(); i < s0; i++ )
         {
             Object o = any.get( i );
 
@@ -577,7 +577,7 @@
             throw new NullPointerException( "name" );
         }
 
-        for ( int i = this.getModlet().size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
         {
             final Modlet m = this.getModlet().get( i );
 
@@ -618,7 +618,7 @@
         mergedModlet.setName( name );
         mergedModlet.setModel( model );
 
-        for ( int i = this.getModlet().size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
         {
             final Modlet m = this.getModlet().get( i );
 
@@ -631,7 +631,7 @@
                         mergedModlet.setSchemas( new Schemas() );
                     }
 
-                    for ( int j = m.getSchemas().getSchema().size() - 1; j >= 0; j-- )
+                    for ( int j = 0, s1 = m.getSchemas().getSchema().size(); j < s1; j++ )
                     {
                         final Schema s = m.getSchemas().getSchema().get( j );
 
@@ -650,7 +650,7 @@
                         mergedModlet.setServices( new Services() );
                     }
 
-                    for ( int j = m.getServices().getService().size() - 1; j >= 0; j-- )
+                    for ( int j = 0, s1 = m.getServices().getService().size(); j < s1; j++ )
                     {
                         final Service s = m.getServices().getService().get( j );
                         boolean merged = false;
@@ -701,13 +701,13 @@
 
         final Schemas schemas = new Schemas();
 
-        for ( int i = this.getModlet().size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
         {
             final Modlet m = this.getModlet().get( i );
 
             if ( m.getSchemas() != null && ( m.getModel() == null || model.equals( m.getModel() ) ) )
             {
-                for ( int j = m.getSchemas().getSchema().size() - 1; j >= 0; j-- )
+                for ( int j = 0, s1 = m.getSchemas().getSchema().size(); j < s1; j++ )
                 {
                     schemas.getSchema().add( m.getSchemas().getSchema().get( j ) );
                 }
@@ -738,13 +738,13 @@
 
         final Services services = new Services();
 
-        for ( int i = this.getModlet().size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
         {
             final Modlet m = this.getModlet().get( i );
 
             if ( m.getServices() != null && ( m.getModel() == null || model.equals( m.getModel() ) ) )
             {
-                for ( int j = m.getServices().getService().size() - 1; j >= 0; j-- )
+                for ( int j = 0, s1 = m.getServices().getService().size(); j < s1; j++ )
                 {
                     services.getService().add( m.getServices().getService().get( j ) );
                 }
@@ -934,7 +934,7 @@
             throw new NullPointerException( "publicId" );
         }
 
-        for ( int i = this.getSchema().size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
         {
             final Schema s = this.getSchema().get( i );
 
@@ -966,7 +966,7 @@
             throw new NullPointerException( "systemId" );
         }
 
-        for ( int i = this.getSchema().size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
         {
             final Schema s = this.getSchema().get( i );
 
@@ -1162,7 +1162,7 @@
 
         final java.util.List<Service> services = new java.util.ArrayList<Service>( this.getService().size() );
 
-        for ( int i = this.getService().size() - 1; i >= 0; i-- )
+        for ( int i = 0, s0 = this.getService().size(); i < s0; i++ )
         {
             final Service s = this.getService().get( i );
 
