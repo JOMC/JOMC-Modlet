@@ -92,7 +92,13 @@ public abstract class ModelContext
          *
          * @throws NullPointerException if {@code level} is {@code null}.
          */
-        public abstract void onLog( Level level, String message, Throwable t );
+        public void onLog( final Level level, final String message, final Throwable t )
+        {
+            if ( level == null )
+            {
+                throw new NullPointerException( "level" );
+            }
+        }
 
     }
 

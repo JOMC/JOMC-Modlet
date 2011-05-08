@@ -123,6 +123,7 @@ public class ModelContextTest
                 @Override
                 public void onLog( final Level level, final String message, final Throwable t )
                 {
+                    super.onLog( level, message, t );
                     System.out.println( "[" + level.getLocalizedName() + "] " + message );
                 }
 
