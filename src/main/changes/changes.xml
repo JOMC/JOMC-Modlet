@@ -66,17 +66,14 @@
     <release version="1.2">
       <action dev="schulte2005" type="add"><![CDATA[Added a <code>META-INF/sun-jaxb.episode</code> file.]]>
       </action>
-      <action dev="schulte2005" type="add"><![CDATA[Added <code>jomc-modlet-1.2.xsd</code> schema deprecating the
-      <code>jomc-modlet-1.0.xsd</code> schema.]]>
+      <action dev="schulte2005" type="add"><![CDATA[Added method <code>findModel</code> taking a <code>Model</code>
+      instance to class <code>org.jomc.modlet.ModelContext</code>.]]>
       </action>
       <action dev="schulte2005" type="fix"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
       to close open streams when reading provider resources or manifest files fails.]]>
       </action>
       <action dev="schulte2005" type="remove"><![CDATA[Removed <code>abstract</code> modifier of method
       <code>onLog</code> of class <code>org.jomc.modlet.ModelContext.Listener</code>.]]>
-      </action>
-      <action dev="schulte2005" type="remove"><![CDATA[Removed <code>jomc-modlet-1.0.xsd</code> schema deprecated by the
-      <code>jomc-modlet-1.2.xsd</code> schema.]]>
       </action>
     </release>
   </body>

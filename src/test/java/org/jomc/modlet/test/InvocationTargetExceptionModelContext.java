@@ -73,6 +73,12 @@ public class InvocationTargetExceptionModelContext extends ModelContext
     }
 
     @Override
+    public Model findModel( final Model model ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public EntityResolver createEntityResolver( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();

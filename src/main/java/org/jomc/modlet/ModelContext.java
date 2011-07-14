@@ -822,6 +822,22 @@ public abstract class ModelContext
     public abstract Model findModel( String model ) throws ModelException;
 
     /**
+     * Populates a given {@code Model} instance.
+     *
+     * @param model The {@code Model} to populate.
+     *
+     * @return The populated model.
+     *
+     * @throws NullPointerException if {@code model} is {@code null}.
+     * @throws ModelException if populating {@code model} fails.
+     *
+     * @see #createModelContext(java.lang.ClassLoader)
+     *
+     * @since 1.2
+     */
+    public abstract Model findModel( Model model ) throws ModelException;
+
+    /**
      * Creates a new SAX entity resolver instance of a given model.
      *
      * @param model The identifier of the model to create a new SAX entity resolver of.

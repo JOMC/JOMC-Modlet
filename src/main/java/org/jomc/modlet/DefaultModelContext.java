@@ -372,12 +372,33 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
+        final Model m = new Model();
+        m.setIdentifier( model );
+
+        return this.findModel( m );
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>This method loads all {@code ModelProvider} services of the given model to populate the given model
+     * instance.</p>
+     *
+     * @see #getModlets()
+     * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
+     */
+    @Override
+    public Model findModel( final Model model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
         try
         {
-            Model m = new Model();
-            m.setIdentifier( model );
+            Model m = new Model( model );
+            final Services services = this.getModlets().getServices( m.getIdentifier() );
 
-            final Services services = this.getModlets().getServices( model );
             if ( services != null )
             {
                 for ( Service provider : services.getServices( ModelProvider.class ) )
@@ -404,7 +425,9 @@ public class DefaultModelContext extends ModelContext
 
                     if ( this.isLoggable( Level.FINER ) )
                     {
-                        this.log( Level.FINER, getMessage( "creatingModel", model, modelProvider.toString() ), null );
+                        this.log( Level.FINER,
+                                  getMessage( "creatingModel", m.getIdentifier(), modelProvider.toString() ), null );
+
                     }
 
                     final Model provided = modelProvider.findModel( this, m );

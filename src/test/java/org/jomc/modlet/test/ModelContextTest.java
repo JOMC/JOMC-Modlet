@@ -713,7 +713,18 @@ public class ModelContextTest
 
         try
         {
-            this.getModelContext().findModel( null );
+            this.getModelContext().findModel( (String) null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().findModel( (Model) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -723,6 +734,11 @@ public class ModelContextTest
         }
 
         assertNotNull( this.getModelContext().findModel( ModletObject.MODEL_PUBLIC_ID ) );
+
+        final Model model = new Model();
+        model.setIdentifier( ModletObject.MODEL_PUBLIC_ID );
+
+        assertNotNull( this.getModelContext().findModel( model ) );
     }
 
     @Test
