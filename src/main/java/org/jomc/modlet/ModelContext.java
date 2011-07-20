@@ -66,6 +66,7 @@ import org.xml.sax.SAXException;
  * <li>{@link #createSchema(java.lang.String) }</li>
  * <li>{@link #createUnmarshaller(java.lang.String) }</li>
  * <li>{@link #findModel(java.lang.String) }</li>
+ * <li>{@link #findModel(org.jomc.modlet.Model) }</li>
  * <li>{@link #processModel(org.jomc.modlet.Model) }</li>
  * <li>{@link #validateModel(org.jomc.modlet.Model) }</li>
  * <li>{@link #validateModel(java.lang.String, javax.xml.transform.Source) }</li>
