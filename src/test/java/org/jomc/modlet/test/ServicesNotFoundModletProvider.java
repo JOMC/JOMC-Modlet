@@ -81,6 +81,16 @@ public class ServicesNotFoundModletProvider implements ModletProvider
         s.setIdentifier( ModelValidator.class.getName() );
         modlet.getServices().getService().add( s );
 
+        s = new Service();
+        s.setClazz( "DOES NOT EXIST" );
+        s.setIdentifier( "javax.xml.bind.Marshaller.Listener" );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( "DOES NOT EXIST" );
+        s.setIdentifier( "javax.xml.bind.Unmarshaller.Listener" );
+        modlet.getServices().getService().add( s );
+
         context.setAttribute( ServicesNotFoundModletProvider.class.getName(), this );
         return modlets;
     }

@@ -32,18 +32,24 @@
  */
 package org.jomc.modlet.test;
 
-import org.junit.Test;
-import org.jomc.modlet.Modlets;
-import org.jomc.modlet.Model;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Properties;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import org.jomc.modlet.DefaultModelContext;
+import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelException;
+import org.jomc.modlet.Modlets;
+import org.junit.Test;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.EntityResolver;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -218,6 +224,28 @@ public class DefaultModelContextTest extends ModelContextTest
             System.out.println( e.toString() );
         }
 
+        try
+        {
+            this.getModelContext().createMarshaller( model.getIdentifier() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createUnmarshaller( model.getIdentifier() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
         this.getModelContext().setProviderLocation( "META-INF/non-existent-services-modlet" );
         this.getModelContext().setModlets( null );
         modlets = this.getModelContext().findModlets();
@@ -251,6 +279,28 @@ public class DefaultModelContextTest extends ModelContextTest
         try
         {
             this.getModelContext().validateModel( model );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createMarshaller( model.getIdentifier() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createUnmarshaller( model.getIdentifier() );
             fail( "Expected ModelException not thrown." );
         }
         catch ( final ModelException e )
@@ -363,13 +413,6 @@ public class DefaultModelContextTest extends ModelContextTest
     public final void testTestModel() throws Exception
     {
         this.getModelContext().setModlets( null );
-
-        assertNotNull( this.getModelContext().createContext( MODLET_TEST_NS ) );
-        assertNotNull( this.getModelContext().createEntityResolver( MODLET_TEST_NS ) );
-        assertNotNull( this.getModelContext().createMarshaller( MODLET_TEST_NS ) );
-        assertNotNull( this.getModelContext().createResourceResolver( MODLET_TEST_NS ) );
-        assertNotNull( this.getModelContext().createUnmarshaller( MODLET_TEST_NS ) );
-
         final Model model = this.getModelContext().findModel( MODLET_TEST_NS );
         assertNotNull( model );
         assertEquals( MODLET_TEST_NS, model.getIdentifier() );
@@ -384,6 +427,31 @@ public class DefaultModelContextTest extends ModelContextTest
             assertNotNull( e.getMessage() );
             System.out.println( e.toString() );
         }
+
+        this.getModelContext().setModlets( null );
+        final JAXBContext context = this.getModelContext().createContext( MODLET_TEST_NS );
+        assertNotNull( context );
+
+        this.getModelContext().setModlets( null );
+        final EntityResolver entityResolver = this.getModelContext().createEntityResolver( MODLET_TEST_NS );
+        assertNotNull( entityResolver );
+
+        this.getModelContext().setModlets( null );
+        final Marshaller marshaller = this.getModelContext().createMarshaller( MODLET_TEST_NS );
+        assertNotNull( marshaller );
+
+        this.getModelContext().setModlets( null );
+        final LSResourceResolver resourceResolver = this.getModelContext().createResourceResolver( MODLET_TEST_NS );
+        assertNotNull( resourceResolver );
+
+        this.getModelContext().setModlets( null );
+        final Unmarshaller unmarshaller = this.getModelContext().createUnmarshaller( MODLET_TEST_NS );
+        assertNotNull( unmarshaller );
+
+        final File tmpFile = File.createTempFile( this.getClass().getSimpleName(), ".xml" );
+        marshaller.marshal( new org.jomc.modlet.ObjectFactory().createModel( model ), tmpFile );
+        assertNotNull( unmarshaller.unmarshal( tmpFile ) );
+        assertTrue( tmpFile.delete() );
     }
 
 }

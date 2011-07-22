@@ -81,6 +81,16 @@ public class IllegalServicesModletProvider implements ModletProvider
         s.setIdentifier( ModelValidator.class.getName() );
         modlet.getServices().getService().add( s );
 
+        s = new Service();
+        s.setClazz( Object.class.getName() );
+        s.setIdentifier( "javax.xml.bind.Marshaller.Listener" );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( Object.class.getName() );
+        s.setIdentifier( "javax.xml.bind.Unmarshaller.Listener" );
+        modlet.getServices().getService().add( s );
+
         context.setAttribute( IllegalServicesModletProvider.class.getName(), this );
         return modlets;
     }

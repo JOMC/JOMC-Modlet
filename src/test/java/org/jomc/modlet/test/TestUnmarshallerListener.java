@@ -32,41 +32,33 @@
  */
 package org.jomc.modlet.test;
 
-import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelProvider;
-import org.jomc.modlet.ModelContext;
-import org.jomc.modlet.ModelException;
+import javax.xml.bind.Unmarshaller;
 
 /**
- * {@code ModelProvider} test implementation.
+ * {@code Unmarshaller.Listener} test implementation.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestModelProvider implements ModelProvider
+public class TestUnmarshallerListener extends Unmarshaller.Listener
 {
 
-    public TestModelProvider()
+    /** Creates a new {@code TestUnmarshallerListener} instance. */
+    public TestUnmarshallerListener()
     {
         super();
     }
 
-    public Model findModel( final ModelContext context, final Model model ) throws ModelException
+    @Override
+    public void beforeUnmarshal( final Object target, final Object parent )
     {
-        if ( context == null )
-        {
-            throw new NullPointerException( "context" );
-        }
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
+        System.out.println( this.getClass().getName() + ": beforeUnmarshal(" + target + ", " + parent + ")" );
+    }
 
-        context.setAttribute( TestModelProvider.class.getName(), this );
-
-        final Model created = new Model( model );
-        created.getAny().add( new ObjectFactory().createTest( new TestComplexType() ) );
-        return created;
+    @Override
+    public void afterUnmarshal( final Object target, final Object parent )
+    {
+        System.out.println( this.getClass().getName() + ": afterUnmarshal(" + target + ", " + parent + ")" );
     }
 
 }

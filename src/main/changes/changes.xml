@@ -72,6 +72,10 @@
       <action dev="schulte2005" type="fix"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
       to close open streams when reading provider resources or manifest files fails.]]>
       </action>
+      <action dev="schulte2005" type="update"><![CDATA[Updated methods <code>createMarshaller</code> and
+      <code>createUnmarshaller</code> of class <code>org.jomc.modlet.DefaultModelContext</code> to support
+      <code>Marshaller.Listener</code> and <code>Unmarshaller.Listener</code> services.]]>
+      </action>
       <action dev="schulte2005" type="remove"><![CDATA[Removed <code>abstract</code> modifier of method
       <code>onLog</code> of class <code>org.jomc.modlet.ModelContext.Listener</code>.]]>
       </action>

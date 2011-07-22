@@ -985,11 +985,67 @@ public class DefaultModelContext extends ModelContext
                 m.setProperty( Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.substring( 1 ) );
             }
 
+            final Services services = this.getModlets().getServices( model );
+            MarshallerListenerList listenerList = null;
+
+            if ( services != null )
+            {
+                for ( Service service : services.getServices( "javax.xml.bind.Marshaller.Listener" ) )
+                {
+                    final Class<?> clazz = this.findClass( service.getClazz() );
+
+                    if ( clazz == null )
+                    {
+                        throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(),
+                                                              service.getIdentifier(), service.getClazz() ) );
+
+                    }
+
+                    if ( !Marshaller.Listener.class.isAssignableFrom( clazz ) )
+                    {
+                        throw new ModelException( getMessage( "illegalService", service.getOrdinal(),
+                                                              service.getIdentifier(), service.getClazz(),
+                                                              Marshaller.Listener.class.getName() ) );
+
+                    }
+
+                    final Class<? extends Marshaller.Listener> listener = clazz.asSubclass( Marshaller.Listener.class );
+
+                    if ( listenerList == null )
+                    {
+                        listenerList = new MarshallerListenerList();
+                    }
+
+                    listenerList.getListeners().add( listener.newInstance() );
+                }
+            }
+
+            if ( listenerList != null )
+            {
+                m.setListener( listenerList );
+            }
+
             if ( this.isLoggable( Level.FINEST ) )
             {
-                this.log( Level.FINEST, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
-                                                    schemaLocation.substring( 1 ) ), null );
+                if ( listenerList == null )
+                {
+                    this.log( Level.FINEST, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
+                                                        schemaLocation.substring( 1 ) ), null );
 
+                }
+                else
+                {
+                    final StringBuilder b = new StringBuilder( listenerList.getListeners().size() * 100 );
+
+                    for ( int i = 0, s0 = listenerList.getListeners().size(); i < s0; i++ )
+                    {
+                        b.append( ',' ).append( listenerList.getListeners().get( i ) );
+                    }
+
+                    this.log( Level.FINEST, getMessage( "creatingMarshallerWithListeners", packageNames.substring( 1 ),
+                                                        schemaLocation.substring( 1 ), b.substring( 1 ) ), null );
+
+                }
             }
 
             return m;
@@ -1003,6 +1059,14 @@ public class DefaultModelContext extends ModelContext
             }
 
             throw new ModelException( message, e );
+        }
+        catch ( final InstantiationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final IllegalAccessException e )
+        {
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -1037,14 +1101,74 @@ public class DefaultModelContext extends ModelContext
                 throw new ModelException( getMessage( "missingSchemas", model ) );
             }
 
-            if ( this.isLoggable( Level.FINEST ) )
-            {
-                this.log( Level.FINEST,
-                          getMessage( "creatingUnmarshaller", packageNames.substring( 1 ) ), null );
+            final Unmarshaller u =
+                JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createUnmarshaller();
 
+            final Services services = this.getModlets().getServices( model );
+            UnmarshallerListenerList listenerList = null;
+
+            if ( services != null )
+            {
+                for ( Service service : services.getServices( "javax.xml.bind.Unmarshaller.Listener" ) )
+                {
+                    final Class<?> clazz = this.findClass( service.getClazz() );
+
+                    if ( clazz == null )
+                    {
+                        throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(),
+                                                              service.getIdentifier(), service.getClazz() ) );
+
+                    }
+
+                    if ( !Unmarshaller.Listener.class.isAssignableFrom( clazz ) )
+                    {
+                        throw new ModelException( getMessage( "illegalService", service.getOrdinal(),
+                                                              service.getIdentifier(), service.getClazz(),
+                                                              Unmarshaller.Listener.class.getName() ) );
+
+                    }
+
+                    final Class<? extends Unmarshaller.Listener> listener =
+                        clazz.asSubclass( Unmarshaller.Listener.class );
+
+                    if ( listenerList == null )
+                    {
+                        listenerList = new UnmarshallerListenerList();
+                    }
+
+                    listenerList.getListeners().add( listener.newInstance() );
+                }
             }
 
-            return JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createUnmarshaller();
+            if ( listenerList != null )
+            {
+                u.setListener( listenerList );
+            }
+
+            if ( this.isLoggable( Level.FINEST ) )
+            {
+                if ( listenerList == null )
+                {
+                    this.log( Level.FINEST,
+                              getMessage( "creatingUnmarshaller", packageNames.substring( 1 ) ), null );
+
+                }
+                else
+                {
+                    final StringBuilder b = new StringBuilder( listenerList.getListeners().size() * 100 );
+
+                    for ( int i = 0, s0 = listenerList.getListeners().size(); i < s0; i++ )
+                    {
+                        b.append( ',' ).append( listenerList.getListeners().get( i ) );
+                    }
+
+                    this.log( Level.FINEST, getMessage( "creatingUnmarshallerWithListeners",
+                                                        packageNames.substring( 1 ), b.substring( 1 ) ), null );
+
+                }
+            }
+
+            return u;
         }
         catch ( final JAXBException e )
         {
@@ -1055,6 +1179,14 @@ public class DefaultModelContext extends ModelContext
             }
 
             throw new ModelException( message, e );
+        }
+        catch ( final InstantiationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final IllegalAccessException e )
+        {
+            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -1619,6 +1751,120 @@ class ModelErrorHandler extends DefaultHandler
     private static String getMessage( final Throwable t )
     {
         return t != null ? t.getMessage() != null ? t.getMessage() : getMessage( t.getCause() ) : null;
+    }
+
+}
+
+/**
+ * List of {@code Marshaller.Listener}s.
+ *
+ * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @version $Id$
+ * @since 1.2
+ */
+class MarshallerListenerList extends Marshaller.Listener
+{
+
+    /** The {@code Marshaller.Listener}s of the instance. */
+    private List<Marshaller.Listener> listeners;
+
+    /** Creates a new {@code MarshallerListenerList} instance. */
+    MarshallerListenerList()
+    {
+        super();
+    }
+
+    /**
+     * Gets the listeners of the instance.
+     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * to the returned list will be present inside the object. This is why there is no {@code set} method for the
+     * listeners property.</p>
+     *
+     * @return The list of listeners of the instance.
+     */
+    List<Marshaller.Listener> getListeners()
+    {
+        if ( this.listeners == null )
+        {
+            this.listeners = new ArrayList<Marshaller.Listener>();
+        }
+
+        return this.listeners;
+    }
+
+    @Override
+    public void beforeMarshal( final Object source )
+    {
+        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        {
+            this.getListeners().get( i ).beforeMarshal( source );
+        }
+    }
+
+    @Override
+    public void afterMarshal( final Object source )
+    {
+        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        {
+            this.getListeners().get( i ).afterMarshal( source );
+        }
+    }
+
+}
+
+/**
+ * List of {@code Unmarshaller.Listener}s.
+ *
+ * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @version $Id$
+ * @since 1.2
+ */
+class UnmarshallerListenerList extends Unmarshaller.Listener
+{
+
+    /** The {@code Unmarshaller.Listener}s of the instance. */
+    private List<Unmarshaller.Listener> listeners;
+
+    /** Creates a new {@code UnmarshallerListenerList} instance. */
+    UnmarshallerListenerList()
+    {
+        super();
+    }
+
+    /**
+     * Gets the listeners of the instance.
+     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * to the returned list will be present inside the object. This is why there is no {@code set} method for the
+     * listeners property.</p>
+     *
+     * @return The list of listeners of the instance.
+     */
+    List<Unmarshaller.Listener> getListeners()
+    {
+        if ( this.listeners == null )
+        {
+            this.listeners = new ArrayList<Unmarshaller.Listener>();
+        }
+
+        return this.listeners;
+    }
+
+    @Override
+    public void beforeUnmarshal( final Object target, final Object parent )
+    {
+        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        {
+            this.getListeners().get( i ).beforeUnmarshal( target, parent );
+        }
+    }
+
+    @Override
+    public void afterUnmarshal( final Object target, final Object parent )
+    {
+        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        {
+            this.getListeners().get( i ).afterUnmarshal( target, parent );
+        }
     }
 
 }

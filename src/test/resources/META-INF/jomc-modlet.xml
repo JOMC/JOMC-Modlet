@@ -51,5 +51,7 @@
     <service identifier="org.jomc.modlet.ModelProcessor" class="org.jomc.modlet.test.TestModelProcessor"/>
     <service identifier="org.jomc.modlet.ModelProvider" class="org.jomc.modlet.test.TestModelProvider"/>
     <service identifier="org.jomc.modlet.ModelValidator" class="org.jomc.modlet.test.TestModelValidator"/>
+    <service identifier="javax.xml.bind.Marshaller.Listener" class="org.jomc.modlet.test.TestMarshallerListener"/>
+    <service identifier="javax.xml.bind.Unmarshaller.Listener" class="org.jomc.modlet.test.TestUnmarshallerListener"/>
   </services>
 </modlet>
