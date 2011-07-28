@@ -749,17 +749,43 @@ public abstract class ModelContext
      * @throws ModelException if creating a new {@code ModelContext} instance fails.
      *
      * @see #getModelContextClassName()
+     * @see #createModelContext(java.lang.String, java.lang.ClassLoader)
      */
     public static ModelContext createModelContext( final ClassLoader classLoader ) throws ModelException
     {
-        if ( DefaultModelContext.class.getName().equals( getModelContextClassName() ) )
+        return createModelContext( getModelContextClassName(), classLoader );
+    }
+
+    /**
+     * Creates a new {@code ModelContext} instance.
+     *
+     * @param className The name of the class providing the {@code ModelContext} implementation.
+     * @param classLoader The class loader to create a new {@code ModelContext} instance with or {@code null} to create
+     * a new context using the platform's bootstrap class loader.
+     *
+     * @return A new {@code ModelContext} instance.
+     *
+     * @throws NullPointerException if {@code className} is {@code null}.
+     * @throws ModelException if creating a new {@code ModelContext} instance fails.
+     *
+     * @since 1.2
+     */
+    public static ModelContext createModelContext( final String className, final ClassLoader classLoader )
+        throws ModelException
+    {
+        if ( className == null )
+        {
+            throw new NullPointerException( "className" );
+        }
+
+        if ( className.equals( DefaultModelContext.class.getName() ) )
         {
             return new DefaultModelContext( classLoader );
         }
 
         try
         {
-            final Class<?> clazz = Class.forName( getModelContextClassName(), true, classLoader );
+            final Class<?> clazz = Class.forName( className, true, classLoader );
             final Constructor<? extends ModelContext> ctor =
                 clazz.asSubclass( ModelContext.class ).getDeclaredConstructor( ClassLoader.class );
 

@@ -377,6 +377,99 @@ public class ModelContextTest
         }
 
         ModelContext.setModelContextClassName( null );
+
+        assertNotNull( ModelContext.createModelContext( ModelContext.getModelContextClassName(), null ) );
+        assertNotNull( ModelContext.createModelContext( ModelContext.getModelContextClassName(),
+                                                        this.getClass().getClassLoader() ) );
+
+        try
+        {
+            ModelContext.createModelContext( null, null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        try
+        {
+            ModelContext.createModelContext( "DOES_NOT_EXIST", null );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        try
+        {
+            ModelContext.createModelContext( InstantiationExceptionModelContext.class.getName(),
+                                             this.getClass().getClassLoader() );
+
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        try
+        {
+            ModelContext.createModelContext( IllegalAccessExceptionModelContext.class.getName(),
+                                             this.getClass().getClassLoader() );
+
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        try
+        {
+            ModelContext.createModelContext( ClassCastExceptionModelContext.class.getName(),
+                                             this.getClass().getClassLoader() );
+
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        try
+        {
+            ModelContext.createModelContext( NoSuchMethodExceptionModelContext.class.getName(),
+                                             this.getClass().getClassLoader() );
+
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        try
+        {
+            ModelContext.createModelContext( InvocationTargetExceptionModelContext.class.getName(),
+                                             this.getClass().getClassLoader() );
+
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        ModelContext.setModelContextClassName( null );
     }
 
     @Test
