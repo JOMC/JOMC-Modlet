@@ -81,6 +81,18 @@
       <code>createUnmarshaller</code> of class <code>org.jomc.modlet.DefaultModelContext</code> to support
       <code>Marshaller.Listener</code> and <code>Unmarshaller.Listener</code> services.]]>
       </action>
+      <action dev="schulte2005" type="update"><![CDATA[Updated methods <code>getProviderLocation</code> and
+      <code>getPlatformProviderLocation</code> of class <code>org.jomc.modlet.DefaultModelContext</code> to support
+      model context attributes <code>org.jomc.modlet.DefaultModelContext.providerLocationAttribute</code> and
+      <code>org.jomc.modlet.DefaultModelContext.platformProviderLocationAttribute</code>.
+      See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
+      </action>
+      <action dev="schulte2005" type="update"><![CDATA[Updated method <code>findModlets</code> of class
+      <code>org.jomc.modlet.DefaultModletProvider</code> to support model context attributes
+      <code>org.jomc.modlet.DefaultModletProvider.enabledAttribute</code> and
+      <code>org.jomc.modlet.DefaultModletProvider.modletLocationAttribute</code>.
+      See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
+      </action>
       <action dev="schulte2005" type="remove"><![CDATA[Removed <code>abstract</code> modifier of method
       <code>onLog</code> of class <code>org.jomc.modlet.ModelContext.Listener</code>.]]>
       </action>

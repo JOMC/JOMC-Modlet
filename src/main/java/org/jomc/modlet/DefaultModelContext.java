@@ -86,6 +86,30 @@ import org.xml.sax.helpers.DefaultHandler;
 public class DefaultModelContext extends ModelContext
 {
 
+    /**
+     * Constant for the name of the model context attribute backing property {@code providerLocation}.
+     * @see #getProviderLocation()
+     * @see ModelContext#getAttribute(java.lang.String)
+     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#clearAttribute(java.lang.String)
+     * @since 1.2
+     */
+    public static final String PROVIDER_LOCATION_ATTRIBUTE_NAME =
+        "org.jomc.modlet.DefaultModelContext.providerLocationAttribute";
+
+    /**
+     * Constant for the name of the model context attribute backing property {@code platformProviderLocation}.
+     * @see #getPlatformProviderLocation()
+     * @see ModelContext#getAttribute(java.lang.String)
+     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#clearAttribute(java.lang.String)
+     * @since 1.2
+     */
+    public static final String PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME =
+        "org.jomc.modlet.DefaultModelContext.platformProviderLocationAttribute";
+
     /** Supported schema name extensions. */
     private static final String[] SCHEMA_EXTENSIONS = new String[]
     {
@@ -173,6 +197,7 @@ public class DefaultModelContext extends ModelContext
      *
      * @see #getDefaultProviderLocation()
      * @see #setProviderLocation(java.lang.String)
+     * @see #PROVIDER_LOCATION_ATTRIBUTE_NAME
      */
     public final String getProviderLocation()
     {
@@ -180,7 +205,13 @@ public class DefaultModelContext extends ModelContext
         {
             this.providerLocation = getDefaultProviderLocation();
 
-            if ( this.isLoggable( Level.CONFIG ) )
+            if ( DEFAULT_PROVIDER_LOCATION.equals( this.providerLocation )
+                 && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
+            {
+                this.providerLocation = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
+                this.log( Level.CONFIG, getMessage( "contextProviderLocationInfo", this.providerLocation ), null );
+            }
+            else if ( this.isLoggable( Level.CONFIG ) )
             {
                 this.log( Level.CONFIG, getMessage( "defaultProviderLocationInfo", this.providerLocation ), null );
             }
@@ -244,6 +275,7 @@ public class DefaultModelContext extends ModelContext
      *
      * @see #getDefaultPlatformProviderLocation()
      * @see #setPlatformProviderLocation(java.lang.String)
+     * @see #PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME
      */
     public final String getPlatformProviderLocation()
     {
@@ -251,7 +283,15 @@ public class DefaultModelContext extends ModelContext
         {
             this.platformProviderLocation = getDefaultPlatformProviderLocation();
 
-            if ( this.isLoggable( Level.CONFIG ) )
+            if ( DEFAULT_PLATFORM_PROVIDER_LOCATION.equals( this.platformProviderLocation )
+                 && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
+            {
+                this.platformProviderLocation = (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
+                this.log( Level.CONFIG,
+                          getMessage( "contextPlatformProviderLocationInfo", this.platformProviderLocation ), null );
+
+            }
+            else if ( this.isLoggable( Level.CONFIG ) )
             {
                 this.log( Level.CONFIG,
                           getMessage( "defaultPlatformProviderLocationInfo", this.platformProviderLocation ), null );

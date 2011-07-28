@@ -53,7 +53,37 @@ public class DefaultModletProvider implements ModletProvider
 {
 
     /**
-     * Classpath location searched for {@code Modlets} by default.
+     * Constant for the name of the model context attribute backing property {@code enabled}.
+     * @see #findModlets(org.jomc.modlet.ModelContext)
+     * @see ModelContext#getAttribute(java.lang.String)
+     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#clearAttribute(java.lang.String)
+     * @since 1.2
+     */
+    public static final String ENABLED_ATTRIBUTE_NAME = "org.jomc.modlet.DefaultModletProvider.enabledAttribute";
+
+    /**
+     * Constant for the name of the model context attribute backing property {@code modletLocation}.
+     * @see #findModlets(org.jomc.modlet.ModelContext)
+     * @see ModelContext#getAttribute(java.lang.String)
+     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
+     * @see ModelContext#clearAttribute(java.lang.String)
+     * @since 1.2
+     */
+    public static final String MODLET_LOCATION_ATTRIBUTE_NAME =
+        "org.jomc.modlet.DefaultModletProvider.modletLocationAttribute";
+
+    /**
+     * Default value of the flag indicating the provider is enabled by default.
+     * @see #isDefaultEnabled()
+     * @since 1.2
+     */
+    private static final Boolean DEFAULT_ENABLED = Boolean.TRUE;
+
+    /**
+     * Class path location searched for {@code Modlets} by default.
      * @see #getDefaultModletLocation()
      */
     private static final String DEFAULT_MODLET_LOCATION = "META-INF/jomc-modlet.xml";
@@ -92,7 +122,7 @@ public class DefaultModletProvider implements ModletProvider
         if ( defaultEnabled == null )
         {
             defaultEnabled = Boolean.valueOf( System.getProperty(
-                "org.jomc.modlet.DefaultModletProvider.defaultEnabled", Boolean.toString( true ) ) );
+                "org.jomc.modlet.DefaultModletProvider.defaultEnabled", Boolean.toString( DEFAULT_ENABLED ) ) );
 
         }
 
@@ -295,6 +325,8 @@ public class DefaultModletProvider implements ModletProvider
      * @see #isEnabled()
      * @see #getModletLocation()
      * @see #findModlets(org.jomc.modlet.ModelContext, java.lang.String)
+     * @see #ENABLED_ATTRIBUTE_NAME
+     * @see #MODLET_LOCATION_ATTRIBUTE_NAME
      */
     public Modlets findModlets( final ModelContext context ) throws ModelException
     {
@@ -303,7 +335,20 @@ public class DefaultModletProvider implements ModletProvider
             throw new NullPointerException( "context" );
         }
 
-        return this.isEnabled() ? this.findModlets( context, this.getModletLocation() ) : null;
+        boolean contextEnabled = this.isEnabled();
+        if ( DEFAULT_ENABLED == contextEnabled && context.getAttribute( ENABLED_ATTRIBUTE_NAME ) != null )
+        {
+            contextEnabled = (Boolean) context.getAttribute( ENABLED_ATTRIBUTE_NAME );
+        }
+
+        String contextModletLocation = this.getModletLocation();
+        if ( DEFAULT_MODLET_LOCATION.equals( contextModletLocation )
+             && context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME ) != null )
+        {
+            contextModletLocation = (String) context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME );
+        }
+
+        return contextEnabled ? this.findModlets( context, contextModletLocation ) : null;
     }
 
     private static String getMessage( final String key, final Object... arguments )
