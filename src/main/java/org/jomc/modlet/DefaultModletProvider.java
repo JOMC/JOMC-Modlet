@@ -56,9 +56,6 @@ public class DefaultModletProvider implements ModletProvider
      * Constant for the name of the model context attribute backing property {@code enabled}.
      * @see #findModlets(org.jomc.modlet.ModelContext)
      * @see ModelContext#getAttribute(java.lang.String)
-     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#clearAttribute(java.lang.String)
      * @since 1.2
      */
     public static final String ENABLED_ATTRIBUTE_NAME = "org.jomc.modlet.DefaultModletProvider.enabledAttribute";
@@ -67,9 +64,6 @@ public class DefaultModletProvider implements ModletProvider
      * Constant for the name of the model context attribute backing property {@code modletLocation}.
      * @see #findModlets(org.jomc.modlet.ModelContext)
      * @see ModelContext#getAttribute(java.lang.String)
-     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#clearAttribute(java.lang.String)
      * @since 1.2
      */
     public static final String MODLET_LOCATION_ATTRIBUTE_NAME =

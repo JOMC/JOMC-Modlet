@@ -90,9 +90,6 @@ public class DefaultModelContext extends ModelContext
      * Constant for the name of the model context attribute backing property {@code providerLocation}.
      * @see #getProviderLocation()
      * @see ModelContext#getAttribute(java.lang.String)
-     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#clearAttribute(java.lang.String)
      * @since 1.2
      */
     public static final String PROVIDER_LOCATION_ATTRIBUTE_NAME =
@@ -102,9 +99,6 @@ public class DefaultModelContext extends ModelContext
      * Constant for the name of the model context attribute backing property {@code platformProviderLocation}.
      * @see #getPlatformProviderLocation()
      * @see ModelContext#getAttribute(java.lang.String)
-     * @see ModelContext#getAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#setAttribute(java.lang.String, java.lang.Object)
-     * @see ModelContext#clearAttribute(java.lang.String)
      * @since 1.2
      */
     public static final String PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME =
