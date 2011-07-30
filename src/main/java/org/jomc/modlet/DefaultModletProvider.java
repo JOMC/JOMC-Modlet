@@ -70,6 +70,15 @@ public class DefaultModletProvider implements ModletProvider
         "org.jomc.modlet.DefaultModletProvider.modletLocationAttribute";
 
     /**
+     * Constant for the name of the model context attribute backing property {@code validating}.
+     * @see #findModlets(org.jomc.modlet.ModelContext, java.lang.String)
+     * @see ModelContext#getAttribute(java.lang.String)
+     * @since 1.2
+     */
+    public static final String VALIDATING_ATTRIBUTE_NAME =
+        "org.jomc.modlet.DefaultModletProvider.validatingAttribute";
+
+    /**
      * Default value of the flag indicating the provider is enabled by default.
      * @see #isDefaultEnabled()
      * @since 1.2
@@ -82,17 +91,36 @@ public class DefaultModletProvider implements ModletProvider
      */
     private static final String DEFAULT_MODLET_LOCATION = "META-INF/jomc-modlet.xml";
 
+    /**
+     * Default value of the flag indicating the provider is validating resources by default.
+     * @see #isValidating()
+     * @since 1.2
+     */
+    private static final Boolean DEFAULT_VALIDATING = Boolean.TRUE;
+
     /** Default {@code Modlet} location. */
     private static volatile String defaultModletLocation;
 
     /** Flag indicating the provider is enabled by default. */
     private static volatile Boolean defaultEnabled;
 
+    /**
+     * Flag indicating the provider is validating resources by default.
+     * @since 1.2
+     */
+    private static volatile Boolean defaultValidating;
+
     /** Flag indicating the provider is enabled. */
     private Boolean enabled;
 
     /** Modlet location of the instance. */
     private String modletLocation;
+
+    /**
+     * Flag indicating the provider is validating resources.
+     * @since 1.2
+     */
+    private Boolean validating;
 
     /** Creates a new {@code DefaultModletProvider} instance. */
     public DefaultModletProvider()
@@ -231,6 +259,82 @@ public class DefaultModletProvider implements ModletProvider
     }
 
     /**
+     * Gets a flag indicating the provider is validating resources by default.
+     * <p>The default validating flag is controlled by system property
+     * {@code org.jomc.modlet.DefaultModletProvider.defaultValidating} holding a value indicating the provider is
+     * validating resources by default. If that property is not set, the {@code true} default is returned.</p>
+     *
+     * @return {@code true} if the provider is validating resources by default; {@code false} if the provider is not
+     * validating resources by default.
+     *
+     * @see #isValidating()
+     * @see #setDefaultValidating(java.lang.Boolean)
+     *
+     * @since 1.2
+     */
+    public static boolean isDefaultValidating()
+    {
+        if ( defaultValidating == null )
+        {
+            defaultValidating = Boolean.valueOf( System.getProperty(
+                "org.jomc.modlet.DefaultModletProvider.defaultValidating", Boolean.toString( DEFAULT_VALIDATING ) ) );
+
+        }
+
+        return defaultValidating;
+    }
+
+    /**
+     * Sets the flag indicating the provider is validating resources by default.
+     *
+     * @param value The new value of the flag indicating the provider is validating resources by default or
+     * {@code null}.
+     *
+     * @see #isDefaultValidating()
+     *
+     * @since 1.2
+     */
+    public static void setDefaultValidating( final Boolean value )
+    {
+        defaultValidating = value;
+    }
+
+    /**
+     * Gets a flag indicating the provider is validating resources.
+     *
+     * @return {@code true} if the provider is validating resources; {@code false} if the provider is not validating
+     * resources.
+     *
+     * @see #isDefaultValidating()
+     * @see #setValidating(java.lang.Boolean)
+     *
+     * @since 1.2
+     */
+    public final boolean isValidating()
+    {
+        if ( this.validating == null )
+        {
+            this.validating = isDefaultValidating();
+        }
+
+        return this.validating;
+    }
+
+    /**
+     * Sets the flag indicating the provider is validating resources.
+     *
+     * @param value The new value of the flag indicating the provider is validating resources or {@code null}.
+     *
+     * @see #isValidating()
+     *
+     * @since 1.2
+     */
+    public final void setValidating( final Boolean value )
+    {
+        this.validating = value;
+    }
+
+    /**
      * Searches a given context for {@code Modlets}.
      *
      * @param context The context to search for {@code Modlets}.
@@ -241,6 +345,9 @@ public class DefaultModletProvider implements ModletProvider
      *
      * @throws NullPointerException if {@code context} or {@code location} is {@code null}.
      * @throws ModelException if searching the context fails.
+     *
+     * @see #isValidating()
+     * @see #VALIDATING_ATTRIBUTE_NAME
      */
     public Modlets findModlets( final ModelContext context, final String location ) throws ModelException
     {
@@ -255,12 +362,22 @@ public class DefaultModletProvider implements ModletProvider
 
         try
         {
+            boolean contextValidating = this.isValidating();
+            if ( DEFAULT_VALIDATING == contextValidating && context.getAttribute( VALIDATING_ATTRIBUTE_NAME ) != null )
+            {
+                contextValidating = (Boolean) context.getAttribute( VALIDATING_ATTRIBUTE_NAME );
+            }
+
             Modlets modlets = null;
             final long t0 = System.currentTimeMillis();
             final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
             final Unmarshaller u = ctx.createUnmarshaller();
             final Enumeration<URL> e = context.findResources( location );
-            u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+
+            if ( contextValidating )
+            {
+                u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+            }
 
             while ( e.hasMoreElements() )
             {
