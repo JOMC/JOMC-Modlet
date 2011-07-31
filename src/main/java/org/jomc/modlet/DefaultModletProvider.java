@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
 
 /**
@@ -360,6 +361,8 @@ public class DefaultModletProvider implements ModletProvider
             throw new NullPointerException( "location" );
         }
 
+        URL url = null;
+
         try
         {
             boolean contextValidating = this.isValidating();
@@ -381,7 +384,7 @@ public class DefaultModletProvider implements ModletProvider
 
             while ( e.hasMoreElements() )
             {
-                final URL url = e.nextElement();
+                url = e.nextElement();
                 Object content = u.unmarshal( url );
                 if ( content instanceof JAXBElement<?> )
                 {
@@ -417,6 +420,23 @@ public class DefaultModletProvider implements ModletProvider
             }
 
             return modlets == null || modlets.getModlet().isEmpty() ? null : modlets;
+        }
+        catch ( final UnmarshalException e )
+        {
+            String message = getMessage( e );
+            if ( message == null && e.getLinkedException() != null )
+            {
+                message = getMessage( e.getLinkedException() );
+            }
+
+            if ( url != null )
+            {
+                message = getMessage( "unmarshalException", url.toExternalForm(),
+                                      message != null ? " " + message : "" );
+
+            }
+
+            throw new ModelException( message, e );
         }
         catch ( final JAXBException e )
         {
