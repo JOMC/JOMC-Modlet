@@ -453,6 +453,9 @@ public class DefaultModletProvider implements ModletProvider
     /**
      * {@inheritDoc}
      *
+     * @return The {@code Modlets} found in the context or {@code null} if no {@code Modlets} are found or the provider
+     * is disabled.
+     *
      * @see #isEnabled()
      * @see #getModletLocation()
      * @see #findModlets(org.jomc.modlet.ModelContext, java.lang.String)
