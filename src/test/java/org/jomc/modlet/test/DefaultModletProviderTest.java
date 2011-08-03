@@ -127,6 +127,20 @@ public class DefaultModletProviderTest extends ModletProviderTest
     }
 
     @Test
+    public final void testDefaultValidating() throws Exception
+    {
+        System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultValidating" );
+        DefaultModletProvider.setDefaultValidating( null );
+        assertTrue( DefaultModletProvider.isDefaultValidating() );
+        DefaultModletProvider.setDefaultValidating( null );
+        System.setProperty( "org.jomc.modlet.DefaultModletProvider.defaultValidating", "false" );
+        assertFalse( DefaultModletProvider.isDefaultValidating() );
+        System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultValidating" );
+        DefaultModletProvider.setDefaultValidating( null );
+        assertTrue( DefaultModletProvider.isDefaultValidating() );
+    }
+
+    @Test
     public final void testModletLocation() throws Exception
     {
         DefaultModletProvider.setDefaultModletLocation( null );
@@ -154,6 +168,21 @@ public class DefaultModletProviderTest extends ModletProviderTest
 
         DefaultModletProvider.setDefaultEnabled( null );
         this.getModletProvider().setEnabled( null );
+    }
+
+    @Test
+    public final void testValidating() throws Exception
+    {
+        DefaultModletProvider.setDefaultValidating( null );
+        this.getModletProvider().setValidating( null );
+        assertTrue( this.getModletProvider().isValidating() );
+
+        DefaultModletProvider.setDefaultValidating( false );
+        this.getModletProvider().setValidating( null );
+        assertFalse( this.getModletProvider().isValidating() );
+
+        DefaultModletProvider.setDefaultValidating( null );
+        this.getModletProvider().setValidating( null );
     }
 
 }
