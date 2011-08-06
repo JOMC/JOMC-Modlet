@@ -115,7 +115,7 @@
         <executions>
           <execution>
             <id>copy-schemas</id>
-            <phase>package</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
@@ -148,7 +148,7 @@
         <executions>
           <execution>
             <id>attach-schemas</id>
-            <phase>package</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>jar</goal>
             </goals>
