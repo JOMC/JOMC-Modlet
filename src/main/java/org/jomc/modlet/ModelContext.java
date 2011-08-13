@@ -58,7 +58,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Model context interface.
- * <p><b>Use Cases</b><br/><ul>
+ * <p><b>Use Cases:</b><br/><ul>
  * <li>{@link #createContext(java.lang.String) }</li>
  * <li>{@link #createEntityResolver(java.lang.String) }</li>
  * <li>{@link #createMarshaller(java.lang.String) }</li>
