@@ -793,23 +793,23 @@ public abstract class ModelContext
         }
         catch ( final ClassNotFoundException e )
         {
-            throw new ModelException( getMessage( "contextClassNotFound", getModelContextClassName() ), e );
+            throw new ModelException( getMessage( "contextClassNotFound", className ), e );
         }
         catch ( final NoSuchMethodException e )
         {
-            throw new ModelException( getMessage( "contextConstructorNotFound", getModelContextClassName() ), e );
+            throw new ModelException( getMessage( "contextConstructorNotFound", className ), e );
         }
         catch ( final InstantiationException e )
         {
             final String message = getMessage( e );
-            throw new ModelException( getMessage( "contextInstantiationException", getModelContextClassName(),
+            throw new ModelException( getMessage( "contextInstantiationException", className,
                                                   message != null ? " " + message : "" ), e );
 
         }
         catch ( final IllegalAccessException e )
         {
             final String message = getMessage( e );
-            throw new ModelException( getMessage( "contextConstructorAccessDenied", getModelContextClassName(),
+            throw new ModelException( getMessage( "contextConstructorAccessDenied", className,
                                                   message != null ? " " + message : "" ), e );
 
         }
@@ -821,13 +821,13 @@ public abstract class ModelContext
                 message = getMessage( e.getTargetException() );
             }
 
-            throw new ModelException( getMessage( "contextConstructorException", getModelContextClassName(),
+            throw new ModelException( getMessage( "contextConstructorException", className,
                                                   message != null ? " " + message : "" ), e );
 
         }
         catch ( final ClassCastException e )
         {
-            throw new ModelException( getMessage( "illegalContextImplementation", getModelContextClassName(),
+            throw new ModelException( getMessage( "illegalContextImplementation", className,
                                                   ModelContext.class.getName() ), e );
 
         }
