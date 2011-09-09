@@ -30,29 +30,30 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelValidationReport;
-import org.jomc.modlet.ModelValidator;
+import org.jomc.modlet.ModelProcessor;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
+import org.jomc.modlet.test.TestComplexType;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * {@code ModelValidator} test implementation.
+ * {@code ModelProcessor} test implementation.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestModelValidator implements ModelValidator
+public class TestModelProcessor implements ModelProcessor
 {
 
-    public TestModelValidator()
+    public TestModelProcessor()
     {
         super();
     }
 
-    public ModelValidationReport validateModel( final ModelContext context, final Model model ) throws ModelException
+    public Model processModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
         {
@@ -63,8 +64,14 @@ public class TestModelValidator implements ModelValidator
             throw new NullPointerException( "model" );
         }
 
-        context.setAttribute( TestModelValidator.class.getName(), this );
-        return new ModelValidationReport();
+        context.setAttribute( TestModelProcessor.class.getName(), this );
+
+        final Model processed = new Model( model );
+        final TestComplexType t = processed.getAnyObject( TestComplexType.class );
+        assertNotNull( t );
+
+        t.getAny().add( new TestComplexType() );
+        return processed;
     }
 
 }

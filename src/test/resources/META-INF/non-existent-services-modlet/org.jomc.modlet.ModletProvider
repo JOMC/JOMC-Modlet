@@ -1,2 +1,2 @@
 # $Id$
-org.jomc.modlet.test.ServicesNotFoundModletProvider
+org.jomc.modlet.test.support.ServicesNotFoundModletProvider

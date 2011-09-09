@@ -32,23 +32,28 @@
  */
 package org.jomc.modlet.test;
 
-import org.jomc.modlet.DefaultModletProvider;
+import java.io.IOException;
 import java.io.InputStream;
-import org.junit.Test;
 import java.io.StringWriter;
+import java.util.Properties;
+import java.util.logging.Level;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
-import javax.xml.bind.JAXBElement;
+import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.Model;
-import org.jomc.modlet.ModletObject;
-import java.io.IOException;
-import java.util.Properties;
-import org.w3c.dom.ls.LSInput;
-import org.w3c.dom.ls.LSResourceResolver;
-import org.jomc.modlet.Modlets;
-import java.util.logging.Level;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
+import org.jomc.modlet.ModletObject;
+import org.jomc.modlet.Modlets;
+import org.jomc.modlet.test.support.ClassCastExceptionModelContext;
+import org.jomc.modlet.test.support.IllegalAccessExceptionModelContext;
+import org.jomc.modlet.test.support.InstantiationExceptionModelContext;
+import org.jomc.modlet.test.support.InvocationTargetExceptionModelContext;
+import org.jomc.modlet.test.support.NoSuchMethodExceptionModelContext;
+import org.junit.Test;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

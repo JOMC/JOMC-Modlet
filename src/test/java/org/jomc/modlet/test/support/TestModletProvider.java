@@ -30,35 +30,59 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
-import javax.xml.bind.Unmarshaller;
+import org.jomc.modlet.ModelProcessor;
+import org.jomc.modlet.ModelProvider;
+import org.jomc.modlet.ModelValidator;
+import org.jomc.modlet.Modlet;
+import org.jomc.modlet.ModelContext;
+import org.jomc.modlet.ModelException;
+import org.jomc.modlet.ModletProvider;
+import org.jomc.modlet.Modlets;
+import org.jomc.modlet.Service;
+import org.jomc.modlet.Services;
 
 /**
- * {@code Unmarshaller.Listener} test implementation.
+ * {@code ModletProvider} test implementation.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestUnmarshallerListener extends Unmarshaller.Listener
+public class TestModletProvider implements ModletProvider
 {
 
-    /** Creates a new {@code TestUnmarshallerListener} instance. */
-    public TestUnmarshallerListener()
+    public TestModletProvider()
     {
         super();
     }
 
-    @Override
-    public void beforeUnmarshal( final Object target, final Object parent )
+    public Modlets findModlets( final ModelContext context ) throws ModelException
     {
-        System.out.println( this.getClass().getName() + ": beforeUnmarshal(" + target + ", " + parent + ")" );
-    }
+        final Modlets modlets = new Modlets();
+        final Modlet modlet = new Modlet();
+        modlets.getModlet().add( modlet );
+        modlet.setName( TestModletProvider.class.getName() );
+        modlet.setModel( TestModletProvider.class.getName() );
+        modlet.setServices( new Services() );
 
-    @Override
-    public void afterUnmarshal( final Object target, final Object parent )
-    {
-        System.out.println( this.getClass().getName() + ": afterUnmarshal(" + target + ", " + parent + ")" );
+        Service s = new Service();
+        s.setClazz( TestModelProvider.class.getName() );
+        s.setIdentifier( ModelProvider.class.getName() );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( TestModelProcessor.class.getName() );
+        s.setIdentifier( ModelProcessor.class.getName() );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( TestModelValidator.class.getName() );
+        s.setIdentifier( ModelValidator.class.getName() );
+        modlet.getServices().getService().add( s );
+
+        context.setAttribute( TestModletProvider.class.getName(), this );
+        return modlets;
     }
 
 }

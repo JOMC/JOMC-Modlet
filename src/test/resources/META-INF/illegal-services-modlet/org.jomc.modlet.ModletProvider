@@ -1,2 +1,2 @@
 # $Id$
-org.jomc.modlet.test.IllegalServicesModletProvider
+org.jomc.modlet.test.support.IllegalServicesModletProvider

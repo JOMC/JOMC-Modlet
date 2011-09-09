@@ -30,29 +30,28 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelProcessor;
+import org.jomc.modlet.ModelProvider;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
-import static org.junit.Assert.assertNotNull;
 
 /**
- * {@code ModelProcessor} test implementation.
+ * {@code ModelProvider} test implementation returning {@code null}.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestModelProcessor implements ModelProcessor
+public class NullModelProvider implements ModelProvider
 {
 
-    public TestModelProcessor()
+    public NullModelProvider()
     {
         super();
     }
 
-    public Model processModel( final ModelContext context, final Model model ) throws ModelException
+    public Model findModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
         {
@@ -63,14 +62,8 @@ public class TestModelProcessor implements ModelProcessor
             throw new NullPointerException( "model" );
         }
 
-        context.setAttribute( TestModelProcessor.class.getName(), this );
-
-        final Model processed = new Model( model );
-        final TestComplexType t = processed.getAnyObject( TestComplexType.class );
-        assertNotNull( t );
-
-        t.getAny().add( new TestComplexType() );
-        return processed;
+        context.setAttribute( NullModelProvider.class.getName(), this );
+        return null;
     }
 
 }

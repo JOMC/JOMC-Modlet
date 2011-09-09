@@ -30,7 +30,7 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import org.jomc.modlet.ModelProcessor;
 import org.jomc.modlet.ModelProvider;
@@ -44,15 +44,15 @@ import org.jomc.modlet.Service;
 import org.jomc.modlet.Services;
 
 /**
- * {@code ModletProvider} test implementation providing incompatible services.
+ * {@code ModletProvider} test implementation providing non-existent services.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class IllegalServicesModletProvider implements ModletProvider
+public class ServicesNotFoundModletProvider implements ModletProvider
 {
 
-    public IllegalServicesModletProvider()
+    public ServicesNotFoundModletProvider()
     {
         super();
     }
@@ -62,36 +62,36 @@ public class IllegalServicesModletProvider implements ModletProvider
         final Modlets modlets = new Modlets();
         final Modlet modlet = new Modlet();
         modlets.getModlet().add( modlet );
-        modlet.setName( IllegalServicesModletProvider.class.getName() );
-        modlet.setModel( IllegalServicesModletProvider.class.getName() );
+        modlet.setName( ServicesNotFoundModletProvider.class.getName() );
+        modlet.setModel( ServicesNotFoundModletProvider.class.getName() );
         modlet.setServices( new Services() );
 
         Service s = new Service();
-        s.setClazz( Object.class.getName() );
+        s.setClazz( "DOES NOT EXIST" );
         s.setIdentifier( ModelProvider.class.getName() );
         modlet.getServices().getService().add( s );
 
         s = new Service();
-        s.setClazz( Object.class.getName() );
+        s.setClazz( "DOES NOT EXIST" );
         s.setIdentifier( ModelProcessor.class.getName() );
         modlet.getServices().getService().add( s );
 
         s = new Service();
-        s.setClazz( Object.class.getName() );
+        s.setClazz( "DOES NOT EXIST" );
         s.setIdentifier( ModelValidator.class.getName() );
         modlet.getServices().getService().add( s );
 
         s = new Service();
-        s.setClazz( Object.class.getName() );
+        s.setClazz( "DOES NOT EXIST" );
         s.setIdentifier( "javax.xml.bind.Marshaller.Listener" );
         modlet.getServices().getService().add( s );
 
         s = new Service();
-        s.setClazz( Object.class.getName() );
+        s.setClazz( "DOES NOT EXIST" );
         s.setIdentifier( "javax.xml.bind.Unmarshaller.Listener" );
         modlet.getServices().getService().add( s );
 
-        context.setAttribute( IllegalServicesModletProvider.class.getName(), this );
+        context.setAttribute( ServicesNotFoundModletProvider.class.getName(), this );
         return modlets;
     }
 

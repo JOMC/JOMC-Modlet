@@ -30,7 +30,7 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;

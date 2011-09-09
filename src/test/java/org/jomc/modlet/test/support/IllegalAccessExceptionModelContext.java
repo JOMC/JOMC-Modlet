@@ -30,7 +30,7 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -46,17 +46,17 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 
 /**
- * Test {@code ModelContext} implementation without constructor taking a class loader.
+ * Test {@code ModelContext} implementation with inaccessible constructor.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class NoSuchMethodExceptionModelContext extends ModelContext
+public class IllegalAccessExceptionModelContext extends ModelContext
 {
 
-    public NoSuchMethodExceptionModelContext()
+    private IllegalAccessExceptionModelContext( final ClassLoader classLoader )
     {
-        super( null );
+        super( classLoader );
     }
 
     @Override

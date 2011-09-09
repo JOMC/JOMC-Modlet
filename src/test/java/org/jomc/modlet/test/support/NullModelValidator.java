@@ -30,28 +30,29 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelProvider;
+import org.jomc.modlet.ModelValidationReport;
+import org.jomc.modlet.ModelValidator;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 
 /**
- * {@code ModelProvider} test implementation returning {@code null}.
+ * {@code ModelValidator} test implementation returning {@code null}.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class NullModelProvider implements ModelProvider
+public class NullModelValidator implements ModelValidator
 {
 
-    public NullModelProvider()
+    public NullModelValidator()
     {
         super();
     }
 
-    public Model findModel( final ModelContext context, final Model model ) throws ModelException
+    public ModelValidationReport validateModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
         {
@@ -62,7 +63,7 @@ public class NullModelProvider implements ModelProvider
             throw new NullPointerException( "model" );
         }
 
-        context.setAttribute( NullModelProvider.class.getName(), this );
+        context.setAttribute( NullModelValidator.class.getName(), this );
         return null;
     }
 

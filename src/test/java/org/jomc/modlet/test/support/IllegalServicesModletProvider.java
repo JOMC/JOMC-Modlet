@@ -30,30 +30,69 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
+import org.jomc.modlet.ModelProcessor;
+import org.jomc.modlet.ModelProvider;
+import org.jomc.modlet.ModelValidator;
+import org.jomc.modlet.Modlet;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModletProvider;
 import org.jomc.modlet.Modlets;
+import org.jomc.modlet.Service;
+import org.jomc.modlet.Services;
 
 /**
- * {@code ModletProvider} test implementation returning {@code null}.
+ * {@code ModletProvider} test implementation providing incompatible services.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class NullModletProvider implements ModletProvider
+public class IllegalServicesModletProvider implements ModletProvider
 {
 
-    public NullModletProvider()
+    public IllegalServicesModletProvider()
     {
         super();
     }
 
     public Modlets findModlets( final ModelContext context ) throws ModelException
     {
-        return null;
+        final Modlets modlets = new Modlets();
+        final Modlet modlet = new Modlet();
+        modlets.getModlet().add( modlet );
+        modlet.setName( IllegalServicesModletProvider.class.getName() );
+        modlet.setModel( IllegalServicesModletProvider.class.getName() );
+        modlet.setServices( new Services() );
+
+        Service s = new Service();
+        s.setClazz( Object.class.getName() );
+        s.setIdentifier( ModelProvider.class.getName() );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( Object.class.getName() );
+        s.setIdentifier( ModelProcessor.class.getName() );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( Object.class.getName() );
+        s.setIdentifier( ModelValidator.class.getName() );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( Object.class.getName() );
+        s.setIdentifier( "javax.xml.bind.Marshaller.Listener" );
+        modlet.getServices().getService().add( s );
+
+        s = new Service();
+        s.setClazz( Object.class.getName() );
+        s.setIdentifier( "javax.xml.bind.Unmarshaller.Listener" );
+        modlet.getServices().getService().add( s );
+
+        context.setAttribute( IllegalServicesModletProvider.class.getName(), this );
+        return modlets;
     }
 
 }

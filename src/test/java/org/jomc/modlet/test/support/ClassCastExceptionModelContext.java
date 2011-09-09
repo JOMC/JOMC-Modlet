@@ -30,7 +30,7 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -38,7 +38,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.validation.Schema;
 import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModelValidationReport;
 import org.jomc.modlet.Modlets;
@@ -46,86 +45,69 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 
 /**
- * Test {@code ModelContext} implementation with inaccessible constructor.
+ * Test {@code ModelContext} implementation not extending {@code ModelContext}.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class IllegalAccessExceptionModelContext extends ModelContext
+public class ClassCastExceptionModelContext
 {
 
-    private IllegalAccessExceptionModelContext( final ClassLoader classLoader )
+    public ClassCastExceptionModelContext( final ClassLoader classLoader )
     {
-        super( classLoader );
+        super();
     }
 
-    @Override
     public Modlets findModlets() throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Model findModel( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Model findModel( final Model model ) throws ModelException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public EntityResolver createEntityResolver( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public LSResourceResolver createResourceResolver( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Schema createSchema( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public JAXBContext createContext( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Marshaller createMarshaller( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Unmarshaller createUnmarshaller( final String model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Model processModel( final Model model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public ModelValidationReport validateModel( final Model model ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public ModelValidationReport validateModel( final String model, final Source source ) throws ModelException
     {
         throw new UnsupportedOperationException();

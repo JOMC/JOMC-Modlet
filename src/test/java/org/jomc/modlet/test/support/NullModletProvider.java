@@ -30,43 +30,30 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
-import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelProvider;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
+import org.jomc.modlet.ModletProvider;
+import org.jomc.modlet.Modlets;
 
 /**
- * {@code ModelProvider} test implementation.
+ * {@code ModletProvider} test implementation returning {@code null}.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestModelProvider implements ModelProvider
+public class NullModletProvider implements ModletProvider
 {
 
-    public TestModelProvider()
+    public NullModletProvider()
     {
         super();
     }
 
-    public Model findModel( final ModelContext context, final Model model ) throws ModelException
+    public Modlets findModlets( final ModelContext context ) throws ModelException
     {
-        if ( context == null )
-        {
-            throw new NullPointerException( "context" );
-        }
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        context.setAttribute( TestModelProvider.class.getName(), this );
-
-        final Model created = new Model( model );
-        created.getAny().add( new ObjectFactory().createTest( new TestComplexType() ) );
-        return created;
+        return null;
     }
 
 }

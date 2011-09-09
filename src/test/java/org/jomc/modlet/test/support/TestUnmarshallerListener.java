@@ -30,40 +30,35 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
-import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelProcessor;
-import org.jomc.modlet.ModelContext;
-import org.jomc.modlet.ModelException;
+import javax.xml.bind.Unmarshaller;
 
 /**
- * {@code ModelProcessor} test implementation returning {@code null}.
+ * {@code Unmarshaller.Listener} test implementation.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class NullModelProcessor implements ModelProcessor
+public class TestUnmarshallerListener extends Unmarshaller.Listener
 {
 
-    public NullModelProcessor()
+    /** Creates a new {@code TestUnmarshallerListener} instance. */
+    public TestUnmarshallerListener()
     {
         super();
     }
 
-    public Model processModel( final ModelContext context, final Model model ) throws ModelException
+    @Override
+    public void beforeUnmarshal( final Object target, final Object parent )
     {
-        if ( context == null )
-        {
-            throw new NullPointerException( "context" );
-        }
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
+        System.out.println( this.getClass().getName() + ": beforeUnmarshal(" + target + ", " + parent + ")" );
+    }
 
-        context.setAttribute( NullModelProcessor.class.getName(), this );
-        return null;
+    @Override
+    public void afterUnmarshal( final Object target, final Object parent )
+    {
+        System.out.println( this.getClass().getName() + ": afterUnmarshal(" + target + ", " + parent + ")" );
     }
 
 }

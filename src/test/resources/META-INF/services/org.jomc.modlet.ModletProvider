@@ -1,2 +1,2 @@
 # $Id$
-org.jomc.modlet.test.NullModletProvider
+org.jomc.modlet.test.support.NullModletProvider

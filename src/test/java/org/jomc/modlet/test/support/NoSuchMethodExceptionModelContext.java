@@ -30,7 +30,7 @@
  *   $Id$
  *
  */
-package org.jomc.modlet.test;
+package org.jomc.modlet.test.support;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -46,18 +46,17 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 
 /**
- * Test {@code ModelContext} implementation throwing an exception.
+ * Test {@code ModelContext} implementation without constructor taking a class loader.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class InvocationTargetExceptionModelContext extends ModelContext
+public class NoSuchMethodExceptionModelContext extends ModelContext
 {
 
-    public InvocationTargetExceptionModelContext( final ClassLoader classLoader )
+    public NoSuchMethodExceptionModelContext()
     {
-        super( classLoader );
-        throw new UnsupportedOperationException();
+        super( null );
     }
 
     @Override
