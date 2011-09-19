@@ -76,7 +76,7 @@ public class ModelContextTest
     public static final String DEFAULT_MODLET_NAME;
 
     /** Constant for the absolute location of an existing test resource. */
-    public static final String TEST_RESOURCE_LOCATION =
+    private static final String TEST_RESOURCE_LOCATION =
         ModelContextTest.class.getName().replace( '.', '/' ) + ".properties";
 
     static
