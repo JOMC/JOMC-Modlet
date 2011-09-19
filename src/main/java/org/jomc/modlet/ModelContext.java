@@ -557,6 +557,10 @@ public abstract class ModelContext
                     {
                         this.modlets.getModlet().add( m );
                     }
+                    else if ( this.isLoggable( Level.WARNING ) )
+                    {
+                        this.log( Level.WARNING, getMessage( "ignoringRedundantModlet", m.getName() ), null );
+                    }
                 }
 
                 final javax.xml.validation.Schema modletSchema = this.createSchema( ModletObject.MODEL_PUBLIC_ID );
