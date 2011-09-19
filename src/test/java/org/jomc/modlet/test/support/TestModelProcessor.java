@@ -45,7 +45,7 @@ import static org.junit.Assert.assertNotNull;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestModelProcessor implements ModelProcessor
+public final class TestModelProcessor implements ModelProcessor
 {
 
     public TestModelProcessor()

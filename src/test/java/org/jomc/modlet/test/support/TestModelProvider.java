@@ -45,7 +45,7 @@ import org.jomc.modlet.test.TestComplexType;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestModelProvider implements ModelProvider
+public final class TestModelProvider implements ModelProvider
 {
 
     public TestModelProvider()

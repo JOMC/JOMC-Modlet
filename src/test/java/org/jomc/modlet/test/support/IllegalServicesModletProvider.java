@@ -49,7 +49,7 @@ import org.jomc.modlet.Services;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class IllegalServicesModletProvider implements ModletProvider
+public final class IllegalServicesModletProvider implements ModletProvider
 {
 
     public IllegalServicesModletProvider()

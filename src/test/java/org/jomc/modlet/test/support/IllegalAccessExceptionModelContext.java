@@ -46,12 +46,12 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 
 /**
- * Test {@code ModelContext} implementation with inaccessible constructor.
+ * {@code ModelContext} implementation with inaccessible constructor.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class IllegalAccessExceptionModelContext extends ModelContext
+public final class IllegalAccessExceptionModelContext extends ModelContext
 {
 
     private IllegalAccessExceptionModelContext( final ClassLoader classLoader )

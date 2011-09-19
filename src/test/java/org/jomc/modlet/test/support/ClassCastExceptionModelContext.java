@@ -45,12 +45,12 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 
 /**
- * Test {@code ModelContext} implementation not extending {@code ModelContext}.
+ * {@code ModelContext} implementation not extending {@code ModelContext}.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class ClassCastExceptionModelContext
+public final class ClassCastExceptionModelContext
 {
 
     public ClassCastExceptionModelContext( final ClassLoader classLoader )

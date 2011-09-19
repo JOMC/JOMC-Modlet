@@ -44,7 +44,7 @@ import org.jomc.modlet.ModelException;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class NullModelValidator implements ModelValidator
+public final class NullModelValidator implements ModelValidator
 {
 
     public NullModelValidator()

@@ -40,7 +40,7 @@ import javax.xml.bind.Marshaller;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestMarshallerListener extends Marshaller.Listener
+public final class TestMarshallerListener extends Marshaller.Listener
 {
 
     /** Creates a new {@code TestMarshallerListener}. */

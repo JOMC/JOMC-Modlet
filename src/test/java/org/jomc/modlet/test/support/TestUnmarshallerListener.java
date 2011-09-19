@@ -40,7 +40,7 @@ import javax.xml.bind.Unmarshaller;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class TestUnmarshallerListener extends Unmarshaller.Listener
+public final class TestUnmarshallerListener extends Unmarshaller.Listener
 {
 
     /** Creates a new {@code TestUnmarshallerListener} instance. */

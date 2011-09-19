@@ -43,7 +43,7 @@ import org.jomc.modlet.Modlets;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $Id$
  */
-public class NullModletProvider implements ModletProvider
+public final class NullModletProvider implements ModletProvider
 {
 
     public NullModletProvider()
