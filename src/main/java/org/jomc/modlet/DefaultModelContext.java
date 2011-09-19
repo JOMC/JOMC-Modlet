@@ -203,7 +203,11 @@ public class DefaultModelContext extends ModelContext
                  && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
             {
                 this.providerLocation = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
-                this.log( Level.CONFIG, getMessage( "contextProviderLocationInfo", this.providerLocation ), null );
+
+                if ( this.isLoggable( Level.CONFIG ) )
+                {
+                    this.log( Level.CONFIG, getMessage( "contextProviderLocationInfo", this.providerLocation ), null );
+                }
             }
             else if ( this.isLoggable( Level.CONFIG ) )
             {
@@ -281,9 +285,13 @@ public class DefaultModelContext extends ModelContext
                  && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
             {
                 this.platformProviderLocation = (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
-                this.log( Level.CONFIG,
-                          getMessage( "contextPlatformProviderLocationInfo", this.platformProviderLocation ), null );
 
+                if ( this.isLoggable( Level.CONFIG ) )
+                {
+                    this.log( Level.CONFIG, getMessage( "contextPlatformProviderLocationInfo",
+                                                        this.platformProviderLocation ), null );
+
+                }
             }
             else if ( this.isLoggable( Level.CONFIG ) )
             {
