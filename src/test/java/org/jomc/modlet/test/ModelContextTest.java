@@ -27,7 +27,7 @@
  *   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  *   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *   $Id$
+ *   $JOMC$
  *
  */
 package org.jomc.modlet.test;
@@ -67,7 +67,7 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
  * Test cases for {@code org.jomc.modlet.ModelContext} implementations.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
- * @version $Id$
+ * @version $JOMC$
  */
 public class ModelContextTest
 {

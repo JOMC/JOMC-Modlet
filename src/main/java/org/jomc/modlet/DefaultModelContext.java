@@ -27,7 +27,7 @@
  *   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  *   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *   $Id$
+ *   $JOMC$
  *
  */
 package org.jomc.modlet;
@@ -80,7 +80,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * Default {@code ModelContext} implementation.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
- * @version $Id$
+ * @version $JOMC$
  * @see ModelContext#createModelContext(java.lang.ClassLoader)
  */
 public class DefaultModelContext extends ModelContext
@@ -1684,7 +1684,7 @@ public class DefaultModelContext extends ModelContext
  * {@code ErrorHandler} collecting {@code ModelValidationReport} details.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
- * @version $Id$
+ * @version $JOMC$
  */
 class ModelErrorHandler extends DefaultHandler
 {
@@ -1801,7 +1801,7 @@ class ModelErrorHandler extends DefaultHandler
  * List of {@code Marshaller.Listener}s.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
- * @version $Id$
+ * @version $JOMC$
  * @since 1.2
  */
 class MarshallerListenerList extends Marshaller.Listener
@@ -1858,7 +1858,7 @@ class MarshallerListenerList extends Marshaller.Listener
  * List of {@code Unmarshaller.Listener}s.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
- * @version $Id$
+ * @version $JOMC$
  * @since 1.2
  */
 class UnmarshallerListenerList extends Unmarshaller.Listener
