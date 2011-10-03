@@ -60,6 +60,27 @@ public class DefaultModletProvider implements ModletProvider
     public static final String ENABLED_ATTRIBUTE_NAME = "org.jomc.modlet.DefaultModletProvider.enabledAttribute";
 
     /**
+     * Constant for the name of the system property controlling property {@code defaultEnabled}.
+     * @see #isDefaultEnabled()
+     * @since 1.2
+     */
+    private static final String DEFAULT_ENABLED_PROPERTY_NAME =
+        "org.jomc.modlet.DefaultModletProvider.defaultEnabled";
+
+    /**
+     * Default value of the flag indicating the provider is enabled by default.
+     * @see #isDefaultEnabled()
+     * @since 1.2
+     */
+    private static final Boolean DEFAULT_ENABLED = Boolean.TRUE;
+
+    /** Flag indicating the provider is enabled by default. */
+    private static volatile Boolean defaultEnabled;
+
+    /** Flag indicating the provider is enabled. */
+    private Boolean enabled;
+
+    /**
      * Constant for the name of the model context attribute backing property {@code modletLocation}.
      * @see #findModlets(org.jomc.modlet.ModelContext)
      * @see ModelContext#getAttribute(java.lang.String)
@@ -67,6 +88,26 @@ public class DefaultModletProvider implements ModletProvider
      */
     public static final String MODLET_LOCATION_ATTRIBUTE_NAME =
         "org.jomc.modlet.DefaultModletProvider.modletLocationAttribute";
+
+    /**
+     * Constant for the name of the system property controlling property {@code defaultModletLocation}.
+     * @see #getDefaultModletLocation()
+     * @since 1.2
+     */
+    private static final String DEFAULT_MODLET_LOCATION_PROPERTY_NAME =
+        "org.jomc.modlet.DefaultModletProvider.defaultModletLocation";
+
+    /**
+     * Class path location searched for {@code Modlets} by default.
+     * @see #getDefaultModletLocation()
+     */
+    private static final String DEFAULT_MODLET_LOCATION = "META-INF/jomc-modlet.xml";
+
+    /** Default {@code Modlet} location. */
+    private static volatile String defaultModletLocation;
+
+    /** Modlet location of the instance. */
+    private String modletLocation;
 
     /**
      * Constant for the name of the model context attribute backing property {@code validating}.
@@ -78,17 +119,12 @@ public class DefaultModletProvider implements ModletProvider
         "org.jomc.modlet.DefaultModletProvider.validatingAttribute";
 
     /**
-     * Default value of the flag indicating the provider is enabled by default.
-     * @see #isDefaultEnabled()
+     * Constant for the name of the system property controlling property {@code defaultValidating}.
+     * @see #isDefaultValidating()
      * @since 1.2
      */
-    private static final Boolean DEFAULT_ENABLED = Boolean.TRUE;
-
-    /**
-     * Class path location searched for {@code Modlets} by default.
-     * @see #getDefaultModletLocation()
-     */
-    private static final String DEFAULT_MODLET_LOCATION = "META-INF/jomc-modlet.xml";
+    private static final String DEFAULT_VALIDATING_PROPERTY_NAME =
+        "org.jomc.modlet.DefaultModletProvider.defaultValidating";
 
     /**
      * Default value of the flag indicating the provider is validating resources by default.
@@ -97,23 +133,11 @@ public class DefaultModletProvider implements ModletProvider
      */
     private static final Boolean DEFAULT_VALIDATING = Boolean.TRUE;
 
-    /** Default {@code Modlet} location. */
-    private static volatile String defaultModletLocation;
-
-    /** Flag indicating the provider is enabled by default. */
-    private static volatile Boolean defaultEnabled;
-
     /**
      * Flag indicating the provider is validating resources by default.
      * @since 1.2
      */
     private static volatile Boolean defaultValidating;
-
-    /** Flag indicating the provider is enabled. */
-    private Boolean enabled;
-
-    /** Modlet location of the instance. */
-    private String modletLocation;
 
     /**
      * Flag indicating the provider is validating resources.
@@ -144,7 +168,7 @@ public class DefaultModletProvider implements ModletProvider
         if ( defaultEnabled == null )
         {
             defaultEnabled = Boolean.valueOf( System.getProperty(
-                "org.jomc.modlet.DefaultModletProvider.defaultEnabled", Boolean.toString( DEFAULT_ENABLED ) ) );
+                DEFAULT_ENABLED_PROPERTY_NAME, Boolean.toString( DEFAULT_ENABLED ) ) );
 
         }
 
@@ -209,7 +233,7 @@ public class DefaultModletProvider implements ModletProvider
         if ( defaultModletLocation == null )
         {
             defaultModletLocation = System.getProperty(
-                "org.jomc.modlet.DefaultModletProvider.defaultModletLocation", DEFAULT_MODLET_LOCATION );
+                DEFAULT_MODLET_LOCATION_PROPERTY_NAME, DEFAULT_MODLET_LOCATION );
 
         }
 
@@ -277,7 +301,7 @@ public class DefaultModletProvider implements ModletProvider
         if ( defaultValidating == null )
         {
             defaultValidating = Boolean.valueOf( System.getProperty(
-                "org.jomc.modlet.DefaultModletProvider.defaultValidating", Boolean.toString( DEFAULT_VALIDATING ) ) );
+                DEFAULT_VALIDATING_PROPERTY_NAME, Boolean.toString( DEFAULT_VALIDATING ) ) );
 
         }
 
