@@ -492,6 +492,8 @@ public class DefaultModletProvider implements ModletProvider
             throw new NullPointerException( "context" );
         }
 
+        Modlets found = null;
+
         boolean contextEnabled = this.isEnabled();
         if ( DEFAULT_ENABLED == contextEnabled && context.getAttribute( ENABLED_ATTRIBUTE_NAME ) != null )
         {
@@ -505,7 +507,16 @@ public class DefaultModletProvider implements ModletProvider
             contextModletLocation = (String) context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME );
         }
 
-        return contextEnabled ? this.findModlets( context, contextModletLocation ) : null;
+        if ( contextEnabled )
+        {
+            found = this.findModlets( context, contextModletLocation );
+        }
+        else if ( context.isLoggable( Level.FINER ) )
+        {
+            context.log( Level.FINER, getMessage( "disabled", this.getClass().getSimpleName() ), null );
+        }
+
+        return found;
     }
 
     private static String getMessage( final String key, final Object... arguments )
