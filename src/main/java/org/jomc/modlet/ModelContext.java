@@ -132,7 +132,7 @@ public abstract class ModelContext
     /** The attributes of the instance. */
     private final Map<String, Object> attributes = new HashMap<String, Object>();
 
-    /** The class loader of the context. */
+    /** The class loader of the instance. */
     private ClassLoader classLoader;
 
     /** The listeners of the instance. */
@@ -163,7 +163,7 @@ public abstract class ModelContext
     /**
      * Gets an attribute of the context.
      *
-     * @param name The name of the attribute to return.
+     * @param name The name of the attribute to get.
      *
      * @return The value of the attribute with name {@code name}; {@code null} if no attribute matching {@code name} is
      * found.
@@ -187,7 +187,7 @@ public abstract class ModelContext
     /**
      * Gets an attribute of the context.
      *
-     * @param name The name of the attribute to return.
+     * @param name The name of the attribute to get.
      * @param def The value to return if no attribute matching {@code name} is found.
      *
      * @return The value of the attribute with name {@code name}; {@code def} if no such attribute is found.
@@ -244,9 +244,9 @@ public abstract class ModelContext
     }
 
     /**
-     * Clears an attribute in the context.
+     * Removes an attribute from the context.
      *
-     * @param name The name of the attribute to clear.
+     * @param name The name of the attribute to remove.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      *
@@ -464,8 +464,8 @@ public abstract class ModelContext
      *
      * @param level The level to test.
      *
-     * @return {@code true} if messages at {@code level} are provided to the listeners of the context;
-     * {@code false} if messages at {@code level} are not provided to the listeners of the context.
+     * @return {@code true}, if messages at {@code level} are provided to the listeners of the context; {@code false},
+     * if messages at {@code level} are not provided to the listeners of the context.
      *
      * @throws NullPointerException if {@code level} is {@code null}.
      *
@@ -512,11 +512,12 @@ public abstract class ModelContext
 
     /**
      * Gets the {@code Modlets} of the context.
-     * <p>This method calls the {@code findModlets} method to initialize the {@code Modlets} of the context, if no
-     * {@code Modlets} instance has been set with the {@code setModlets} method.</p>
+     * <p>If no {@code Modlets} have been set using the {@code setModlets} method, this method calls the
+     * {@code findModlets} method to initialize the {@code Modlets} of the context.</p>
+     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * to the returned list will be present inside the object.</p>
      *
-     * @return The {@code Modlets} of the context. This accessor method returns a reference to the live list, not a
-     * snapshot. Therefore any modification you make to the returned list will be present inside the object.
+     * @return The {@code Modlets} of the context.
      *
      * @throws ModelException if getting the {@code Modlets} of the context fails.
      *
@@ -609,13 +610,13 @@ public abstract class ModelContext
     }
 
     /**
-     * Gets the name of the class providing the {@code ModelContext} implementation.
-     * <p>The name of the class providing the {@code ModelContext} implementation returned by method
+     * Gets the name of the class providing the default {@code ModelContext} implementation.
+     * <p>The name of the class providing the default {@code ModelContext} implementation returned by method
      * {@link #createModelContext(java.lang.ClassLoader)} is controlled by system property
      * {@code org.jomc.modlet.ModelContext.className}. If that property is not set, the name of the
-     * {@link DefaultModelContext} class is returned.</p>
+     * {@link org.jomc.modlet.DefaultModelContext} class is returned.</p>
      *
-     * @return The name of the class providing the {@code ModelContext} implementation.
+     * @return The name of the class providing the default {@code ModelContext} implementation.
      *
      * @see #setModelContextClassName(java.lang.String)
      */
@@ -632,9 +633,9 @@ public abstract class ModelContext
     }
 
     /**
-     * Sets the name of the class providing the {@code ModelContext} implementation.
+     * Sets the name of the class providing the default {@code ModelContext} implementation.
      *
-     * @param value The new name of the class providing the {@code ModelContext} implementation or {@code null}.
+     * @param value The new name of the class providing the default {@code ModelContext} implementation or {@code null}.
      *
      * @see #getModelContextClassName()
      */
@@ -646,9 +647,9 @@ public abstract class ModelContext
     /**
      * Searches the context for a class with a given name.
      *
-     * @param name The name of the class to return.
+     * @param name The name of the class to search.
      *
-     * @return A class object of the class with name {@code name} or {@code null} if no such class is found.
+     * @return A class object of the class with name {@code name} or {@code null}, if no such class is found.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      * @throws ModelException if searching fails.
@@ -680,9 +681,9 @@ public abstract class ModelContext
     /**
      * Searches the context for a resource with a given name.
      *
-     * @param name The name of the resource to return.
+     * @param name The name of the resource to search.
      *
-     * @return An URL object for reading the resource or {@code null} if no such resource is found.
+     * @return An URL object for reading the resource or {@code null}, if no such resource is found.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      * @throws ModelException if searching fails.
@@ -702,7 +703,7 @@ public abstract class ModelContext
     /**
      * Searches the context for resources with a given name.
      *
-     * @param name The name of the resources to return.
+     * @param name The name of the resources to search.
      *
      * @return An enumeration of URL objects for reading the resources. If no resources are found, the enumeration will
      * be empty.
@@ -741,10 +742,10 @@ public abstract class ModelContext
     public abstract Modlets findModlets() throws ModelException;
 
     /**
-     * Creates a new {@code ModelContext} instance.
+     * Creates a new default {@code ModelContext} instance.
      *
-     * @param classLoader The class loader to create a new {@code ModelContext} instance with or {@code null} to create
-     * a new context using the platform's bootstrap class loader.
+     * @param classLoader The class loader to create a new default {@code ModelContext} instance with or {@code null},
+     * to create a new context using the platform's bootstrap class loader.
      *
      * @return A new {@code ModelContext} instance.
      *
@@ -762,7 +763,7 @@ public abstract class ModelContext
      * Creates a new {@code ModelContext} instance.
      *
      * @param className The name of the class providing the {@code ModelContext} implementation.
-     * @param classLoader The class loader to create a new {@code ModelContext} instance with or {@code null} to create
+     * @param classLoader The class loader to create a new {@code ModelContext} instance with or {@code null}, to create
      * a new context using the platform's bootstrap class loader.
      *
      * @return A new {@code ModelContext} instance.

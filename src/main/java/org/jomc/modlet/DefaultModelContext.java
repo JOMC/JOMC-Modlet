@@ -109,7 +109,7 @@ public class DefaultModelContext extends ModelContext
     };
 
     /**
-     * Classpath location searched for providers by default.
+     * Class path location searched for providers by default.
      * @see #getDefaultProviderLocation()
      */
     private static final String DEFAULT_PROVIDER_LOCATION = "META-INF/services";
@@ -398,8 +398,8 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelProvider} services of the model identified by {@code model} to create a new
-     * {@code Model} instance.</p>
+     * <p>This method loads all {@code ModelProvider} service classes of the model identified by {@code model} to create
+     * a new {@code Model} instance.</p>
      *
      * @see #getModlets()
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
@@ -420,7 +420,7 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelProvider} services of the given model to populate the given model
+     * <p>This method loads all {@code ModelProvider} service classes of the given model to populate the given model
      * instance.</p>
      *
      * @see #getModlets()
@@ -1232,7 +1232,7 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelProcessor} services of {@code model} to process the given
+     * <p>This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
      * {@code Model}.</p>
      *
      * @see #getModlets()
@@ -1305,7 +1305,7 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelValidator} services of {@code model} to validate the given
+     * <p>This method loads all {@code ModelValidator} service classes of {@code model} to validate the given
      * {@code Model}.</p>
      *
      * @see #getModlets()

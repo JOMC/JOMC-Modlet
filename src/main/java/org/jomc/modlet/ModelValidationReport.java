@@ -78,7 +78,7 @@ public class ModelValidationReport implements Serializable
         private JAXBElement<?> element;
 
         /**
-         * Creates a new {@code Detail} taking an identifier, a level and a message.
+         * Creates a new {@code Detail} taking an identifier, a level, a message and an element.
          *
          * @param identifier The detail identifier.
          * @param level The detail level.
@@ -182,7 +182,6 @@ public class ModelValidationReport implements Serializable
      * to the returned list will be present inside the object. This is why there is no {@code set} method for the
      * details property.</p>
      *
-     *
      * @return All details of the instance.
      */
     public List<Detail> getDetails()
@@ -225,8 +224,10 @@ public class ModelValidationReport implements Serializable
     /**
      * Gets a flag indicating model validity.
      *
-     * @return {@code true} if the validated model is considered valid; {@code false} if the validated model is
-     * considered invalid.
+     * @return {@code true}, if all details are set to a level lower or equal to {@code WARNING}; {@code false}, if at
+     * least one detail is set to a level higher than {@code WARNING}.
+     *
+     * @see #getDetails()
      */
     public boolean isModelValid()
     {

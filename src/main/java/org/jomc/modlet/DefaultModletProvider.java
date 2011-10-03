@@ -92,7 +92,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Default value of the flag indicating the provider is validating resources by default.
-     * @see #isValidating()
+     * @see #isDefaultValidating()
      * @since 1.2
      */
     private static final Boolean DEFAULT_VALIDATING = Boolean.TRUE;
@@ -133,7 +133,8 @@ public class DefaultModletProvider implements ModletProvider
      * {@code org.jomc.modlet.DefaultModletProvider.defaultEnabled} holding a value indicating the provider is
      * enabled by default. If that property is not set, the {@code true} default is returned.</p>
      *
-     * @return {@code true} if the provider is enabled by default; {@code false} if the provider is disabled by default.
+     * @return {@code true}, if the provider is enabled by default; {@code false}, if the provider is disabled by
+     * default.
      *
      * @see #isEnabled()
      * @see #setDefaultEnabled(java.lang.Boolean)
@@ -165,7 +166,7 @@ public class DefaultModletProvider implements ModletProvider
     /**
      * Gets a flag indicating the provider is enabled.
      *
-     * @return {@code true} if the provider is enabled; {@code false} if the provider is disabled.
+     * @return {@code true}, if the provider is enabled; {@code false}, if the provider is disabled.
      *
      * @see #isDefaultEnabled()
      * @see #setEnabled(java.lang.Boolean)
@@ -263,7 +264,7 @@ public class DefaultModletProvider implements ModletProvider
      * {@code org.jomc.modlet.DefaultModletProvider.defaultValidating} holding a value indicating the provider is
      * validating resources by default. If that property is not set, the {@code true} default is returned.</p>
      *
-     * @return {@code true} if the provider is validating resources by default; {@code false} if the provider is not
+     * @return {@code true}, if the provider is validating resources by default; {@code false}, if the provider is not
      * validating resources by default.
      *
      * @see #isValidating()
@@ -301,7 +302,7 @@ public class DefaultModletProvider implements ModletProvider
     /**
      * Gets a flag indicating the provider is validating resources.
      *
-     * @return {@code true} if the provider is validating resources; {@code false} if the provider is not validating
+     * @return {@code true}, if the provider is validating resources; {@code false}, if the provider is not validating
      * resources.
      *
      * @see #isDefaultValidating()
@@ -339,7 +340,7 @@ public class DefaultModletProvider implements ModletProvider
      * @param context The context to search for {@code Modlets}.
      * @param location The location to search at.
      *
-     * @return The {@code Modlets} found at {@code location} in {@code context} or {@code null} if no {@code Modlets}
+     * @return The {@code Modlets} found at {@code location} in {@code context} or {@code null}, if no {@code Modlets}
      * are found.
      *
      * @throws NullPointerException if {@code context} or {@code location} is {@code null}.
@@ -451,7 +452,7 @@ public class DefaultModletProvider implements ModletProvider
     /**
      * {@inheritDoc}
      *
-     * @return The {@code Modlets} found in the context or {@code null} if no {@code Modlets} are found or the provider
+     * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found or the provider
      * is disabled.
      *
      * @see #isEnabled()

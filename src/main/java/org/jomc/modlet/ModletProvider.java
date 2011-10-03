@@ -45,7 +45,7 @@ public interface ModletProvider
      *
      * @param context The context to search for {@code Modlets}.
      *
-     * @return The {@code Modlets} found in the context or {@code null} if no {@code Modlets} are found.
+     * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found.
      *
      * @throws NullPointerException if {@code context} is {@code null}.
      * @throws ModelException if searching the context fails.

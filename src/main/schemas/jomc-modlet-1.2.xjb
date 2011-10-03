@@ -314,7 +314,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} list or {@code null} if no such instance is found.
+     * @return The instance of {@code clazz} from the {@code any} list or {@code null}, if no such instance is found.
      *
      * @throws NullPointerException if {@code any} or {@code clazz} is {@code null}.
      * @throws IllegalStateException if {@code any} contains more than one matching object.
@@ -429,7 +429,7 @@
      * @param localPart The local part of the {@code JAXBElement} to return.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI} or {@code localPart} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -479,7 +479,7 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -525,7 +525,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null} if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
@@ -561,16 +561,16 @@
     <jaxb:bindings node="xs:complexType[@name='Modlets']">
       <ci:code><![CDATA[
     /**
-     * Gets a modlet for a given name from this list of modlets.
+     * Gets a modlet for a given name from the list of modlets.
      *
      * @param name The name of the modlet to return.
      *
-     * @return The modlet with name {@code name} from the list or {@code null} if no modlet matching {@code name} is
-     * found.
+     * @return The first matching modlet or {@code null}, if no such modlet is found.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      *
      * @see #getModlet()
+     * @see Modlet#getName()
      */
     public Modlet getModlet( final String name )
     {
@@ -687,7 +687,7 @@
      *
      * @param model The identifier of the model to return schemas of.
      *
-     * @return A list of schemas for {@code model} or {@code null} if no such schemas are found.
+     * @return A list of schemas for {@code model} or {@code null}, if no such schemas are found.
      *
      * @throws NullPointerException if {@code model} is {@code null}.
      *
@@ -724,7 +724,7 @@
      *
      * @param model The identifier of the model to return services of.
      *
-     * @return A list of services for {@code model} or {@code null} if no such services are found.
+     * @return A list of services for {@code model} or {@code null}, if no such services are found.
      *
      * @throws NullPointerException if {@code model} is {@code null}.
      *
@@ -788,7 +788,7 @@
      * @param localPart The local part of the {@code JAXBElement} to return.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI} or {@code localPart} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -838,7 +838,7 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -884,7 +884,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null} if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
@@ -920,16 +920,16 @@
     <jaxb:bindings node="xs:complexType[@name='Schemas']">
       <ci:code><![CDATA[
     /**
-     * Gets a schema for a given public identifier from this list of schemas.
+     * Gets a schema for a given public identifier from the list of schemas.
      *
      * @param publicId The public identifier of the schema to return.
      *
-     * @return The schema with public identifier {@code publicId} from the list or {@code null} if no schema matching
-     * {@code publicId} is found.
+     * @return The first matching schema or {@code null}, if no such schema is found.
      *
      * @throws NullPointerException if {@code publicId} is {@code null}.
      *
      * @see #getSchema()
+     * @see Schema#getPublicId()
      */
     public Schema getSchemaByPublicId( final String publicId )
     {
@@ -952,16 +952,16 @@
     }
 
     /**
-     * Gets a schema for a given system identifier from this list of schemas.
+     * Gets a schema for a given system identifier from the list of schemas.
      *
      * @param systemId The system identifier of the schema to return.
      *
-     * @return The schema with system identifier {@code systemId} from the list or {@code null} if no schema matching
-     * {@code systemId} is found.
+     * @return The first matching schema or {@code null}, if no such schema is found.
      *
      * @throws NullPointerException if {@code systemId} is {@code null}.
      *
      * @see #getSchema()
+     * @see Schema#getSystemId()
      */
     public Schema getSchemaBySystemId( final String systemId )
     {
@@ -1016,7 +1016,7 @@
      * @param localPart The local part of the {@code JAXBElement} to return.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI} or {@code localPart} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -1066,7 +1066,7 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -1112,7 +1112,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null} if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
@@ -1241,7 +1241,7 @@
      * @param localPart The local part of the {@code JAXBElement} to return.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI} or {@code localPart} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -1291,7 +1291,7 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null} if no such element is found.
+     * of the instance or {@code null}, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
@@ -1337,7 +1337,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null} if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
