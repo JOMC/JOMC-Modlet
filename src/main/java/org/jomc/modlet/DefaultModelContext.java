@@ -200,12 +200,16 @@ public class DefaultModelContext extends ModelContext
             if ( DEFAULT_PROVIDER_LOCATION.equals( this.providerLocation )
                  && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
             {
-                this.providerLocation = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
+                final String contextProviderLocation = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
 
                 if ( this.isLoggable( Level.CONFIG ) )
                 {
-                    this.log( Level.CONFIG, getMessage( "contextProviderLocationInfo", this.providerLocation ), null );
+                    this.log( Level.CONFIG, getMessage( "contextProviderLocationInfo",
+                                                        contextProviderLocation ), null );
                 }
+
+                this.providerLocation = null;
+                return contextProviderLocation;
             }
             else if ( this.isLoggable( Level.CONFIG ) )
             {
@@ -282,14 +286,18 @@ public class DefaultModelContext extends ModelContext
             if ( DEFAULT_PLATFORM_PROVIDER_LOCATION.equals( this.platformProviderLocation )
                  && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
             {
-                this.platformProviderLocation = (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
+                final String contextPlatformProviderLocation =
+                    (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
 
                 if ( this.isLoggable( Level.CONFIG ) )
                 {
                     this.log( Level.CONFIG, getMessage( "contextPlatformProviderLocationInfo",
-                                                        this.platformProviderLocation ), null );
+                                                        contextPlatformProviderLocation ), null );
 
                 }
+
+                this.platformProviderLocation = null;
+                return contextPlatformProviderLocation;
             }
             else if ( this.isLoggable( Level.CONFIG ) )
             {
