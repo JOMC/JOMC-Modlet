@@ -64,7 +64,7 @@ public final class TestModelProcessor implements ModelProcessor
 
         context.setAttribute( TestModelProcessor.class.getName(), this );
 
-        final Model processed = new Model( model );
+        final Model processed = model.clone();
         final TestComplexType t = processed.getAnyObject( TestComplexType.class );
         assertNotNull( t );
 

@@ -64,7 +64,7 @@ public final class TestModelProvider implements ModelProvider
 
         context.setAttribute( TestModelProvider.class.getName(), this );
 
-        final Model created = new Model( model );
+        final Model created = model.clone();
         created.getAny().add( new ObjectFactory().createTest( new TestComplexType() ) );
         return created;
     }

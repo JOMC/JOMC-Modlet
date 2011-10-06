@@ -444,7 +444,7 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
-            Model m = new Model( model );
+            Model m = model.clone();
             final Services services = this.getModlets().getServices( m.getIdentifier() );
 
             if ( services != null )
