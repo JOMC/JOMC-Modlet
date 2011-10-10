@@ -83,12 +83,12 @@ public class ModelContextTest
         {
             final Properties p = new Properties();
             final InputStream in = ModelContextTest.class.getResourceAsStream( "/" + TEST_RESOURCE_LOCATION );
-            assert in != null : "Expected '" + TEST_RESOURCE_LOCATION + "' not found.";
+            assertNotNull( "Expected '" + TEST_RESOURCE_LOCATION + "' not found.", in );
             p.load( in );
             in.close();
 
             final String defaultModletName = p.getProperty( "defaultModletName" );
-            assert defaultModletName != null : "Expected 'defaultModletName' property not found.";
+            assertNotNull( "Expected 'defaultModletName' property not found.", defaultModletName );
             DEFAULT_MODLET_NAME = defaultModletName;
         }
         catch ( final IOException e )
