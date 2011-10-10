@@ -30,10 +30,10 @@
  */
 package org.jomc.modlet.test;
 
-import org.junit.Test;
 import java.io.ObjectInputStream;
 import java.util.logging.Level;
 import org.jomc.modlet.ModelValidationReport;
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 

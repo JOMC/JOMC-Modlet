@@ -30,12 +30,12 @@
  */
 package org.jomc.modlet.test;
 
-import org.junit.Test;
 import org.jomc.modlet.Service;
 import org.jomc.modlet.Services;
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test cases for class {@code org.jomc.modlet.Services}.

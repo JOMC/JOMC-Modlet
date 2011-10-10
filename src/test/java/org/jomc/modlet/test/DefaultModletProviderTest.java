@@ -30,9 +30,9 @@
  */
 package org.jomc.modlet.test;
 
-import org.junit.Test;
-import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.DefaultModletProvider;
+import org.jomc.modlet.ModelContext;
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

@@ -31,10 +31,10 @@
 package org.jomc.modlet.test.support;
 
 import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelValidationReport;
-import org.jomc.modlet.ModelValidator;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
+import org.jomc.modlet.ModelValidationReport;
+import org.jomc.modlet.ModelValidator;
 
 /**
  * {@code ModelValidator} test implementation.

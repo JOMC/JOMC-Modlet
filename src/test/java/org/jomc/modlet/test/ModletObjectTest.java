@@ -30,12 +30,12 @@
  */
 package org.jomc.modlet.test;
 
-import org.junit.Test;
-import org.jomc.modlet.ModletObject;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import org.jomc.modlet.ModletObject;
+import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 

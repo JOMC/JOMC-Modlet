@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
+import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
@@ -50,16 +51,15 @@ import org.jomc.modlet.test.support.InstantiationExceptionModelContext;
 import org.jomc.modlet.test.support.InvocationTargetExceptionModelContext;
 import org.jomc.modlet.test.support.NoSuchMethodExceptionModelContext;
 import org.junit.Test;
-import org.w3c.dom.ls.LSInput;
-import org.w3c.dom.ls.LSResourceResolver;
-import org.xml.sax.EntityResolver;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
+import static org.junit.Assert.fail;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.EntityResolver;
 
 /**
  * Test cases for {@code org.jomc.modlet.ModelContext} implementations.

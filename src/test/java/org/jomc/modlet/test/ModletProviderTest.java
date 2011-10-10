@@ -30,9 +30,9 @@
  */
 package org.jomc.modlet.test;
 
-import org.junit.Test;
 import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.ModletProvider;
+import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 

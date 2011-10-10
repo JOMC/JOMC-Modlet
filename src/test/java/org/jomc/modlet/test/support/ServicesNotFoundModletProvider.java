@@ -30,12 +30,12 @@
  */
 package org.jomc.modlet.test.support;
 
+import org.jomc.modlet.ModelContext;
+import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModelProcessor;
 import org.jomc.modlet.ModelProvider;
 import org.jomc.modlet.ModelValidator;
 import org.jomc.modlet.Modlet;
-import org.jomc.modlet.ModelContext;
-import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModletProvider;
 import org.jomc.modlet.Modlets;
 import org.jomc.modlet.Service;

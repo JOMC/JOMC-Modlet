@@ -31,9 +31,9 @@
 package org.jomc.modlet.test.support;
 
 import org.jomc.modlet.Model;
-import org.jomc.modlet.ModelProcessor;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
+import org.jomc.modlet.ModelProcessor;
 
 /**
  * {@code ModelProcessor} test implementation returning {@code null}.
