@@ -1471,9 +1471,16 @@ public class DefaultModelContext extends ModelContext
                 }
                 finally
                 {
-                    if ( in != null )
+                    try
                     {
-                        in.close();
+                        if ( in != null )
+                        {
+                            in.close();
+                        }
+                    }
+                    catch ( final IOException e )
+                    {
+                        this.log( Level.WARNING, getMessage( e ), e );
                     }
                 }
 
@@ -1569,9 +1576,16 @@ public class DefaultModelContext extends ModelContext
                 }
                 finally
                 {
-                    if ( reader != null )
+                    try
                     {
-                        reader.close();
+                        if ( reader != null )
+                        {
+                            reader.close();
+                        }
+                    }
+                    catch ( final IOException e )
+                    {
+                        this.log( Level.WARNING, getMessage( e ), e );
                     }
                 }
             }
@@ -1651,9 +1665,16 @@ public class DefaultModelContext extends ModelContext
                 }
                 finally
                 {
-                    if ( manifestStream != null )
+                    try
                     {
-                        manifestStream.close();
+                        if ( manifestStream != null )
+                        {
+                            manifestStream.close();
+                        }
+                    }
+                    catch ( final IOException ex )
+                    {
+                        this.log( Level.WARNING, getMessage( ex ), ex );
                     }
                 }
             }
