@@ -32,6 +32,7 @@ package org.jomc.modlet.test;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 import javax.xml.bind.JAXBContext;
@@ -95,10 +96,7 @@ public class DefaultModelContextTest extends ModelContextTest
 
         final Properties properties = new Properties();
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", "DOES_NOT_EXIST" );
-
-        OutputStream out = new FileOutputStream( tmpFile );
-        properties.store( out, this.getClass().getName() );
-        out.close();
+        this.writePropertiesFile( properties, tmpFile );
 
         try
         {
@@ -117,9 +115,7 @@ public class DefaultModelContextTest extends ModelContextTest
         }
 
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", "java.lang.Object" );
-        out = new FileOutputStream( tmpFile );
-        properties.store( out, this.getClass().getName() );
-        out.close();
+        this.writePropertiesFile( properties, tmpFile );
 
         try
         {
@@ -138,9 +134,7 @@ public class DefaultModelContextTest extends ModelContextTest
         }
 
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", TestModletProvider.class.getName() );
-        out = new FileOutputStream( tmpFile );
-        properties.store( out, this.getClass().getName() );
-        out.close();
+        this.writePropertiesFile( properties, tmpFile );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( tmpFile.getAbsolutePath() );
         DefaultModelContext.setDefaultProviderLocation( "DOES_NOT_EXIST" );
@@ -456,6 +450,36 @@ public class DefaultModelContextTest extends ModelContextTest
         marshaller.marshal( new org.jomc.modlet.ObjectFactory().createModel( model ), tmpFile );
         assertNotNull( unmarshaller.unmarshal( tmpFile ) );
         assertTrue( tmpFile.delete() );
+    }
+
+    private void writePropertiesFile( final Properties properties, final File file ) throws IOException
+    {
+        OutputStream out = null;
+        boolean suppressExceptionOnClose = true;
+
+        try
+        {
+            out = new FileOutputStream( file );
+            properties.store( out, this.getClass().getName() );
+            suppressExceptionOnClose = false;
+        }
+        finally
+        {
+            try
+            {
+                if ( out != null )
+                {
+                    out.close();
+                }
+            }
+            catch ( final IOException e )
+            {
+                if ( !suppressExceptionOnClose )
+                {
+                    throw e;
+                }
+            }
+        }
     }
 
 }

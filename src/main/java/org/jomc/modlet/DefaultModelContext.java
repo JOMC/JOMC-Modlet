@@ -1462,12 +1462,14 @@ public class DefaultModelContext extends ModelContext
                 }
 
                 InputStream in = null;
+                boolean suppressExceptionOnClose = true;
                 final java.util.Properties p = new java.util.Properties();
 
                 try
                 {
                     in = new FileInputStream( platformProviders );
                     p.load( in );
+                    suppressExceptionOnClose = false;
                 }
                 finally
                 {
@@ -1480,7 +1482,14 @@ public class DefaultModelContext extends ModelContext
                     }
                     catch ( final IOException e )
                     {
-                        this.log( Level.WARNING, getMessage( e ), e );
+                        if ( suppressExceptionOnClose )
+                        {
+                            this.log( Level.SEVERE, getMessage( e ), e );
+                        }
+                        else
+                        {
+                            throw e;
+                        }
                     }
                 }
 
@@ -1535,6 +1544,7 @@ public class DefaultModelContext extends ModelContext
                 }
 
                 BufferedReader reader = null;
+                boolean suppressExceptionOnClose = true;
 
                 try
                 {
@@ -1573,6 +1583,8 @@ public class DefaultModelContext extends ModelContext
 
                         providers.put( providerNamePrefix + providers.size(), provider.asSubclass( providerClass ) );
                     }
+
+                    suppressExceptionOnClose = false;
                 }
                 finally
                 {
@@ -1585,7 +1597,14 @@ public class DefaultModelContext extends ModelContext
                     }
                     catch ( final IOException e )
                     {
-                        this.log( Level.WARNING, getMessage( e ), e );
+                        if ( suppressExceptionOnClose )
+                        {
+                            this.log( Level.SEVERE, getMessage( e ), e );
+                        }
+                        else
+                        {
+                            throw new ModelException( getMessage( e ), e );
+                        }
                     }
                 }
             }
@@ -1629,6 +1648,7 @@ public class DefaultModelContext extends ModelContext
                   e.hasMoreElements(); )
             {
                 InputStream manifestStream = null;
+                boolean suppressExceptionOnClose = true;
 
                 try
                 {
@@ -1662,6 +1682,8 @@ public class DefaultModelContext extends ModelContext
                             }
                         }
                     }
+
+                    suppressExceptionOnClose = false;
                 }
                 finally
                 {
@@ -1674,7 +1696,14 @@ public class DefaultModelContext extends ModelContext
                     }
                     catch ( final IOException ex )
                     {
-                        this.log( Level.WARNING, getMessage( ex ), ex );
+                        if ( suppressExceptionOnClose )
+                        {
+                            this.log( Level.SEVERE, getMessage( ex ), ex );
+                        }
+                        else
+                        {
+                            throw ex;
+                        }
                     }
                 }
             }

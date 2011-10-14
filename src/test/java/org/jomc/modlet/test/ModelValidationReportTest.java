@@ -30,11 +30,13 @@
  */
 package org.jomc.modlet.test;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.logging.Level;
 import org.jomc.modlet.ModelValidationReport;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -58,17 +60,12 @@ public class ModelValidationReportTest
     @Test
     public final void testSerializabe() throws Exception
     {
-        final ObjectInputStream reportStream = new ObjectInputStream( this.getClass().getResourceAsStream(
-            ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelValidationReport.ser" ) );
+        final ModelValidationReport report =
+            this.readObject( ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelValidationReport.ser", ModelValidationReport.class );
 
-        final ObjectInputStream detailStream = new ObjectInputStream( this.getClass().getResourceAsStream(
-            ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelValidationReportDetail.ser" ) );
-
-        final ModelValidationReport report = (ModelValidationReport) reportStream.readObject();
-        final ModelValidationReport.Detail detail = (ModelValidationReport.Detail) detailStream.readObject();
-
-        reportStream.close();
-        detailStream.close();
+        final ModelValidationReport.Detail detail =
+            this.readObject( ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelValidationReportDetail.ser",
+                             ModelValidationReport.Detail.class );
 
         System.out.println( report );
         System.out.println( detail );
@@ -88,6 +85,38 @@ public class ModelValidationReportTest
         assertEquals( Level.OFF, detail.getLevel() );
         assertEquals( "Message", detail.getMessage() );
         assertNull( detail.getElement() );
+    }
+
+    private <T> T readObject( final String location, final Class<T> type ) throws IOException, ClassNotFoundException
+    {
+        ObjectInputStream in = null;
+        boolean suppressExceptionOnClose = true;
+
+        try
+        {
+            in = new ObjectInputStream( this.getClass().getResourceAsStream( location ) );
+            assertNotNull( in );
+            final T object = (T) in.readObject();
+            suppressExceptionOnClose = false;
+            return object;
+        }
+        finally
+        {
+            try
+            {
+                if ( in != null )
+                {
+                    in.close();
+                }
+            }
+            catch ( final IOException e )
+            {
+                if ( !suppressExceptionOnClose )
+                {
+                    throw e;
+                }
+            }
+        }
     }
 
 }
