@@ -72,6 +72,11 @@
       instance to class <code>org.jomc.modlet.ModelContext</code>.
       See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
       </action>
+      <action dev="schulte2005" type="add"><![CDATA[Added property <code>validating</code> to class
+      <code>org.jomc.modlet.DefaultModletProvider</code> and updated method <code>findModlets</code> to support model
+      context attribute <code>org.jomc.modlet.DefaultModletProvider.validatingAttribute</code>.
+      See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
+      </action>
       <action dev="schulte2005" type="fix"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
       to close open streams when reading provider resources or manifest files fails.]]>
       </action>
@@ -89,11 +94,6 @@
       <code>org.jomc.modlet.DefaultModletProvider</code> to support model context attributes
       <code>org.jomc.modlet.DefaultModletProvider.enabledAttribute</code> and
       <code>org.jomc.modlet.DefaultModletProvider.modletLocationAttribute</code>.
-      See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
-      </action>
-      <action dev="schulte2005" type="update"><![CDATA[Added property <code>validating</code> to class
-      <code>org.jomc.modlet.DefaultModletProvider</code> and updated method <code>findModlets</code> to support model
-      context attribute <code>org.jomc.modlet.DefaultModletProvider.validatingAttribute</code>.
       See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
       </action>
       <action dev="schulte2005" type="remove"><![CDATA[Removed <code>abstract</code> modifier of method
