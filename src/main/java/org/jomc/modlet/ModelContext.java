@@ -665,7 +665,7 @@ public abstract class ModelContext
 
         try
         {
-            return Class.forName( name, true, this.getClassLoader() );
+            return Class.forName( name, false, this.getClassLoader() );
         }
         catch ( final ClassNotFoundException e )
         {
@@ -788,7 +788,7 @@ public abstract class ModelContext
 
         try
         {
-            final Class<?> clazz = Class.forName( className, true, classLoader );
+            final Class<?> clazz = Class.forName( className, false, classLoader );
             final Constructor<? extends ModelContext> ctor =
                 clazz.asSubclass( ModelContext.class ).getDeclaredConstructor( ClassLoader.class );
 
