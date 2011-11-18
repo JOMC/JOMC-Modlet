@@ -54,7 +54,7 @@
       </action>
       <action dev="schulte2005" type="fix"><![CDATA[Added <code>schemas-system-id-key</code>,
       <code>schemas-public-id-key</code> and <code>services-identifier-class-key</code> keys to the
-      <code>modlets</code> element of the <code>jomc-modlet-1.0.xsd</code> schema.]]>
+      <code>modlets</code> element of the <code>jomc-modlet-1.1.xsd</code> schema.]]>
       </action>
       <action dev="schulte2005" type="fix"><![CDATA[Corrected method <code>getMergedModlet</code> of class
       <code>org.jomc.modlet.Modlets</code> to correctly merge duplicate schemas and services.]]>
