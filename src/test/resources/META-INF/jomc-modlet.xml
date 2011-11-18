@@ -32,7 +32,7 @@
 -->
 <modlet xmlns="http://jomc.org/modlet"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://jomc.org/modlet http://jomc.sourceforge.net/modlet/jomc-modlet-1.0.xsd"
+        xsi:schemaLocation="http://jomc.org/modlet http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"
         name="${project.name} Tests" model="http://jomc.org/modlet/test" vendor="${project.organization.name}"
         version="${project.version}">
 
@@ -46,10 +46,75 @@
 
   </schemas>
   <services>
-    <service identifier="org.jomc.modlet.ModelProcessor" class="org.jomc.modlet.test.support.TestModelProcessor"/>
-    <service identifier="org.jomc.modlet.ModelProvider" class="org.jomc.modlet.test.support.TestModelProvider"/>
-    <service identifier="org.jomc.modlet.ModelValidator" class="org.jomc.modlet.test.support.TestModelValidator"/>
-    <service identifier="javax.xml.bind.Marshaller.Listener" class="org.jomc.modlet.test.support.TestMarshallerListener"/>
-    <service identifier="javax.xml.bind.Unmarshaller.Listener" class="org.jomc.modlet.test.support.TestUnmarshallerListener"/>
+    <service identifier="org.jomc.modlet.ModelProcessor" class="org.jomc.modlet.test.support.TestModelProcessor">
+      <property name="booleanProperty" value="true"/>
+      <property name="characterProperty" value="X"/>
+      <property name="byteProperty" value="-1"/>
+      <property name="shortProperty" value="-1"/>
+      <property name="intProperty" value="-1"/>
+      <property name="longProperty" value="-1"/>
+      <property name="floatProperty" value="-1"/>
+      <property name="doubleProperty" value="-1"/>
+      <property name="stringProperty" value="TEST"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="enumProperty" value="NEW"/>
+      <property name="objectProperty"/>
+    </service>
+    <service identifier="org.jomc.modlet.ModelProvider" class="org.jomc.modlet.test.support.TestModelProvider">
+      <property name="booleanProperty" value="true"/>
+      <property name="characterProperty" value="X"/>
+      <property name="byteProperty" value="-1"/>
+      <property name="shortProperty" value="-1"/>
+      <property name="intProperty" value="-1"/>
+      <property name="longProperty" value="-1"/>
+      <property name="floatProperty" value="-1"/>
+      <property name="doubleProperty" value="-1"/>
+      <property name="stringProperty" value="TEST"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="enumProperty" value="NEW"/>
+      <property name="objectProperty"/>
+    </service>
+    <service identifier="org.jomc.modlet.ModelValidator" class="org.jomc.modlet.test.support.TestModelValidator">
+      <property name="booleanProperty" value="true"/>
+      <property name="characterProperty" value="X"/>
+      <property name="byteProperty" value="-1"/>
+      <property name="shortProperty" value="-1"/>
+      <property name="intProperty" value="-1"/>
+      <property name="longProperty" value="-1"/>
+      <property name="floatProperty" value="-1"/>
+      <property name="doubleProperty" value="-1"/>
+      <property name="stringProperty" value="TEST"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="enumProperty" value="NEW"/>
+      <property name="objectProperty"/>
+    </service>
+    <service identifier="javax.xml.bind.Marshaller.Listener" class="org.jomc.modlet.test.support.TestMarshallerListener">
+      <property name="booleanProperty" value="true"/>
+      <property name="characterProperty" value="X"/>
+      <property name="byteProperty" value="-1"/>
+      <property name="shortProperty" value="-1"/>
+      <property name="intProperty" value="-1"/>
+      <property name="longProperty" value="-1"/>
+      <property name="floatProperty" value="-1"/>
+      <property name="doubleProperty" value="-1"/>
+      <property name="stringProperty" value="TEST"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="enumProperty" value="NEW"/>
+      <property name="objectProperty"/>
+    </service>
+    <service identifier="javax.xml.bind.Unmarshaller.Listener" class="org.jomc.modlet.test.support.TestUnmarshallerListener">
+      <property name="booleanProperty" value="true"/>
+      <property name="characterProperty" value="X"/>
+      <property name="byteProperty" value="-1"/>
+      <property name="shortProperty" value="-1"/>
+      <property name="intProperty" value="-1"/>
+      <property name="longProperty" value="-1"/>
+      <property name="floatProperty" value="-1"/>
+      <property name="doubleProperty" value="-1"/>
+      <property name="stringProperty" value="TEST"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="enumProperty" value="NEW"/>
+      <property name="objectProperty"/>
+    </service>
   </services>
 </modlet>

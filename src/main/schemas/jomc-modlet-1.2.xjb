@@ -37,7 +37,7 @@
                xmlns:ci="http://jaxb.dev.java.net/plugin/code-injector"
                version="2.0">
 
-  <jaxb:bindings schemaLocation="jomc-modlet-1.0.xsd">
+  <jaxb:bindings schemaLocation="jomc-modlet-1.1.xsd">
     <!-- *********************************************************************************************************** -->
     <jaxb:bindings node="xs:complexType[@name='ModletObject']">
       <ci:code><![CDATA[
@@ -1323,6 +1323,107 @@
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
      *
      * @since 1.1
+     */
+    public <T> java.util.List<javax.xml.bind.JAXBElement<T>> getAnyElements( final String namespaceURI,
+                                                                             final String localPart,
+                                                                             final Class<T> type )
+    {
+        return this.getAnyElements( this.getAny(), namespaceURI, localPart, type );
+    }
+
+    /**
+     * Gets a single object matching a given class from the {@code any} property of the instance.
+     *
+     * @param clazz The class to return an instance of.
+     * @param <T> The type of the object to return.
+     *
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
+     * instance is found.
+     *
+     * @throws NullPointerException if {@code clazz} is {@code null}.
+     * @throws IllegalStateException if the {@code any} property contains more than one matching object.
+     *
+     * @see #getAnyObject(java.util.List, java.lang.Class)
+     */
+    public <T> T getAnyObject( final Class<T> clazz )
+    {
+        return this.getAnyObject( this.getAny(), clazz );
+    }
+
+    /**
+     * Gets a list containing all objects matching a given class from the {@code any} property of the instance.
+     *
+     * @param clazz The class to return all instances of.
+     * @param <T> The type of the objects to return.
+     *
+     * @return An unmodifiable list of all instances of {@code clazz} from the {@code any} property of the instance -
+     * an empty list if no such objects are found.
+     *
+     * @throws NullPointerException if {@code clazz} is {@code null}.
+     *
+     * @see #getAnyObjects(java.util.List, java.lang.Class)
+     */
+    public <T> java.util.List<T> getAnyObjects( final Class<T> clazz )
+    {
+        return this.getAnyObjects( this.getAny(), clazz );
+    }]]>
+      </ci:code>
+    </jaxb:bindings>
+    <!-- *********************************************************************************************************** -->
+    <jaxb:bindings node="xs:complexType[@name='Property']/xs:complexContent/xs:extension/xs:attribute[@name='name']">
+      <jaxb:property>
+        <jaxb:javadoc>The name of the property.</jaxb:javadoc>
+      </jaxb:property>
+    </jaxb:bindings>
+    <jaxb:bindings node="xs:complexType[@name='Property']/xs:complexContent/xs:extension/xs:attribute[@name='value']">
+      <jaxb:property>
+        <jaxb:javadoc>The value of the property.</jaxb:javadoc>
+      </jaxb:property>
+    </jaxb:bindings>
+    <jaxb:bindings node="xs:complexType[@name='Property']">
+      <ci:code><![CDATA[
+    /**
+     * Gets a single {@code JAXBElement} matching a namespace URI and local part from the {@code any} property of the
+     * instance.
+     *
+     * @param namespaceURI The namespace URI of the {@code JAXBElement} to return.
+     * @param localPart The local part of the {@code JAXBElement} to return.
+     * @param type The class of the type the element is bound to.
+     * @param <T> The type the element is bound to.
+     *
+     * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
+     * of the instance or {@code null}, if no such element is found.
+     *
+     * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
+     * @throws IllegalStateException if the {@code any} property contains more than one matching element.
+     *
+     * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
+     *
+     * @since 1.2
+     */
+    public <T> javax.xml.bind.JAXBElement<T> getAnyElement( final String namespaceURI, final String localPart,
+                                                            final Class<T> type )
+    {
+        return this.getAnyElement( this.getAny(), namespaceURI, localPart, type );
+    }
+
+    /**
+     * Gets a list containing all {@code JAXBElement}s matching a namespace URI and local part from the {@code any}
+     * property of the instance.
+     *
+     * @param namespaceURI The namespace URI of the {@code JAXBElement}s to return.
+     * @param localPart The local part of the {@code JAXBElement}s to return.
+     * @param type The class of the type the elements are bound to.
+     * @param <T> The type the elements are bound to.
+     *
+     * @return An unmodifiable list of all {@code JAXBElement}s matching {@code namespaceURI} and {@code localPart} from
+     * the {@code any} property of the instance - an empty list if no such elements are found.
+     *
+     * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
+     *
+     * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
+     *
+     * @since 1.2
      */
     public <T> java.util.List<javax.xml.bind.JAXBElement<T>> getAnyElements( final String namespaceURI,
                                                                              final String localPart,

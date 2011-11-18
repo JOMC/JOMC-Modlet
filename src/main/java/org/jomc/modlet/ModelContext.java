@@ -112,7 +112,7 @@ public abstract class ModelContext
      * @see #getDefaultModletSchemaSystemId()
      */
     private static final String DEFAULT_MODLET_SCHEMA_SYSTEM_ID =
-        "http://jomc.sourceforge.net/modlet/jomc-modlet-1.0.xsd";
+        "http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd";
 
     /**
      * Log level events are logged at by default.
@@ -319,7 +319,7 @@ public abstract class ModelContext
      * Gets the default {@code http://jomc.org/modlet} namespace schema system id.
      * <p>The default {@code http://jomc.org/modlet} namespace schema system id is controlled by system property
      * {@code org.jomc.modlet.ModelContext.defaultModletSchemaSystemId} holding a system id URI.
-     * If that property is not set, the {@code http://jomc.sourceforge.net/modlet/jomc-modlet-1.0.xsd} default is
+     * If that property is not set, the {@code http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd} default is
      * returned.</p>
      *
      * @return The default system id of the {@code http://jomc.org/modlet} namespace schema.
@@ -541,7 +541,7 @@ public abstract class ModelContext
                 schema.setSystemId( this.getModletSchemaSystemId() );
                 schema.setContextId( ModletObject.class.getPackage().getName() );
                 schema.setClasspathId( ModletObject.class.getPackage().getName().replace( '.', '/' )
-                                       + "/jomc-modlet-1.0.xsd" );
+                                       + "/jomc-modlet-1.1.xsd" );
 
                 modlet.getSchemas().getSchema().add( schema );
 

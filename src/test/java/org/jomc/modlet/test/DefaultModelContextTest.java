@@ -39,6 +39,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import org.jomc.modlet.DefaultModelContext;
+import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.Modlets;
@@ -450,6 +451,102 @@ public class DefaultModelContextTest extends ModelContextTest
         marshaller.marshal( new org.jomc.modlet.ObjectFactory().createModel( model ), tmpFile );
         assertNotNull( unmarshaller.unmarshal( tmpFile ) );
         assertTrue( tmpFile.delete() );
+    }
+
+    @Test
+    public final void testServiceProperties() throws Exception
+    {
+        this.getModelContext().setModlets( null );
+        DefaultModletProvider.setDefaultModletLocation( "META-INF/properties-test/jomc-modlet.xml" );
+
+        this.getModelContext().setModlets( null );
+        final JAXBContext context = this.getModelContext().createContext( MODLET_TEST_NS );
+        assertNotNull( context );
+
+        this.getModelContext().setModlets( null );
+        final EntityResolver entityResolver = this.getModelContext().createEntityResolver( MODLET_TEST_NS );
+        assertNotNull( entityResolver );
+
+        this.getModelContext().setModlets( null );
+        final LSResourceResolver resourceResolver = this.getModelContext().createResourceResolver( MODLET_TEST_NS );
+        assertNotNull( resourceResolver );
+
+        try
+        {
+            this.getModelContext().setModlets( null );
+            this.getModelContext().createMarshaller( MODLET_TEST_NS );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            System.out.println( e.toString() );
+            assertNotNull( e.getMessage() );
+        }
+
+        try
+        {
+            this.getModelContext().setModlets( null );
+            this.getModelContext().createUnmarshaller( MODLET_TEST_NS );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            System.out.println( e.toString() );
+            assertNotNull( e.getMessage() );
+        }
+
+        try
+        {
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModel( MODLET_TEST_NS );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            System.out.println( e.toString() );
+            assertNotNull( e.getMessage() );
+        }
+
+        final Model model = new Model();
+        model.setIdentifier( MODLET_TEST_NS );
+
+        try
+        {
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModel( model );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            System.out.println( e.toString() );
+            assertNotNull( e.getMessage() );
+        }
+
+        try
+        {
+            this.getModelContext().setModlets( null );
+            this.getModelContext().processModel( model );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            System.out.println( e.toString() );
+            assertNotNull( e.getMessage() );
+        }
+
+        try
+        {
+            this.getModelContext().setModlets( null );
+            this.getModelContext().validateModel( model );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            System.out.println( e.toString() );
+            assertNotNull( e.getMessage() );
+        }
+
+        DefaultModletProvider.setDefaultModletLocation( null );
     }
 
     private void writePropertiesFile( final Properties properties, final File file ) throws IOException

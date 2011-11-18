@@ -29,7 +29,7 @@
 
   $JOMC$
 
-  Location: http://jomc.sourceforge.net/modlet/jomc-modlet-1.0.xsd
+  Location: http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd
 
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -68,7 +68,7 @@
 
   $JOMC$
 
-  Location: http://jomc.sourceforge.net/modlet/jomc-modlet-1.0.xsd
+  Location: http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd
 
 ]]>
     </xsd:documentation>
@@ -247,7 +247,15 @@ schema. Attribute 'classpath-id' holds the Java classpath location of the refere
     </xsd:complexContent>
   </xsd:complexType>
   <!-- ************************************************************************************************************* -->
-  <xsd:element name="service" type="modlet:Service"/>
+  <xsd:element name="service" type="modlet:Service">
+    <xsd:key name="property-name-key">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">Name key of a property.</xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="modlet:property"/>
+      <xsd:field xpath="@name"/>
+    </xsd:key>
+  </xsd:element>
   <xsd:complexType name="Service">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">Service.</xsd:documentation>
@@ -255,11 +263,27 @@ schema. Attribute 'classpath-id' holds the Java classpath location of the refere
     <xsd:complexContent>
       <xsd:extension base="modlet:ModletObject">
         <xsd:sequence>
+          <xsd:element name="property" type="modlet:Property" minOccurs="0" maxOccurs="unbounded"/>
           <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="ordinal" type="xsd:int" use="optional" default="10000"/>
         <xsd:attribute name="identifier" type="modlet:Identifier" use="required"/>
         <xsd:attribute name="class" type="modlet:Identifier" use="required"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <!-- ************************************************************************************************************* -->
+  <xsd:complexType name="Property">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">Property.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="modlet:ModletObject">
+        <xsd:sequence>
+          <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="modlet:Identifier" use="required"/>
+        <xsd:attribute name="value" type="modlet:String" use="optional"/>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>

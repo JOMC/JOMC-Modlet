@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test.support;
 
+import java.net.URL;
 import javax.xml.bind.Marshaller;
 
 /**
@@ -40,6 +41,34 @@ import javax.xml.bind.Marshaller;
  */
 public final class TestMarshallerListener extends Marshaller.Listener
 {
+
+    private boolean booleanProperty;
+
+    private char characterProperty;
+
+    private byte byteProperty;
+
+    private short shortProperty;
+
+    private int intProperty;
+
+    private long longProperty;
+
+    private float floatProperty;
+
+    private double doubleProperty;
+
+    private String stringProperty;
+
+    private URL urlProperty;
+
+    private Thread.State enumProperty;
+
+    private Object objectProperty;
+
+    private String stringPropertyWithoutSetter;
+
+    private String stringPropertyWithoutGetter;
 
     /** Creates a new {@code TestMarshallerListener}. */
     public TestMarshallerListener()
@@ -57,6 +86,136 @@ public final class TestMarshallerListener extends Marshaller.Listener
     public void afterMarshal( final Object source )
     {
         System.out.println( this.getClass().getName() + ": afterMarshal(" + source + ")" );
+    }
+
+    public boolean isBooleanProperty()
+    {
+        return this.booleanProperty;
+    }
+
+    public void setBooleanProperty( final boolean value )
+    {
+        this.booleanProperty = value;
+    }
+
+    public char getCharacterProperty()
+    {
+        return this.characterProperty;
+    }
+
+    public void setCharacterProperty( final char value )
+    {
+        this.characterProperty = value;
+    }
+
+    public byte getByteProperty()
+    {
+        return this.byteProperty;
+    }
+
+    public void setByteProperty( final byte value )
+    {
+        this.byteProperty = value;
+    }
+
+    public short getShortProperty()
+    {
+        return this.shortProperty;
+    }
+
+    public void setShortProperty( final short value )
+    {
+        this.shortProperty = value;
+    }
+
+    public int getIntProperty()
+    {
+        return this.intProperty;
+    }
+
+    public void setIntProperty( final int value )
+    {
+        this.intProperty = value;
+    }
+
+    public long getLongProperty()
+    {
+        return this.longProperty;
+    }
+
+    public void setLongProperty( final long value )
+    {
+        this.longProperty = value;
+    }
+
+    public float getFloatProperty()
+    {
+        return this.floatProperty;
+    }
+
+    public void setFloatProperty( final float value )
+    {
+        this.floatProperty = value;
+    }
+
+    public double getDoubleProperty()
+    {
+        return this.doubleProperty;
+    }
+
+    public void setDoubleProperty( final double value )
+    {
+        this.doubleProperty = value;
+    }
+
+    public String getStringProperty()
+    {
+        return this.stringProperty;
+    }
+
+    public void setStringProperty( final String value )
+    {
+        this.stringProperty = value;
+    }
+
+    public String getStringPropertyWithoutSetter()
+    {
+        return this.stringPropertyWithoutSetter;
+    }
+
+    public void setStringPropertyWithoutGetter( final String value )
+    {
+        this.stringPropertyWithoutGetter = value;
+    }
+
+    public URL getUrlProperty()
+    {
+        return this.urlProperty;
+    }
+
+    public void setUrlProperty( final URL value )
+    {
+        this.urlProperty = value;
+    }
+
+    public Thread.State getEnumProperty()
+    {
+        return this.enumProperty;
+    }
+
+    public void setEnumProperty( final Thread.State value )
+    {
+        this.enumProperty = value;
+    }
+
+    public Object getObjectProperty()
+    {
+        return this.objectProperty;
+    }
+
+    public void setObjectProperty( final Object value )
+    {
+        this.objectProperty = value;
     }
 
 }

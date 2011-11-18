@@ -39,6 +39,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -442,61 +445,50 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
-        try
+        Model m = model.clone();
+        final Services services = this.getModlets().getServices( m.getIdentifier() );
+
+        if ( services != null )
         {
-            Model m = model.clone();
-            final Services services = this.getModlets().getServices( m.getIdentifier() );
-
-            if ( services != null )
+            for ( Service provider : services.getServices( ModelProvider.class ) )
             {
-                for ( Service provider : services.getServices( ModelProvider.class ) )
+                final Class<?> clazz = this.findClass( provider.getClazz() );
+
+                if ( clazz == null )
                 {
-                    final Class<?> clazz = this.findClass( provider.getClazz() );
+                    throw new ModelException( getMessage( "serviceNotFound", provider.getOrdinal(),
+                                                          provider.getIdentifier(), provider.getClazz() ) );
 
-                    if ( clazz == null )
-                    {
-                        throw new ModelException( getMessage( "serviceNotFound", provider.getOrdinal(),
-                                                              provider.getIdentifier(), provider.getClazz() ) );
+                }
 
-                    }
+                if ( !ModelProvider.class.isAssignableFrom( clazz ) )
+                {
+                    throw new ModelException( getMessage( "illegalService", provider.getOrdinal(),
+                                                          provider.getIdentifier(), provider.getClazz(),
+                                                          ModelProvider.class.getName() ) );
 
-                    if ( !ModelProvider.class.isAssignableFrom( clazz ) )
-                    {
-                        throw new ModelException( getMessage( "illegalService", provider.getOrdinal(),
-                                                              provider.getIdentifier(), provider.getClazz(),
-                                                              ModelProvider.class.getName() ) );
+                }
 
-                    }
+                final Class<? extends ModelProvider> modelProviderClass = clazz.asSubclass( ModelProvider.class );
+                final ModelProvider modelProvider = this.createServiceObject( provider, modelProviderClass );
 
-                    final Class<? extends ModelProvider> modelProviderClass = clazz.asSubclass( ModelProvider.class );
-                    final ModelProvider modelProvider = modelProviderClass.newInstance();
+                if ( this.isLoggable( Level.FINER ) )
+                {
+                    this.log( Level.FINER,
+                              getMessage( "creatingModel", m.getIdentifier(), modelProvider.toString() ), null );
 
-                    if ( this.isLoggable( Level.FINER ) )
-                    {
-                        this.log( Level.FINER,
-                                  getMessage( "creatingModel", m.getIdentifier(), modelProvider.toString() ), null );
+                }
 
-                    }
+                final Model provided = modelProvider.findModel( this, m );
 
-                    final Model provided = modelProvider.findModel( this, m );
-
-                    if ( provided != null )
-                    {
-                        m = provided;
-                    }
+                if ( provided != null )
+                {
+                    m = provided;
                 }
             }
+        }
 
-            return m;
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
+        return m;
     }
 
     @Override
@@ -1065,7 +1057,7 @@ public class DefaultModelContext extends ModelContext
                         listenerList = new MarshallerListenerList();
                     }
 
-                    listenerList.getListeners().add( listener.newInstance() );
+                    listenerList.getListeners().add( this.createServiceObject( service, listener ) );
                 }
             }
 
@@ -1108,14 +1100,6 @@ public class DefaultModelContext extends ModelContext
             }
 
             throw new ModelException( message, e );
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( e ), e );
         }
     }
 
@@ -1185,7 +1169,7 @@ public class DefaultModelContext extends ModelContext
                         listenerList = new UnmarshallerListenerList();
                     }
 
-                    listenerList.getListeners().add( listener.newInstance() );
+                    listenerList.getListeners().add( this.createServiceObject( service, listener ) );
                 }
             }
 
@@ -1229,14 +1213,6 @@ public class DefaultModelContext extends ModelContext
 
             throw new ModelException( message, e );
         }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
     }
 
     /**
@@ -1255,61 +1231,50 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
-        try
+        Model processed = model;
+        final Services services = this.getModlets().getServices( model.getIdentifier() );
+        final List<Service> processors = services != null ? services.getServices( ModelProcessor.class ) : null;
+
+        if ( processors != null )
         {
-            Model processed = model;
-            final Services services = this.getModlets().getServices( model.getIdentifier() );
-            final List<Service> processors = services != null ? services.getServices( ModelProcessor.class ) : null;
-
-            if ( processors != null )
+            for ( Service processor : processors )
             {
-                for ( Service processor : processors )
+                final Class<?> clazz = this.findClass( processor.getClazz() );
+
+                if ( clazz == null )
                 {
-                    final Class<?> clazz = this.findClass( processor.getClazz() );
+                    throw new ModelException( getMessage( "serviceNotFound", processor.getOrdinal(),
+                                                          processor.getIdentifier(), processor.getClazz() ) );
 
-                    if ( clazz == null )
-                    {
-                        throw new ModelException( getMessage( "serviceNotFound", processor.getOrdinal(),
-                                                              processor.getIdentifier(), processor.getClazz() ) );
+                }
 
-                    }
+                if ( !ModelProcessor.class.isAssignableFrom( clazz ) )
+                {
+                    throw new ModelException( getMessage( "illegalService", processor.getOrdinal(),
+                                                          processor.getIdentifier(), processor.getClazz(),
+                                                          ModelProcessor.class.getName() ) );
 
-                    if ( !ModelProcessor.class.isAssignableFrom( clazz ) )
-                    {
-                        throw new ModelException( getMessage( "illegalService", processor.getOrdinal(),
-                                                              processor.getIdentifier(), processor.getClazz(),
-                                                              ModelProcessor.class.getName() ) );
+                }
 
-                    }
+                final Class<? extends ModelProcessor> modelProcessorClass = clazz.asSubclass( ModelProcessor.class );
+                final ModelProcessor modelProcessor = this.createServiceObject( processor, modelProcessorClass );
 
-                    final Class<? extends ModelProcessor> modelProcessorClass = clazz.asSubclass( ModelProcessor.class );
-                    final ModelProcessor modelProcessor = modelProcessorClass.newInstance();
+                if ( this.isLoggable( Level.FINER ) )
+                {
+                    this.log( Level.FINER, getMessage( "processingModel", model.getIdentifier(),
+                                                       modelProcessor.toString() ), null );
 
-                    if ( this.isLoggable( Level.FINER ) )
-                    {
-                        this.log( Level.FINER, getMessage( "processingModel", model.getIdentifier(),
-                                                           modelProcessor.toString() ), null );
+                }
 
-                    }
-
-                    final Model current = modelProcessor.processModel( this, processed );
-                    if ( current != null )
-                    {
-                        processed = current;
-                    }
+                final Model current = modelProcessor.processModel( this, processed );
+                if ( current != null )
+                {
+                    processed = current;
                 }
             }
+        }
 
-            return processed;
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
+        return processed;
     }
 
     /**
@@ -1328,61 +1293,51 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
-        try
+        final Services services = this.getModlets().getServices( model.getIdentifier() );
+        final List<Service> validators = services != null ? services.getServices( ModelValidator.class ) : null;
+        final ModelValidationReport report = new ModelValidationReport();
+
+        if ( validators != null )
         {
-            final Services services = this.getModlets().getServices( model.getIdentifier() );
-            final List<Service> validators = services != null ? services.getServices( ModelValidator.class ) : null;
-            final ModelValidationReport report = new ModelValidationReport();
-
-            if ( validators != null )
+            for ( Service validator : validators )
             {
-                for ( Service validator : validators )
+                final Class<?> clazz = this.findClass( validator.getClazz() );
+
+                if ( clazz == null )
                 {
-                    final Class<?> clazz = this.findClass( validator.getClazz() );
+                    throw new ModelException( getMessage( "serviceNotFound", validator.getOrdinal(),
+                                                          validator.getIdentifier(), validator.getClazz() ) );
 
-                    if ( clazz == null )
-                    {
-                        throw new ModelException( getMessage( "serviceNotFound", validator.getOrdinal(),
-                                                              validator.getIdentifier(), validator.getClazz() ) );
+                }
 
-                    }
+                if ( !ModelValidator.class.isAssignableFrom( clazz ) )
+                {
+                    throw new ModelException( getMessage( "illegalService", validator.getOrdinal(),
+                                                          validator.getIdentifier(), validator.getClazz(),
+                                                          ModelValidator.class.getName() ) );
 
-                    if ( !ModelValidator.class.isAssignableFrom( clazz ) )
-                    {
-                        throw new ModelException( getMessage( "illegalService", validator.getOrdinal(),
-                                                              validator.getIdentifier(), validator.getClazz(),
-                                                              ModelValidator.class.getName() ) );
+                }
 
-                    }
+                final Class<? extends ModelValidator> modelValidatorClass = clazz.asSubclass( ModelValidator.class );
+                final ModelValidator modelValidator = this.createServiceObject( validator, modelValidatorClass );
 
-                    final Class<? extends ModelValidator> modelValidatorClass = clazz.asSubclass( ModelValidator.class );
-                    final ModelValidator modelValidator = modelValidatorClass.newInstance();
+                if ( this.isLoggable( Level.FINER ) )
+                {
+                    this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
+                                                       modelValidator.toString() ), null );
 
-                    if ( this.isLoggable( Level.FINER ) )
-                    {
-                        this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
-                                                           modelValidator.toString() ), null );
+                }
 
-                    }
+                final ModelValidationReport current = modelValidator.validateModel( this, model );
 
-                    final ModelValidationReport current = modelValidator.validateModel( this, model );
-                    if ( current != null )
-                    {
-                        report.getDetails().addAll( current.getDetails() );
-                    }
+                if ( current != null )
+                {
+                    report.getDetails().addAll( current.getDetails() );
                 }
             }
+        }
 
-            return report;
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
+        return report;
     }
 
     /**
@@ -1720,6 +1675,197 @@ public class DefaultModelContext extends ModelContext
         }
 
         return resources;
+    }
+
+    private <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
+    {
+        try
+        {
+            final T serviceObject = type.newInstance();
+
+            with_next_property:
+            for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+            {
+                final Property p = service.getProperty().get( i );
+                final char[] chars = p.getName().toCharArray();
+
+                if ( Character.isLowerCase( chars[0] ) )
+                {
+                    chars[0] = Character.toUpperCase( chars[0] );
+                }
+
+                final String methodNameSuffix = String.valueOf( chars );
+                Method getterMethod = null;
+
+                try
+                {
+                    getterMethod = type.getMethod( "get" + methodNameSuffix );
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+
+                    getterMethod = null;
+                }
+
+                if ( getterMethod == null )
+                {
+                    try
+                    {
+                        getterMethod = type.getMethod( "is" + methodNameSuffix );
+                    }
+                    catch ( final NoSuchMethodException e )
+                    {
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, null, e );
+                        }
+
+                        getterMethod = null;
+                    }
+                }
+
+                if ( getterMethod == null )
+                {
+                    throw new ModelException( getMessage( "getterMethodNotFound", type.getName(), p.getName() ) );
+                }
+
+                final Class<?> propertyType = getterMethod.getReturnType();
+                Class<?> boxedPropertyType = propertyType;
+
+                if ( Boolean.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Boolean.class;
+                }
+                else if ( Character.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Character.class;
+                }
+                else if ( Byte.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Byte.class;
+                }
+                else if ( Short.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Short.class;
+                }
+                else if ( Integer.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Integer.class;
+                }
+                else if ( Long.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Long.class;
+                }
+                else if ( Float.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Float.class;
+                }
+                else if ( Double.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Double.class;
+                }
+
+                Method setterMethod = null;
+
+                try
+                {
+                    setterMethod = type.getMethod( "set" + methodNameSuffix, propertyType );
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+
+                    setterMethod = null;
+                }
+
+                if ( setterMethod == null )
+                {
+                    throw new ModelException( getMessage( "setterMethodNotFound", type.getName(), p.getName() ) );
+                }
+
+                if ( boxedPropertyType.equals( Character.class ) )
+                {
+                    if ( p.getValue() == null || p.getValue().length() != 1 )
+                    {
+                        throw new ModelException( getMessage( "unsupportedCharacterValue", p.getName() ) );
+                    }
+
+                    setterMethod.invoke( serviceObject, Character.valueOf( p.getValue().charAt( 0 ) ) );
+                    continue with_next_property;
+                }
+
+                if ( p.getValue() != null )
+                {
+                    if ( propertyType.equals( String.class ) )
+                    {
+                        setterMethod.invoke( serviceObject, p.getValue() );
+                        continue with_next_property;
+                    }
+
+                    try
+                    {
+                        setterMethod.invoke( serviceObject, boxedPropertyType.getConstructor( String.class ).
+                            newInstance( p.getValue() ) );
+
+                        continue with_next_property;
+                    }
+                    catch ( final NoSuchMethodException e )
+                    {
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, null, e );
+                        }
+                    }
+
+                    try
+                    {
+                        final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
+
+                        if ( Modifier.isStatic( valueOf.getModifiers() )
+                             && ( valueOf.getReturnType().equals( propertyType )
+                                  || valueOf.getReturnType().equals( boxedPropertyType ) ) )
+                        {
+                            setterMethod.invoke( serviceObject, valueOf.invoke( null, p.getValue() ) );
+                            continue with_next_property;
+                        }
+                    }
+                    catch ( final NoSuchMethodException e )
+                    {
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, null, e );
+                        }
+                    }
+
+                    throw new ModelException( getMessage( "unsupportedPropertyType", propertyType.getName() ) );
+                }
+                else
+                {
+                    setterMethod.invoke( serviceObject, (Object) null );
+                }
+            }
+
+            return serviceObject;
+        }
+        catch ( final InstantiationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final IllegalAccessException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final InvocationTargetException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
     }
 
     private static String getMessage( final String key, final Object... arguments )
