@@ -35,6 +35,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -158,6 +160,22 @@ public abstract class ModelContext
     {
         super();
         this.classLoader = classLoader;
+    }
+
+    /**
+     * Gets a set holding the names of all attributes of the context.
+     *
+     * @return An unmodifiable set holding the names of all attributes of the context.
+     *
+     * @see #clearAttribute(java.lang.String)
+     * @see #getAttribute(java.lang.String)
+     * @see #getAttribute(java.lang.String, java.lang.Object)
+     * @see #setAttribute(java.lang.String, java.lang.Object)
+     * @since 1.2
+     */
+    public Set<String> getAttributeNames()
+    {
+        return Collections.unmodifiableSet( this.attributes.keySet() );
     }
 
     /**
