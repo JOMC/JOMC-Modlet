@@ -32,7 +32,7 @@
 -->
 <modlet xmlns="http://jomc.org/modlet"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://jomc.org/modlet http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"
+        xsi:schemaLocation="http://jomc.org/modlet http://jomc.sourceforge.net/modlet/jomc-modlet-1.2.xsd"
         name="${project.name} Tests" model="http://jomc.org/modlet/test" vendor="${project.organization.name}"
         version="${project.version}">
 
@@ -56,7 +56,7 @@
       <property name="floatProperty" value="-1"/>
       <property name="doubleProperty" value="-1"/>
       <property name="stringProperty" value="TEST"/>
-      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.2.xsd"/>
       <property name="enumProperty" value="NEW"/>
       <property name="objectProperty"/>
     </service>
@@ -70,7 +70,7 @@
       <property name="floatProperty" value="-1"/>
       <property name="doubleProperty" value="-1"/>
       <property name="stringProperty" value="TEST"/>
-      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.2.xsd"/>
       <property name="enumProperty" value="NEW"/>
       <property name="objectProperty"/>
     </service>
@@ -84,7 +84,7 @@
       <property name="floatProperty" value="-1"/>
       <property name="doubleProperty" value="-1"/>
       <property name="stringProperty" value="TEST"/>
-      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.2.xsd"/>
       <property name="enumProperty" value="NEW"/>
       <property name="objectProperty"/>
     </service>
@@ -98,7 +98,7 @@
       <property name="floatProperty" value="-1"/>
       <property name="doubleProperty" value="-1"/>
       <property name="stringProperty" value="TEST"/>
-      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.2.xsd"/>
       <property name="enumProperty" value="NEW"/>
       <property name="objectProperty"/>
     </service>
@@ -112,7 +112,7 @@
       <property name="floatProperty" value="-1"/>
       <property name="doubleProperty" value="-1"/>
       <property name="stringProperty" value="TEST"/>
-      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.1.xsd"/>
+      <property name="urlProperty" value="http://jomc.sourceforge.net/modlet/jomc-modlet-1.2.xsd"/>
       <property name="enumProperty" value="NEW"/>
       <property name="objectProperty"/>
     </service>

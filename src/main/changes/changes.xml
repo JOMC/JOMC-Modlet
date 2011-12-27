@@ -77,11 +77,11 @@
       context attribute <code>org.jomc.modlet.DefaultModletProvider.validatingAttribute</code>.
       See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
       </action>
-      <action dev="schulte2005" type="add"><![CDATA[Added the <code>jomc-modlet-1.1.xsd</code> schema deprecating
+      <action dev="schulte2005" type="add"><![CDATA[Added the <code>jomc-modlet-1.2.xsd</code> schema deprecating
       the <code>jomc-modlet-1.0.xsd</code> schema.]]>
       </action>
       <action dev="schulte2005" type="add"><![CDATA[Added the <code>Property</code> complex type to the
-      <code>jomc-modlet-1.1.xsd</code> schema and updated the <code>Service</code> complex type to support nested
+      <code>jomc-modlet-1.2.xsd</code> schema and updated the <code>Service</code> complex type to support nested
       <code>property</code> elements.]]>
       </action>
       <action dev="schulte2005" type="fix"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
@@ -105,13 +105,13 @@
       </action>
       <action dev="schulte2005" type="update"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
       to support setting properties on service objects based on the <code>Property</code> complex type of the
-      <code>jomc-modlet-1.1.xsd</code> schema.]]>
+      <code>jomc-modlet-1.2.xsd</code> schema.]]>
       </action>
       <action dev="schulte2005" type="remove"><![CDATA[Removed <code>abstract</code> modifier of method
       <code>onLog</code> of class <code>org.jomc.modlet.ModelContext.Listener</code>.]]>
       </action>
       <action dev="schulte2005" type="remove"><![CDATA[Removed the <code>jomc-modlet-1.0.xsd</code> schema deprecated
-      by the <code>jomc-modlet-1.1.xsd</code> schema.]]>
+      by the <code>jomc-modlet-1.2.xsd</code> schema.]]>
       </action>
     </release>
   </body>
