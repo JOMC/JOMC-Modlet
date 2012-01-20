@@ -33,8 +33,11 @@ package org.jomc.modlet;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -64,6 +67,7 @@ import org.xml.sax.SAXException;
  * <li>{@link #createMarshaller(java.lang.String) }</li>
  * <li>{@link #createResourceResolver(java.lang.String) }</li>
  * <li>{@link #createSchema(java.lang.String) }</li>
+ * <li>{@link #createServiceObject(org.jomc.modlet.Service, java.lang.Class) }</li>
  * <li>{@link #createUnmarshaller(java.lang.String) }</li>
  * <li>{@link #findModel(java.lang.String) }</li>
  * <li>{@link #findModel(org.jomc.modlet.Model) }</li>
@@ -542,7 +546,7 @@ public abstract class ModelContext
      * @see #findModlets()
      * @see #setModlets(org.jomc.modlet.Modlets)
      */
-    public Modlets getModlets() throws ModelException
+    public final Modlets getModlets() throws ModelException
     {
         try
         {
@@ -622,9 +626,239 @@ public abstract class ModelContext
      *
      * @see #getModlets()
      */
-    public void setModlets( final Modlets value )
+    public final void setModlets( final Modlets value )
     {
         this.modlets = value;
+    }
+
+    /**
+     * Creates a new service object.
+     *
+     * @param <T> The type of the service.
+     * @param service The service to create a new object of.
+     * @param type The class of the type of the service.
+     *
+     * @return An new service object for {@code service}.
+     *
+     * @throws NullPointerException if {@code service} or {@code type} is {@code null}.
+     * @throws ModelException If creating the service object fails.
+     *
+     * @since 1.2
+     */
+    public <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
+    {
+        if ( service == null )
+        {
+            throw new NullPointerException( "service" );
+        }
+        if ( type == null )
+        {
+            throw new NullPointerException( "type" );
+        }
+
+        try
+        {
+            final Class<?> clazz = this.findClass( service.getClazz() );
+
+            if ( clazz == null )
+            {
+                throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(), service.getIdentifier(),
+                                                      service.getClazz() ) );
+
+            }
+
+            if ( !type.isAssignableFrom( clazz ) )
+            {
+                throw new ModelException( getMessage( "illegalService", service.getOrdinal(), service.getIdentifier(),
+                                                      service.getClazz(), type.getName() ) );
+
+            }
+
+            final T serviceObject = clazz.asSubclass( type ).newInstance();
+
+            with_next_property:
+            for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+            {
+                final Property p = service.getProperty().get( i );
+                final char[] chars = p.getName().toCharArray();
+
+                if ( Character.isLowerCase( chars[0] ) )
+                {
+                    chars[0] = Character.toUpperCase( chars[0] );
+                }
+
+                final String methodNameSuffix = String.valueOf( chars );
+                Method getterMethod = null;
+
+                try
+                {
+                    getterMethod = clazz.getMethod( "get" + methodNameSuffix );
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+
+                    getterMethod = null;
+                }
+
+                if ( getterMethod == null )
+                {
+                    try
+                    {
+                        getterMethod = clazz.getMethod( "is" + methodNameSuffix );
+                    }
+                    catch ( final NoSuchMethodException e )
+                    {
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, null, e );
+                        }
+
+                        getterMethod = null;
+                    }
+                }
+
+                if ( getterMethod == null )
+                {
+                    throw new ModelException( getMessage( "getterMethodNotFound", clazz.getName(), p.getName() ) );
+                }
+
+                final Class<?> propertyType = getterMethod.getReturnType();
+                Class<?> boxedPropertyType = propertyType;
+
+                if ( Boolean.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Boolean.class;
+                }
+                else if ( Character.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Character.class;
+                }
+                else if ( Byte.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Byte.class;
+                }
+                else if ( Short.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Short.class;
+                }
+                else if ( Integer.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Integer.class;
+                }
+                else if ( Long.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Long.class;
+                }
+                else if ( Float.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Float.class;
+                }
+                else if ( Double.TYPE.equals( propertyType ) )
+                {
+                    boxedPropertyType = Double.class;
+                }
+
+                Method setterMethod = null;
+
+                try
+                {
+                    setterMethod = clazz.getMethod( "set" + methodNameSuffix, propertyType );
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+
+                    setterMethod = null;
+                }
+
+                if ( setterMethod == null )
+                {
+                    throw new ModelException( getMessage( "setterMethodNotFound", clazz.getName(), p.getName() ) );
+                }
+
+                if ( boxedPropertyType.equals( Character.class ) )
+                {
+                    if ( p.getValue() == null || p.getValue().length() != 1 )
+                    {
+                        throw new ModelException( getMessage( "unsupportedCharacterValue", p.getName() ) );
+                    }
+
+                    setterMethod.invoke( serviceObject, Character.valueOf( p.getValue().charAt( 0 ) ) );
+                    continue with_next_property;
+                }
+
+                if ( p.getValue() != null )
+                {
+                    if ( propertyType.equals( String.class ) )
+                    {
+                        setterMethod.invoke( serviceObject, p.getValue() );
+                        continue with_next_property;
+                    }
+
+                    try
+                    {
+                        setterMethod.invoke( serviceObject, boxedPropertyType.getConstructor( String.class ).
+                            newInstance( p.getValue() ) );
+
+                        continue with_next_property;
+                    }
+                    catch ( final NoSuchMethodException e )
+                    {
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, null, e );
+                        }
+                    }
+
+                    try
+                    {
+                        final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
+
+                        if ( Modifier.isStatic( valueOf.getModifiers() )
+                             && ( valueOf.getReturnType().equals( propertyType )
+                                  || valueOf.getReturnType().equals( boxedPropertyType ) ) )
+                        {
+                            setterMethod.invoke( serviceObject, valueOf.invoke( null, p.getValue() ) );
+                            continue with_next_property;
+                        }
+                    }
+                    catch ( final NoSuchMethodException e )
+                    {
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, null, e );
+                        }
+                    }
+
+                    throw new ModelException( getMessage( "unsupportedPropertyType", propertyType.getName() ) );
+                }
+                else
+                {
+                    setterMethod.invoke( serviceObject, (Object) null );
+                }
+            }
+
+            return serviceObject;
+        }
+        catch ( final InstantiationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final IllegalAccessException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final InvocationTargetException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
     }
 
     /**
