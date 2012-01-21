@@ -37,7 +37,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -641,7 +640,7 @@ public abstract class ModelContext
      * @return An new service object for {@code service}.
      *
      * @throws NullPointerException if {@code service} or {@code type} is {@code null}.
-     * @throws ModelException If creating the service object fails.
+     * @throws ModelException if creating the service object fails.
      *
      * @since 1.2
      */
