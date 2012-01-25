@@ -391,7 +391,8 @@ public class DefaultModletProvider implements ModletProvider
         try
         {
             boolean contextValidating = this.isValidating();
-            if ( DEFAULT_VALIDATING == contextValidating && context.getAttribute( VALIDATING_ATTRIBUTE_NAME ) != null )
+            if ( DEFAULT_VALIDATING == contextValidating
+                 && context.getAttribute( VALIDATING_ATTRIBUTE_NAME ) instanceof Boolean )
             {
                 contextValidating = (Boolean) context.getAttribute( VALIDATING_ATTRIBUTE_NAME );
             }
@@ -497,14 +498,14 @@ public class DefaultModletProvider implements ModletProvider
         Modlets found = null;
 
         boolean contextEnabled = this.isEnabled();
-        if ( DEFAULT_ENABLED == contextEnabled && context.getAttribute( ENABLED_ATTRIBUTE_NAME ) != null )
+        if ( DEFAULT_ENABLED == contextEnabled && context.getAttribute( ENABLED_ATTRIBUTE_NAME ) instanceof Boolean )
         {
             contextEnabled = (Boolean) context.getAttribute( ENABLED_ATTRIBUTE_NAME );
         }
 
         String contextModletLocation = this.getModletLocation();
         if ( DEFAULT_MODLET_LOCATION.equals( contextModletLocation )
-             && context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME ) != null )
+             && context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME ) instanceof String )
         {
             contextModletLocation = (String) context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME );
         }

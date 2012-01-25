@@ -224,7 +224,7 @@ public class DefaultModelContext extends ModelContext
             this.providerLocation = getDefaultProviderLocation();
 
             if ( DEFAULT_PROVIDER_LOCATION.equals( this.providerLocation )
-                 && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
+                 && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
             {
                 final String contextProviderLocation = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
 
@@ -310,7 +310,7 @@ public class DefaultModelContext extends ModelContext
             this.platformProviderLocation = getDefaultPlatformProviderLocation();
 
             if ( DEFAULT_PLATFORM_PROVIDER_LOCATION.equals( this.platformProviderLocation )
-                 && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) != null )
+                 && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
             {
                 final String contextPlatformProviderLocation =
                     (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
