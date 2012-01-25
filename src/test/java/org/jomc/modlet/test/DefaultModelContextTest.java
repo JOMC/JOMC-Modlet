@@ -84,9 +84,9 @@ public class DefaultModelContextTest extends ModelContextTest
 
     /** {@inheritDoc} */
     @Override
-    protected DefaultModelContext newModelContext() throws ModelException
+    protected DefaultModelContext newModelContext()
     {
-        return new DefaultModelContext( this.getClass().getClassLoader() );
+        return new DefaultModelContext();
     }
 
     @Test

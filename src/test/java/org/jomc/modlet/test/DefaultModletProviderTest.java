@@ -31,7 +31,7 @@
 package org.jomc.modlet.test;
 
 import org.jomc.modlet.DefaultModletProvider;
-import org.jomc.modlet.ModelContext;
+import org.jomc.modlet.ModelContextFactory;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -84,9 +84,7 @@ public class DefaultModletProviderTest extends ModletProviderTest
 
         try
         {
-            this.getModletProvider().findModlets(
-                ModelContext.createModelContext( this.getClass().getClassLoader() ), null );
-
+            this.getModletProvider().findModlets( ModelContextFactory.newInstance().newModelContext(), null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )

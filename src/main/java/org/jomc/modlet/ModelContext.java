@@ -33,8 +33,6 @@ package org.jomc.modlet;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -78,7 +76,7 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
  * @version $JOMC$
  *
- * @see #createModelContext(java.lang.ClassLoader)
+ * @see ModelContextFactory
  */
 public abstract class ModelContext
 {
@@ -132,6 +130,7 @@ public abstract class ModelContext
     private static volatile String defaultModletSchemaSystemId;
 
     /** Class name of the {@code ModelContext} implementation. */
+    @Deprecated
     private static volatile String modelContextClassName;
 
     /** The attributes of the instance. */
@@ -139,6 +138,12 @@ public abstract class ModelContext
 
     /** The class loader of the instance. */
     private ClassLoader classLoader;
+
+    /**
+     * Flag indicating the {@code classLoader} field is initialized.
+     * @since 1.2
+     */
+    private boolean classLoaderSet;
 
     /** The listeners of the instance. */
     private List<Listener> listeners;
@@ -150,7 +155,19 @@ public abstract class ModelContext
     private Modlets modlets;
 
     /** Modlet namespace schema system id of the instance. */
+    @Deprecated
     private String modletSchemaSystemId;
+
+    /**
+     * Creates a new {@code ModelContext} instance.
+     * @since 1.2
+     */
+    public ModelContext()
+    {
+        super();
+        this.classLoader = null;
+        this.classLoaderSet = false;
+    }
 
     /**
      * Creates a new {@code ModelContext} instance taking a class loader.
@@ -163,6 +180,7 @@ public abstract class ModelContext
     {
         super();
         this.classLoader = classLoader;
+        this.classLoaderSet = true;
     }
 
     /**
@@ -288,7 +306,7 @@ public abstract class ModelContext
     /**
      * Gets the class loader of the context.
      *
-     * @return The class loader of the context.
+     * @return The class loader of the context or {@code null}, indicating the bootstrap class loader.
      *
      * @see #findClass(java.lang.String)
      * @see #findResource(java.lang.String)
@@ -296,21 +314,10 @@ public abstract class ModelContext
      */
     public ClassLoader getClassLoader()
     {
-        if ( this.classLoader == null )
+        if ( !this.classLoaderSet )
         {
-            this.classLoader = new ClassLoader( null )
-            {
-
-                @Override
-                public String toString()
-                {
-                    return ModelContext.class.getName() + ".BootstrapClassLoader@"
-                           + Integer.toHexString( this.hashCode() );
-
-                }
-
-            };
-
+            this.classLoader = this.getClass().getClassLoader();
+            this.classLoaderSet = true;
         }
 
         return this.classLoader;
@@ -378,7 +385,9 @@ public abstract class ModelContext
      *
      * @see #getDefaultModletSchemaSystemId()
      * @see #setModletSchemaSystemId(java.lang.String)
+     * @deprecated As of JOMC 1.2, removed without replacement. This method will be removed in version 2.0.
      */
+    @Deprecated
     public final String getModletSchemaSystemId()
     {
         if ( this.modletSchemaSystemId == null )
@@ -402,7 +411,9 @@ public abstract class ModelContext
      * @param value The new {@code http://jomc.org/modlet} namespace schema system id or {@code null}.
      *
      * @see #getModletSchemaSystemId()
+     * @deprecated As of JOMC 1.2, removed without replacement. This method will be removed in version 2.0.
      */
+    @Deprecated
     public final void setModletSchemaSystemId( final String value )
     {
         this.modletSchemaSystemId = value;
@@ -542,8 +553,8 @@ public abstract class ModelContext
      *
      * @throws ModelException if getting the {@code Modlets} of the context fails.
      *
-     * @see #findModlets()
      * @see #setModlets(org.jomc.modlet.Modlets)
+     * @see #findModlets()
      */
     public final Modlets getModlets() throws ModelException
     {
@@ -631,271 +642,6 @@ public abstract class ModelContext
     }
 
     /**
-     * Creates a new service object.
-     *
-     * @param <T> The type of the service.
-     * @param service The service to create a new object of.
-     * @param type The class of the type of the service.
-     *
-     * @return An new service object for {@code service}.
-     *
-     * @throws NullPointerException if {@code service} or {@code type} is {@code null}.
-     * @throws ModelException if creating the service object fails.
-     *
-     * @since 1.2
-     */
-    public <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
-    {
-        if ( service == null )
-        {
-            throw new NullPointerException( "service" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
-
-        try
-        {
-            final Class<?> clazz = this.findClass( service.getClazz() );
-
-            if ( clazz == null )
-            {
-                throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(), service.getIdentifier(),
-                                                      service.getClazz() ) );
-
-            }
-
-            if ( !type.isAssignableFrom( clazz ) )
-            {
-                throw new ModelException( getMessage( "illegalService", service.getOrdinal(), service.getIdentifier(),
-                                                      service.getClazz(), type.getName() ) );
-
-            }
-
-            final T serviceObject = clazz.asSubclass( type ).newInstance();
-
-            with_next_property:
-            for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
-            {
-                final Property p = service.getProperty().get( i );
-                final char[] chars = p.getName().toCharArray();
-
-                if ( Character.isLowerCase( chars[0] ) )
-                {
-                    chars[0] = Character.toUpperCase( chars[0] );
-                }
-
-                final String methodNameSuffix = String.valueOf( chars );
-                Method getterMethod = null;
-
-                try
-                {
-                    getterMethod = clazz.getMethod( "get" + methodNameSuffix );
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-
-                    getterMethod = null;
-                }
-
-                if ( getterMethod == null )
-                {
-                    try
-                    {
-                        getterMethod = clazz.getMethod( "is" + methodNameSuffix );
-                    }
-                    catch ( final NoSuchMethodException e )
-                    {
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, null, e );
-                        }
-
-                        getterMethod = null;
-                    }
-                }
-
-                if ( getterMethod == null )
-                {
-                    throw new ModelException( getMessage( "getterMethodNotFound", clazz.getName(), p.getName() ) );
-                }
-
-                final Class<?> propertyType = getterMethod.getReturnType();
-                Class<?> boxedPropertyType = propertyType;
-
-                if ( Boolean.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Boolean.class;
-                }
-                else if ( Character.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Character.class;
-                }
-                else if ( Byte.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Byte.class;
-                }
-                else if ( Short.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Short.class;
-                }
-                else if ( Integer.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Integer.class;
-                }
-                else if ( Long.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Long.class;
-                }
-                else if ( Float.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Float.class;
-                }
-                else if ( Double.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Double.class;
-                }
-
-                Method setterMethod = null;
-
-                try
-                {
-                    setterMethod = clazz.getMethod( "set" + methodNameSuffix, propertyType );
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-
-                    setterMethod = null;
-                }
-
-                if ( setterMethod == null )
-                {
-                    throw new ModelException( getMessage( "setterMethodNotFound", clazz.getName(), p.getName() ) );
-                }
-
-                if ( boxedPropertyType.equals( Character.class ) )
-                {
-                    if ( p.getValue() == null || p.getValue().length() != 1 )
-                    {
-                        throw new ModelException( getMessage( "unsupportedCharacterValue", p.getName() ) );
-                    }
-
-                    setterMethod.invoke( serviceObject, Character.valueOf( p.getValue().charAt( 0 ) ) );
-                    continue with_next_property;
-                }
-
-                if ( p.getValue() != null )
-                {
-                    if ( propertyType.equals( String.class ) )
-                    {
-                        setterMethod.invoke( serviceObject, p.getValue() );
-                        continue with_next_property;
-                    }
-
-                    try
-                    {
-                        setterMethod.invoke( serviceObject, boxedPropertyType.getConstructor( String.class ).
-                            newInstance( p.getValue() ) );
-
-                        continue with_next_property;
-                    }
-                    catch ( final NoSuchMethodException e )
-                    {
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, null, e );
-                        }
-                    }
-
-                    try
-                    {
-                        final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
-
-                        if ( Modifier.isStatic( valueOf.getModifiers() )
-                             && ( valueOf.getReturnType().equals( propertyType )
-                                  || valueOf.getReturnType().equals( boxedPropertyType ) ) )
-                        {
-                            setterMethod.invoke( serviceObject, valueOf.invoke( null, p.getValue() ) );
-                            continue with_next_property;
-                        }
-                    }
-                    catch ( final NoSuchMethodException e )
-                    {
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, null, e );
-                        }
-                    }
-
-                    throw new ModelException( getMessage( "unsupportedPropertyType", propertyType.getName() ) );
-                }
-                else
-                {
-                    setterMethod.invoke( serviceObject, (Object) null );
-                }
-            }
-
-            return serviceObject;
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final InvocationTargetException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-    }
-
-    /**
-     * Gets the name of the class providing the default {@code ModelContext} implementation.
-     * <p>The name of the class providing the default {@code ModelContext} implementation returned by method
-     * {@link #createModelContext(java.lang.ClassLoader)} is controlled by system property
-     * {@code org.jomc.modlet.ModelContext.className}. If that property is not set, the name of the
-     * {@link org.jomc.modlet.DefaultModelContext} class is returned.</p>
-     *
-     * @return The name of the class providing the default {@code ModelContext} implementation.
-     *
-     * @see #setModelContextClassName(java.lang.String)
-     */
-    public static String getModelContextClassName()
-    {
-        if ( modelContextClassName == null )
-        {
-            modelContextClassName = System.getProperty( "org.jomc.modlet.ModelContext.className",
-                                                        DefaultModelContext.class.getName() );
-
-        }
-
-        return modelContextClassName;
-    }
-
-    /**
-     * Sets the name of the class providing the default {@code ModelContext} implementation.
-     *
-     * @param value The new name of the class providing the default {@code ModelContext} implementation or {@code null}.
-     *
-     * @see #getModelContextClassName()
-     */
-    public static void setModelContextClassName( final String value )
-    {
-        modelContextClassName = value;
-    }
-
-    /**
      * Searches the context for a class with a given name.
      *
      * @param name The name of the class to search.
@@ -948,7 +694,14 @@ public abstract class ModelContext
             throw new NullPointerException( "name" );
         }
 
-        return this.getClassLoader().getResource( name );
+        if ( this.getClassLoader() == null )
+        {
+            return ClassLoader.getSystemResource( name );
+        }
+        else
+        {
+            return this.getClassLoader().getResource( name );
+        }
     }
 
     /**
@@ -973,7 +726,14 @@ public abstract class ModelContext
 
         try
         {
-            return this.getClassLoader().getResources( name );
+            if ( this.getClassLoader() == null )
+            {
+                return ClassLoader.getSystemResources( name );
+            }
+            else
+            {
+                return this.getClassLoader().getResources( name );
+            }
         }
         catch ( final IOException e )
         {
@@ -988,104 +748,10 @@ public abstract class ModelContext
      *
      * @throws ModelException if searching {@code Modlets} fails.
      *
+     * @see ModletProvider META-INF/services/org.jomc.modlet.ModletProvider
      * @see #getModlets()
      */
     public abstract Modlets findModlets() throws ModelException;
-
-    /**
-     * Creates a new default {@code ModelContext} instance.
-     *
-     * @param classLoader The class loader to create a new default {@code ModelContext} instance with or {@code null},
-     * to create a new context using the platform's bootstrap class loader.
-     *
-     * @return A new {@code ModelContext} instance.
-     *
-     * @throws ModelException if creating a new {@code ModelContext} instance fails.
-     *
-     * @see #getModelContextClassName()
-     * @see #createModelContext(java.lang.String, java.lang.ClassLoader)
-     */
-    public static ModelContext createModelContext( final ClassLoader classLoader ) throws ModelException
-    {
-        return createModelContext( getModelContextClassName(), classLoader );
-    }
-
-    /**
-     * Creates a new {@code ModelContext} instance.
-     *
-     * @param className The name of the class providing the {@code ModelContext} implementation.
-     * @param classLoader The class loader to create a new {@code ModelContext} instance with or {@code null}, to create
-     * a new context using the platform's bootstrap class loader.
-     *
-     * @return A new {@code ModelContext} instance.
-     *
-     * @throws NullPointerException if {@code className} is {@code null}.
-     * @throws ModelException if creating a new {@code ModelContext} instance fails.
-     *
-     * @since 1.2
-     */
-    public static ModelContext createModelContext( final String className, final ClassLoader classLoader )
-        throws ModelException
-    {
-        if ( className == null )
-        {
-            throw new NullPointerException( "className" );
-        }
-
-        if ( className.equals( DefaultModelContext.class.getName() ) )
-        {
-            return new DefaultModelContext( classLoader );
-        }
-
-        try
-        {
-            final Class<?> clazz = Class.forName( className, false, classLoader );
-            final Constructor<? extends ModelContext> ctor =
-                clazz.asSubclass( ModelContext.class ).getDeclaredConstructor( ClassLoader.class );
-
-            return ctor.newInstance( classLoader );
-        }
-        catch ( final ClassNotFoundException e )
-        {
-            throw new ModelException( getMessage( "contextClassNotFound", className ), e );
-        }
-        catch ( final NoSuchMethodException e )
-        {
-            throw new ModelException( getMessage( "contextConstructorNotFound", className ), e );
-        }
-        catch ( final InstantiationException e )
-        {
-            final String message = getMessage( e );
-            throw new ModelException( getMessage( "contextInstantiationException", className,
-                                                  message != null ? " " + message : "" ), e );
-
-        }
-        catch ( final IllegalAccessException e )
-        {
-            final String message = getMessage( e );
-            throw new ModelException( getMessage( "contextConstructorAccessDenied", className,
-                                                  message != null ? " " + message : "" ), e );
-
-        }
-        catch ( final InvocationTargetException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getTargetException() != null )
-            {
-                message = getMessage( e.getTargetException() );
-            }
-
-            throw new ModelException( getMessage( "contextConstructorException", className,
-                                                  message != null ? " " + message : "" ), e );
-
-        }
-        catch ( final ClassCastException e )
-        {
-            throw new ModelException( getMessage( "illegalContextImplementation", className,
-                                                  ModelContext.class.getName() ), e );
-
-        }
-    }
 
     /**
      * Creates a new {@code Model} instance.
@@ -1097,7 +763,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new {@code Model} instance fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
+     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelProvider.class )
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Model findModel( String model ) throws ModelException;
@@ -1112,11 +778,148 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if populating {@code model} fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
+     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelProvider.class )
      *
      * @since 1.2
      */
     public abstract Model findModel( Model model ) throws ModelException;
+
+    /**
+     * Gets the name of the class providing the default {@code ModelContext} implementation.
+     * <p>The name of the class providing the default {@code ModelContext} implementation returned by method
+     * {@link #createModelContext(java.lang.ClassLoader)} is controlled by system property
+     * {@code org.jomc.modlet.ModelContext.className}. If that property is not set, the name of the
+     * {@link org.jomc.modlet.DefaultModelContext} class is returned.</p>
+     *
+     * @return The name of the class providing the default {@code ModelContext} implementation.
+     *
+     * @see #setModelContextClassName(java.lang.String)
+     *
+     * @deprecated As of JOMC 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in version
+     * 2.0.
+     */
+    @Deprecated
+    public static String getModelContextClassName()
+    {
+        if ( modelContextClassName == null )
+        {
+            modelContextClassName = System.getProperty( "org.jomc.modlet.ModelContext.className",
+                                                        DefaultModelContext.class.getName() );
+
+        }
+
+        return modelContextClassName;
+    }
+
+    /**
+     * Sets the name of the class providing the default {@code ModelContext} implementation.
+     *
+     * @param value The new name of the class providing the default {@code ModelContext} implementation or {@code null}.
+     *
+     * @see #getModelContextClassName()
+     *
+     * @deprecated As of JOMC 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in version
+     * 2.0.
+     */
+    @Deprecated
+    public static void setModelContextClassName( final String value )
+    {
+        modelContextClassName = value;
+    }
+
+    /**
+     * Creates a new default {@code ModelContext} instance.
+     *
+     * @param classLoader The class loader to create a new default {@code ModelContext} instance with or {@code null},
+     * to create a new context using the platform's bootstrap class loader.
+     *
+     * @return A new {@code ModelContext} instance.
+     *
+     * @throws ModelException if creating a new {@code ModelContext} instance fails.
+     *
+     * @see #getModelContextClassName()
+     *
+     * @deprecated As of JOMC 1.2, replaced by method {@link ModelContextFactory#newModelContext(java.lang.ClassLoader)}.
+     * This method will be removed in version 2.0.
+     */
+    public static ModelContext createModelContext( final ClassLoader classLoader ) throws ModelException
+    {
+        if ( getModelContextClassName().equals( DefaultModelContext.class.getName() ) )
+        {
+            return new DefaultModelContext( classLoader );
+        }
+
+        try
+        {
+            final Class<?> clazz = Class.forName( getModelContextClassName(), false, classLoader );
+
+            if ( !ModelContext.class.isAssignableFrom( clazz ) )
+            {
+                throw new ModelException( getMessage( "illegalContextImplementation", getModelContextClassName(),
+                                                      ModelContext.class.getName() ) );
+
+            }
+
+            final Constructor<? extends ModelContext> ctor =
+                clazz.asSubclass( ModelContext.class ).getDeclaredConstructor( ClassLoader.class );
+
+            return ctor.newInstance( classLoader );
+        }
+        catch ( final ClassNotFoundException e )
+        {
+            throw new ModelException( getMessage( "contextClassNotFound", getModelContextClassName() ), e );
+        }
+        catch ( final NoSuchMethodException e )
+        {
+            throw new ModelException( getMessage( "contextConstructorNotFound", getModelContextClassName() ), e );
+        }
+        catch ( final InstantiationException e )
+        {
+            final String message = getMessage( e );
+            throw new ModelException( getMessage( "contextInstantiationException", getModelContextClassName(),
+                                                  message != null ? " " + message : "" ), e );
+
+        }
+        catch ( final IllegalAccessException e )
+        {
+            final String message = getMessage( e );
+            throw new ModelException( getMessage( "contextConstructorAccessDenied", getModelContextClassName(),
+                                                  message != null ? " " + message : "" ), e );
+
+        }
+        catch ( final InvocationTargetException e )
+        {
+            String message = getMessage( e );
+            if ( message == null && e.getTargetException() != null )
+            {
+                message = getMessage( e.getTargetException() );
+            }
+
+            throw new ModelException( getMessage( "contextConstructorException", getModelContextClassName(),
+                                                  message != null ? " " + message : "" ), e );
+
+        }
+    }
+
+    /**
+     * Creates a new service object.
+     *
+     * @param <T> The type of the service.
+     * @param service The service to create a new object of.
+     * @param type The class of the type of the service.
+     *
+     * @return An new service object for {@code service}.
+     *
+     * @throws NullPointerException if {@code service} or {@code type} is {@code null}.
+     * @throws ModelException if creating the service object fails.
+     *
+     * @see ModelProvider
+     * @see ModelProcessor
+     * @see ModelValidator
+     *
+     * @since 1.2
+     */
+    public abstract <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException;
 
     /**
      * Creates a new SAX entity resolver instance of a given model.
@@ -1128,7 +931,6 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new SAX entity resolver instance fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract EntityResolver createEntityResolver( String model ) throws ModelException;
@@ -1143,7 +945,6 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new L/S resource resolver instance fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract LSResourceResolver createResourceResolver( String model ) throws ModelException;
@@ -1158,7 +959,6 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new JAXP schema instance fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract javax.xml.validation.Schema createSchema( String model ) throws ModelException;
@@ -1173,7 +973,6 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new JAXB context instance fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract JAXBContext createContext( String model ) throws ModelException;
@@ -1188,7 +987,6 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new JAXB marshaller instance fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Marshaller createMarshaller( String model ) throws ModelException;
@@ -1203,7 +1001,6 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new JAXB unmarshaller instance fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Unmarshaller createUnmarshaller( String model ) throws ModelException;
@@ -1218,7 +1015,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if processing {@code model} fails.
      *
-     * @see #findModel(java.lang.String)
+     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelProcessor.class )
      */
     public abstract Model processModel( Model model ) throws ModelException;
 
@@ -1232,7 +1029,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if validating the modules fails.
      *
-     * @see #findModel(java.lang.String)
+     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelValidator.class )
      * @see ModelValidationReport#isModelValid()
      */
     public abstract ModelValidationReport validateModel( Model model ) throws ModelException;
@@ -1248,7 +1045,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} or {@code source} is {@code null}.
      * @throws ModelException if validating the model fails.
      *
-     * @see #createModelContext(java.lang.ClassLoader)
+     * @see #createSchema(java.lang.String)
      * @see ModelValidationReport#isModelValid()
      * @see ModletObject#MODEL_PUBLIC_ID
      */

@@ -64,10 +64,6 @@
     <release version="1.2">
       <action dev="schulte2005" type="add"><![CDATA[Added a <code>META-INF/sun-jaxb.episode</code> file.]]>
       </action>
-      <action dev="schulte2005" type="add"><![CDATA[Added method <code>createModelContext</code> to class
-      <code>org.jomc.modlet.ModelContext</code> taking a class name.
-      See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
-      </action>
       <action dev="schulte2005" type="add"><![CDATA[Added method <code>findModel</code> taking a <code>Model</code>
       instance to class <code>org.jomc.modlet.ModelContext</code>.
       See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
@@ -83,6 +79,16 @@
       <action dev="schulte2005" type="add"><![CDATA[Added the <code>Property</code> complex type to the
       <code>jomc-modlet-1.2.xsd</code> schema and updated the <code>Service</code> complex type to support nested
       <code>property</code> elements.]]>
+      </action>
+      <action dev="schulte2005" type="add"><![CDATA[Added method <code>createServiceObject</code> to class
+      <code>org.jomc.modlet.ModelContext</code>.
+      See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
+      </action>
+      <action dev="schulte2005" type="add"><![CDATA[Added classes <code>org.jomc.modlet.ModelContextFactory</code>
+      and <code>org.jomc.modlet.ModelContextFactoryError</code> deprecating methods
+      <code>getModelContextClassName</code>, <code>setModelContextClassName</code> and
+      <code>createModelContext</code> of class <code>org.jomc.modlet.ModelContext</code>.
+      See the <a href="http://jomc.sourceforge.net/jomc/1.2/jomc-modlet-1.2/clirr-report.html">CLIRR report</a>.]]>
       </action>
       <action dev="schulte2005" type="fix"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
       to close open streams when reading provider resources or manifest files fails.]]>
