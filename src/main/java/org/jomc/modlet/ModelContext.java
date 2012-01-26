@@ -155,7 +155,6 @@ public abstract class ModelContext
     private Modlets modlets;
 
     /** Modlet namespace schema system id of the instance. */
-    @Deprecated
     private String modletSchemaSystemId;
 
     /**
@@ -385,9 +384,7 @@ public abstract class ModelContext
      *
      * @see #getDefaultModletSchemaSystemId()
      * @see #setModletSchemaSystemId(java.lang.String)
-     * @deprecated As of JOMC 1.2, removed without replacement. This method will be removed in version 2.0.
      */
-    @Deprecated
     public final String getModletSchemaSystemId()
     {
         if ( this.modletSchemaSystemId == null )
@@ -411,12 +408,28 @@ public abstract class ModelContext
      * @param value The new {@code http://jomc.org/modlet} namespace schema system id or {@code null}.
      *
      * @see #getModletSchemaSystemId()
-     * @deprecated As of JOMC 1.2, removed without replacement. This method will be removed in version 2.0.
      */
-    @Deprecated
     public final void setModletSchemaSystemId( final String value )
     {
         this.modletSchemaSystemId = value;
+
+        if ( this.modlets != null )
+        {
+            for ( int i = 0, s0 = this.modlets.getModlet().size(); i < s0; i++ )
+            {
+                final Modlet m = this.modlets.getModlet().get( i );
+
+                if ( m.getSchemas() != null )
+                {
+                    final Schema s = m.getSchemas().getSchemaByPublicId( ModletObject.MODEL_PUBLIC_ID );
+
+                    if ( s != null )
+                    {
+                        s.setSystemId( this.getModletSchemaSystemId() );
+                    }
+                }
+            }
+        }
     }
 
     /**

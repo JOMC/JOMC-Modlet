@@ -93,6 +93,10 @@
       <action dev="schulte2005" type="fix"><![CDATA[Updated class <code>org.jomc.modlet.DefaultModelContext</code>
       to close open streams when reading provider resources or manifest files fails.]]>
       </action>
+      <action dev="schulte2005" type="fix"><![CDATA[Updated method <code>setModletSchemaSystemId</code> of class
+      <code>org.jomc.modlet.ModelContext</code> to update the system id of all schemas matching the
+      <code>http://jomc.org/modlet</code> public id when used after modlets have been initialized.]]>
+      </action>
       <action dev="schulte2005" type="update"><![CDATA[Updated methods <code>createMarshaller</code> and
       <code>createUnmarshaller</code> of class <code>org.jomc.modlet.DefaultModelContext</code> to support
       <code>Marshaller.Listener</code> and <code>Unmarshaller.Listener</code> services.]]>

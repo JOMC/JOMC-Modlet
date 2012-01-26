@@ -47,9 +47,7 @@ import javax.xml.bind.Unmarshaller;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
  * @version $JOMC$
  * @see ModelContext#findModlets()
- * @deprecated As of JOMC 1.2, removed without replacement. This class will be removed in version 2.0.
  */
-@Deprecated
 public class DefaultModletProvider implements ModletProvider
 {
 

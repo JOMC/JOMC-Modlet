@@ -83,9 +83,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
  * @version $JOMC$
  * @see ModelContextFactory
- * @deprecated As of JOMC 1.2, removed without replacement. This class will be removed in version 2.0.
  */
-@Deprecated
 public class DefaultModelContext extends ModelContext
 {
 
