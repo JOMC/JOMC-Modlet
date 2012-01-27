@@ -62,7 +62,7 @@ public class ModelContextFactoryTest
     }
 
     @Test
-    public void testModelContextFactoryDefaultInstance() throws Exception
+    public final void testModelContextFactoryDefaultInstance() throws Exception
     {
         assertNotNull( ModelContextFactory.newInstance() );
         assertEquals( DEFAULT_MODEL_CONTEXT_FACTORY_CLASS_NAME,
@@ -77,7 +77,7 @@ public class ModelContextFactoryTest
     }
 
     @Test
-    public void testModelContextFactoryClassNotFound() throws Exception
+    public final void testModelContextFactoryClassNotFound() throws Exception
     {
         try
         {
@@ -106,7 +106,7 @@ public class ModelContextFactoryTest
     }
 
     @Test
-    public void testModelContextFactoryIllegalClass() throws Exception
+    public final void testModelContextFactoryIllegalClass() throws Exception
     {
         try
         {
@@ -137,7 +137,7 @@ public class ModelContextFactoryTest
     }
 
     @Test
-    public void testModelContextFactoryInstantiationException() throws Exception
+    public final void testModelContextFactoryInstantiationException() throws Exception
     {
         try
         {
@@ -168,7 +168,7 @@ public class ModelContextFactoryTest
     }
 
     @Test
-    public void testModelContextFactoryIllegalAccessException() throws Exception
+    public final void testModelContextFactoryIllegalAccessException() throws Exception
     {
         try
         {
@@ -199,7 +199,7 @@ public class ModelContextFactoryTest
     }
 
     @Test
-    public void testModelContextNotNull() throws Exception
+    public final void testModelContextNotNull() throws Exception
     {
         assertNotNull( ModelContextFactory.newInstance().newModelContext() );
         assertNotNull( ModelContextFactory.newInstance().newModelContext( null ) );
