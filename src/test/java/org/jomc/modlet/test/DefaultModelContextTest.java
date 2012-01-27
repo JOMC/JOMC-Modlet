@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Properties;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -53,6 +54,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.w3c.dom.ls.LSResourceResolver;
@@ -301,6 +303,67 @@ public class DefaultModelContextTest extends ModelContextTest
         {
             this.getModelContext().createUnmarshaller( model.getIdentifier() );
             fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setProviderLocation( "META-INF/extended-services" );
+        this.getModelContext().setModlets( null );
+        modlets = this.getModelContext().findModlets();
+        assertNotNull( modlets );
+
+        final TestModletProvider testModletProvider =
+            (TestModletProvider) this.getModelContext().getAttribute( TestModletProvider.class.getName() );
+
+        assertNotNull( testModletProvider );
+        assertTrue( testModletProvider.isBooleanProperty() );
+        assertEquals( 'T', testModletProvider.getCharacterProperty() );
+        assertEquals( (byte) -1, testModletProvider.getByteProperty() );
+        assertEquals( (short) -1, testModletProvider.getShortProperty() );
+        assertEquals( -1, testModletProvider.getIntProperty() );
+        assertEquals( -1, testModletProvider.getLongProperty() );
+        assertEquals( -1, testModletProvider.getFloatProperty(), 0 );
+        assertEquals( -1, testModletProvider.getDoubleProperty(), 0 );
+        assertEquals( "TEST", testModletProvider.getStringProperty() );
+        assertEquals( new URL( "file:///tmp" ), testModletProvider.getUrlProperty() );
+        assertEquals( Thread.State.RUNNABLE, testModletProvider.getEnumProperty() );
+        assertNull( testModletProvider.getObjectProperty() );
+
+        try
+        {
+            this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-1" );
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModlets();
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-2" );
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModlets();
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-3" );
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModlets();
+            fail( "Expected 'ModelException' not thrown." );
         }
         catch ( final ModelException e )
         {

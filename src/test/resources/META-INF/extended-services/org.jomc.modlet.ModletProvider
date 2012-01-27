@@ -1,0 +1,2 @@
+# $JOMC$
+org.jomc.modlet.test.support.TestModletProvider[booleanProperty=true,characterProperty=T,byteProperty=-1,shortProperty=-1,intProperty=-1,longProperty=-1,floatProperty=-1,doubleProperty=-1,stringProperty=TEST,urlProperty=file:///tmp,enumProperty=RUNNABLE,objectProperty]

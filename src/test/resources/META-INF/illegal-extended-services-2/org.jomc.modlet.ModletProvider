@@ -1,0 +1,2 @@
+# $JOMC$
+org.jomc.modlet.test.support.TestModletProvider[stringPropertyWithoutGetter=TEST]

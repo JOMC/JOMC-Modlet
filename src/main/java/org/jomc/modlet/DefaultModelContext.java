@@ -50,11 +50,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -358,74 +360,62 @@ public class DefaultModelContext extends ModelContext
     @Override
     public Modlets findModlets() throws ModelException
     {
-        try
+        final Modlets modlets = new Modlets();
+        final Collection<ModletProvider> providers = this.loadProviders( ModletProvider.class );
+
+        for ( ModletProvider provider : providers )
         {
-            final Modlets modlets = new Modlets();
-            final Collection<Class<? extends ModletProvider>> providers = this.loadProviders( ModletProvider.class );
-
-            for ( Class<? extends ModletProvider> provider : providers )
+            if ( this.isLoggable( Level.FINER ) )
             {
-                final ModletProvider modletProvider = provider.newInstance();
+                this.log( Level.FINER, getMessage( "creatingModlets", provider.toString() ), null );
+            }
 
-                if ( this.isLoggable( Level.FINER ) )
+            final Modlets provided = provider.findModlets( this );
+
+            if ( provided != null )
+            {
+                if ( this.isLoggable( Level.FINEST ) )
                 {
-                    this.log( Level.FINER, getMessage( "creatingModlets", modletProvider.toString() ), null );
-                }
-
-                final Modlets provided = modletProvider.findModlets( this );
-
-                if ( provided != null )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
+                    for ( Modlet m : provided.getModlet() )
                     {
-                        for ( Modlet m : provided.getModlet() )
+                        this.log( Level.FINEST,
+                                  getMessage( "modletInfo", m.getName(), m.getModel(),
+                                              m.getVendor() != null
+                                              ? m.getVendor() : getMessage( "noVendor" ),
+                                              m.getVersion() != null
+                                              ? m.getVersion() : getMessage( "noVersion" ) ), null );
+
+                        if ( m.getSchemas() != null )
                         {
-                            this.log( Level.FINEST,
-                                      getMessage( "modletInfo", m.getName(), m.getModel(),
-                                                  m.getVendor() != null ? m.getVendor() : getMessage( "noVendor" ),
-                                                  m.getVersion() != null ? m.getVersion() : getMessage( "noVersion" ) ),
-                                      null );
-
-                            if ( m.getSchemas() != null )
+                            for ( Schema s : m.getSchemas().getSchema() )
                             {
-                                for ( Schema s : m.getSchemas().getSchema() )
-                                {
-                                    this.log( Level.FINEST, getMessage(
-                                        "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
-                                        s.getContextId() != null ? s.getContextId() : getMessage( "noContext" ),
-                                        s.getClasspathId() != null
-                                        ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
+                                this.log( Level.FINEST,
+                                          getMessage( "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
+                                                      s.getContextId() != null
+                                                      ? s.getContextId() : getMessage( "noContext" ),
+                                                      s.getClasspathId() != null
+                                                      ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
 
-                                }
                             }
+                        }
 
-                            if ( m.getServices() != null )
+                        if ( m.getServices() != null )
+                        {
+                            for ( Service s : m.getServices().getService() )
                             {
-                                for ( Service s : m.getServices().getService() )
-                                {
-                                    this.log( Level.FINEST, getMessage( "modletServiceInfo", m.getName(),
-                                                                        s.getOrdinal(), s.getIdentifier(),
-                                                                        s.getClazz() ), null );
+                                this.log( Level.FINEST, getMessage( "modletServiceInfo", m.getName(), s.getOrdinal(),
+                                                                    s.getIdentifier(), s.getClazz() ), null );
 
-                                }
                             }
                         }
                     }
-
-                    modlets.getModlet().addAll( provided.getModlet() );
                 }
-            }
 
-            return modlets;
+                modlets.getModlet().addAll( provided.getModlet() );
+            }
         }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
+
+        return modlets;
     }
 
     /**
@@ -532,188 +522,21 @@ public class DefaultModelContext extends ModelContext
 
             final T serviceObject = clazz.asSubclass( type ).newInstance();
 
-            with_next_property:
             for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
             {
                 final Property p = service.getProperty().get( i );
-                final char[] chars = p.getName().toCharArray();
-
-                if ( Character.isLowerCase( chars[0] ) )
-                {
-                    chars[0] = Character.toUpperCase( chars[0] );
-                }
-
-                final String methodNameSuffix = String.valueOf( chars );
-                Method getterMethod = null;
-
-                try
-                {
-                    getterMethod = clazz.getMethod( "get" + methodNameSuffix );
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-
-                    getterMethod = null;
-                }
-
-                if ( getterMethod == null )
-                {
-                    try
-                    {
-                        getterMethod = clazz.getMethod( "is" + methodNameSuffix );
-                    }
-                    catch ( final NoSuchMethodException e )
-                    {
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, null, e );
-                        }
-
-                        getterMethod = null;
-                    }
-                }
-
-                if ( getterMethod == null )
-                {
-                    throw new ModelException( getMessage( "getterMethodNotFound", clazz.getName(), p.getName() ) );
-                }
-
-                final Class<?> propertyType = getterMethod.getReturnType();
-                Class<?> boxedPropertyType = propertyType;
-
-                if ( Boolean.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Boolean.class;
-                }
-                else if ( Character.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Character.class;
-                }
-                else if ( Byte.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Byte.class;
-                }
-                else if ( Short.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Short.class;
-                }
-                else if ( Integer.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Integer.class;
-                }
-                else if ( Long.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Long.class;
-                }
-                else if ( Float.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Float.class;
-                }
-                else if ( Double.TYPE.equals( propertyType ) )
-                {
-                    boxedPropertyType = Double.class;
-                }
-
-                Method setterMethod = null;
-
-                try
-                {
-                    setterMethod = clazz.getMethod( "set" + methodNameSuffix, propertyType );
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-
-                    setterMethod = null;
-                }
-
-                if ( setterMethod == null )
-                {
-                    throw new ModelException( getMessage( "setterMethodNotFound", clazz.getName(), p.getName() ) );
-                }
-
-                if ( boxedPropertyType.equals( Character.class ) )
-                {
-                    if ( p.getValue() == null || p.getValue().length() != 1 )
-                    {
-                        throw new ModelException( getMessage( "unsupportedCharacterValue", p.getName() ) );
-                    }
-
-                    setterMethod.invoke( serviceObject, Character.valueOf( p.getValue().charAt( 0 ) ) );
-                    continue with_next_property;
-                }
-
-                if ( p.getValue() != null )
-                {
-                    if ( propertyType.equals( String.class ) )
-                    {
-                        setterMethod.invoke( serviceObject, p.getValue() );
-                        continue with_next_property;
-                    }
-
-                    try
-                    {
-                        setterMethod.invoke( serviceObject, boxedPropertyType.getConstructor( String.class ).
-                            newInstance( p.getValue() ) );
-
-                        continue with_next_property;
-                    }
-                    catch ( final NoSuchMethodException e )
-                    {
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, null, e );
-                        }
-                    }
-
-                    try
-                    {
-                        final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
-
-                        if ( Modifier.isStatic( valueOf.getModifiers() )
-                             && ( valueOf.getReturnType().equals( propertyType )
-                                  || valueOf.getReturnType().equals( boxedPropertyType ) ) )
-                        {
-                            setterMethod.invoke( serviceObject, valueOf.invoke( null, p.getValue() ) );
-                            continue with_next_property;
-                        }
-                    }
-                    catch ( final NoSuchMethodException e )
-                    {
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, null, e );
-                        }
-                    }
-
-                    throw new ModelException( getMessage( "unsupportedPropertyType", propertyType.getName() ) );
-                }
-                else
-                {
-                    setterMethod.invoke( serviceObject, (Object) null );
-                }
+                this.setProperty( serviceObject, p.getName(), p.getValue() );
             }
 
             return serviceObject;
         }
         catch ( final InstantiationException e )
         {
-            throw new ModelException( getMessage( e ), e );
+            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
         }
         catch ( final IllegalAccessException e )
         {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final InvocationTargetException e )
-        {
-            throw new ModelException( getMessage( e ), e );
+            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
         }
     }
 
@@ -1542,13 +1365,12 @@ public class DefaultModelContext extends ModelContext
         return modelErrorHandler.getReport();
     }
 
-    private <T> Collection<Class<? extends T>> loadProviders( final Class<T> providerClass ) throws ModelException
+    private <T> Collection<T> loadProviders( final Class<T> providerClass ) throws ModelException
     {
         try
         {
             final String providerNamePrefix = providerClass.getName() + ".";
-            final Map<String, Class<? extends T>> providers =
-                new TreeMap<String, Class<? extends T>>( new Comparator<String>()
+            final Map<String, T> providers = new TreeMap<String, T>( new Comparator<String>()
             {
 
                 public int compare( final String key1, final String key2 )
@@ -1603,32 +1425,19 @@ public class DefaultModelContext extends ModelContext
                 {
                     if ( e.getKey().toString().startsWith( providerNamePrefix ) )
                     {
-                        final Class<?> provider = this.findClass( e.getValue().toString() );
-
-                        if ( provider == null )
-                        {
-                            throw new ModelException( getMessage( "implementationNotFound", providerClass.getName(),
-                                                                  e.getValue().toString(),
-                                                                  platformProviders.getAbsolutePath() ) );
-
-                        }
-
-                        if ( !providerClass.isAssignableFrom( provider ) )
-                        {
-                            throw new ModelException( getMessage( "illegalImplementation", providerClass.getName(),
-                                                                  e.getValue().toString(),
-                                                                  platformProviders.getAbsolutePath() ) );
-
-                        }
+                        final String configuration = e.getValue().toString();
 
                         if ( this.isLoggable( Level.FINEST ) )
                         {
                             this.log( Level.FINEST, getMessage( "providerInfo", platformProviders.getAbsolutePath(),
-                                                                providerClass.getName(), provider.getName() ), null );
+                                                                providerClass.getName(), configuration ), null );
 
                         }
 
-                        providers.put( e.getKey().toString(), provider.asSubclass( providerClass ) );
+                        providers.put( e.getKey().toString(),
+                                       this.createProviderObject( providerClass, configuration,
+                                                                  platformProviders.toURI().toURL() ) );
+
                     }
                 }
             }
@@ -1664,30 +1473,16 @@ public class DefaultModelContext extends ModelContext
                             continue;
                         }
 
-                        final Class<?> provider = this.findClass( line );
-
-                        if ( provider == null )
-                        {
-                            throw new ModelException( getMessage(
-                                "implementationNotFound", providerClass.getName(), line, url.toExternalForm() ) );
-
-                        }
-
-                        if ( !providerClass.isAssignableFrom( provider ) )
-                        {
-                            throw new ModelException( getMessage(
-                                "illegalImplementation", providerClass.getName(), line, url.toExternalForm() ) );
-
-                        }
-
                         if ( this.isLoggable( Level.FINEST ) )
                         {
                             this.log( Level.FINEST, getMessage( "providerInfo", url.toExternalForm(),
-                                                                providerClass.getName(), provider.getName() ), null );
+                                                                providerClass.getName(), line ), null );
 
                         }
 
-                        providers.put( providerNamePrefix + providers.size(), provider.asSubclass( providerClass ) );
+                        providers.put( providerNamePrefix + providers.size(),
+                                       this.createProviderObject( providerClass, line, url ) );
+
                     }
 
                     suppressExceptionOnClose = false;
@@ -1728,6 +1523,282 @@ public class DefaultModelContext extends ModelContext
         catch ( final IOException e )
         {
             throw new ModelException( getMessage( e ), e );
+        }
+    }
+
+    private <T> T createProviderObject( final Class<T> providerClass, final String configuration, final URL location )
+        throws ModelException
+    {
+        String className = configuration;
+
+        try
+        {
+            final Map<String, String> properties = new HashMap<String, String>();
+            final int i0 = configuration.indexOf( '[' );
+            final int i1 = configuration.lastIndexOf( ']' );
+
+            if ( i0 != -1 && i1 != -1 )
+            {
+                className = configuration.substring( 0, i0 );
+                final StringTokenizer propertyTokens =
+                    new StringTokenizer( configuration.substring( i0 + 1, i1 ), "," );
+
+                while ( propertyTokens.hasMoreTokens() )
+                {
+                    final String property = propertyTokens.nextToken();
+                    final int d0 = property.indexOf( '=' );
+
+                    String propertyName = property;
+                    String propertyValue = null;
+
+                    if ( d0 != -1 )
+                    {
+                        propertyName = property.substring( 0, d0 );
+                        propertyValue = property.substring( d0 + 1, property.length() );
+                    }
+
+                    properties.put( propertyName, propertyValue );
+                }
+            }
+
+            final Class<?> provider = this.findClass( className );
+
+            if ( provider == null )
+            {
+                throw new ModelException( getMessage( "implementationNotFound", providerClass.getName(), className,
+                                                      location.toExternalForm() ) );
+
+            }
+
+            if ( !providerClass.isAssignableFrom( provider ) )
+            {
+                throw new ModelException( getMessage( "illegalImplementation", providerClass.getName(), className,
+                                                      location.toExternalForm() ) );
+
+            }
+
+            final T o = provider.asSubclass( providerClass ).newInstance();
+
+            for ( final Map.Entry<String, String> property : properties.entrySet() )
+            {
+                this.setProperty( o, property.getKey(), property.getValue() );
+            }
+
+            return o;
+        }
+        catch ( final InstantiationException e )
+        {
+            throw new ModelException( getMessage( "failedCreatingObject", className ), e );
+        }
+        catch ( final IllegalAccessException e )
+        {
+            throw new ModelException( getMessage( "failedCreatingObject", className ), e );
+        }
+    }
+
+    private <T> void setProperty( final T object, final String propertyName, final String propertyValue )
+        throws ModelException
+    {
+        if ( object == null )
+        {
+            throw new NullPointerException( "object" );
+        }
+        if ( propertyName == null )
+        {
+            throw new NullPointerException( "propertyName" );
+        }
+
+        try
+        {
+            final char[] chars = propertyName.toCharArray();
+
+            if ( Character.isLowerCase( chars[0] ) )
+            {
+                chars[0] = Character.toUpperCase( chars[0] );
+            }
+
+            final String methodNameSuffix = String.valueOf( chars );
+            Method getterMethod = null;
+
+            try
+            {
+                getterMethod = object.getClass().getMethod( "get" + methodNameSuffix );
+            }
+            catch ( final NoSuchMethodException e )
+            {
+                if ( this.isLoggable( Level.FINEST ) )
+                {
+                    this.log( Level.FINEST, null, e );
+                }
+
+                getterMethod = null;
+            }
+
+            if ( getterMethod == null )
+            {
+                try
+                {
+                    getterMethod = object.getClass().getMethod( "is" + methodNameSuffix );
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+
+                    getterMethod = null;
+                }
+            }
+
+            if ( getterMethod == null )
+            {
+                throw new ModelException( getMessage( "getterMethodNotFound", object.getClass().getName(),
+                                                      propertyName ) );
+
+            }
+
+            final Class<?> propertyType = getterMethod.getReturnType();
+            Class<?> boxedPropertyType = propertyType;
+
+            if ( Boolean.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Boolean.class;
+            }
+            else if ( Character.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Character.class;
+            }
+            else if ( Byte.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Byte.class;
+            }
+            else if ( Short.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Short.class;
+            }
+            else if ( Integer.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Integer.class;
+            }
+            else if ( Long.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Long.class;
+            }
+            else if ( Float.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Float.class;
+            }
+            else if ( Double.TYPE.equals( propertyType ) )
+            {
+                boxedPropertyType = Double.class;
+            }
+
+            Method setterMethod = null;
+
+            try
+            {
+                setterMethod = object.getClass().getMethod( "set" + methodNameSuffix, propertyType );
+            }
+            catch ( final NoSuchMethodException e )
+            {
+                if ( this.isLoggable( Level.FINEST ) )
+                {
+                    this.log( Level.FINEST, null, e );
+                }
+
+                setterMethod = null;
+            }
+
+            if ( setterMethod == null )
+            {
+                throw new ModelException( getMessage( "setterMethodNotFound", object.getClass().getName(),
+                                                      propertyName ) );
+
+            }
+
+            if ( boxedPropertyType.equals( Character.class ) )
+            {
+                if ( propertyValue == null || propertyValue.length() != 1 )
+                {
+                    throw new ModelException( getMessage( "unsupportedCharacterValue", object.getClass().getName(),
+                                                          propertyName ) );
+
+                }
+
+                setterMethod.invoke( object, Character.valueOf( propertyValue.charAt( 0 ) ) );
+                return;
+            }
+
+            if ( propertyValue != null )
+            {
+                if ( propertyType.equals( String.class ) )
+                {
+                    setterMethod.invoke( object, propertyValue );
+                    return;
+                }
+
+                try
+                {
+                    setterMethod.invoke(
+                        object, boxedPropertyType.getConstructor( String.class ).newInstance( propertyValue ) );
+
+                    return;
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+                }
+
+                try
+                {
+                    final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
+
+                    if ( Modifier.isStatic( valueOf.getModifiers() )
+                         && ( valueOf.getReturnType().equals( propertyType )
+                              || valueOf.getReturnType().equals( boxedPropertyType ) ) )
+                    {
+                        setterMethod.invoke( object, valueOf.invoke( null, propertyValue ) );
+                        return;
+                    }
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+                }
+
+                throw new ModelException( getMessage( "unsupportedPropertyType", object.getClass().getName(),
+                                                      propertyName, propertyType.getName() ) );
+
+            }
+            else
+            {
+                setterMethod.invoke( object, (Object) null );
+            }
+        }
+        catch ( final IllegalAccessException e )
+        {
+            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
+                                                  object.getClass().getName() ), e );
+
+        }
+        catch ( final InvocationTargetException e )
+        {
+            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
+                                                  object.getClass().getName() ), e );
+
+        }
+        catch ( final InstantiationException e )
+        {
+            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
+                                                  object.getClass().getName() ), e );
+
         }
     }
 
