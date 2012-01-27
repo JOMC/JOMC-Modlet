@@ -39,7 +39,7 @@ import org.jomc.modlet.ModelContextFactory;
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $JOMC$
  */
-public class IllegalAccessExceptionModelContextFactory extends ModelContextFactory
+public final class IllegalAccessExceptionModelContextFactory extends ModelContextFactory
 {
 
     private IllegalAccessExceptionModelContextFactory()

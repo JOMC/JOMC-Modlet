@@ -38,6 +38,7 @@ import org.jomc.modlet.test.support.InstantiationExceptionModelContextFactory;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test cases for class {@code org.jomc.modlet.ModelContextFactory}.
@@ -83,6 +84,7 @@ public class ModelContextFactoryTest
         {
             System.setProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY, "DOES_NOT_EXIST" );
             ModelContextFactory.newInstance();
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {
@@ -97,6 +99,7 @@ public class ModelContextFactoryTest
         try
         {
             ModelContextFactory.newInstance( "DOES_NOT_EXIST" );
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {
@@ -114,6 +117,7 @@ public class ModelContextFactoryTest
                                 ClassCastExceptionModelContextFactory.class.getName() );
 
             ModelContextFactory.newInstance();
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {
@@ -128,6 +132,7 @@ public class ModelContextFactoryTest
         try
         {
             ModelContextFactory.newInstance( ClassCastExceptionModelContextFactory.class.getName() );
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {
@@ -145,6 +150,7 @@ public class ModelContextFactoryTest
                                 InstantiationExceptionModelContextFactory.class.getName() );
 
             ModelContextFactory.newInstance();
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {
@@ -159,6 +165,7 @@ public class ModelContextFactoryTest
         try
         {
             ModelContextFactory.newInstance( InstantiationExceptionModelContextFactory.class.getName() );
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {
@@ -176,6 +183,7 @@ public class ModelContextFactoryTest
                                 IllegalAccessExceptionModelContextFactory.class.getName() );
 
             ModelContextFactory.newInstance();
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {
@@ -190,6 +198,7 @@ public class ModelContextFactoryTest
         try
         {
             ModelContextFactory.newInstance( IllegalAccessExceptionModelContextFactory.class.getName() );
+            fail( "Expected 'ModelContextFactoryError' not thrown." );
         }
         catch ( final ModelContextFactoryError e )
         {

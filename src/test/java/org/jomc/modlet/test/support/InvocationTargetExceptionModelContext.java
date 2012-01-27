@@ -53,6 +53,12 @@ import org.xml.sax.EntityResolver;
 public final class InvocationTargetExceptionModelContext extends ModelContext
 {
 
+    public InvocationTargetExceptionModelContext()
+    {
+        super();
+        throw new UnsupportedOperationException();
+    }
+
     public InvocationTargetExceptionModelContext( final ClassLoader classLoader )
     {
         super( classLoader );

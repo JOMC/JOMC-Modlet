@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) Christian Schulte, 2012-22
+ *   Copyright (C) Christian Schulte, 2012-27
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -31,15 +31,15 @@
 package org.jomc.modlet.test.support;
 
 /**
- * {@code ModelContextFactory} implementation not extending {@code ModelContext}.
+ * Property type throwing an {@code UnsupportedOperationException} on instantiation.
  *
  * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
  * @version $JOMC$
  */
-public final class ClassCastExceptionModelContextFactory
+public abstract class InstantiationExceptionPropertyType
 {
 
-    public ClassCastExceptionModelContextFactory()
+    public InstantiationExceptionPropertyType( final String string )
     {
         super();
     }

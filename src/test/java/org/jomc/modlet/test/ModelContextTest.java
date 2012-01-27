@@ -38,29 +38,33 @@ import java.util.logging.Level;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelContextFactory;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModletObject;
+import org.jomc.modlet.ModletProvider;
 import org.jomc.modlet.Modlets;
+import org.jomc.modlet.Property;
+import org.jomc.modlet.Service;
 import org.jomc.modlet.test.support.ClassCastExceptionModelContext;
 import org.jomc.modlet.test.support.IllegalAccessExceptionModelContext;
 import org.jomc.modlet.test.support.InstantiationExceptionModelContext;
 import org.jomc.modlet.test.support.InvocationTargetExceptionModelContext;
 import org.jomc.modlet.test.support.NoSuchMethodExceptionModelContext;
+import org.jomc.modlet.test.support.TestModletProvider;
 import org.junit.Test;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.EntityResolver;
+import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.w3c.dom.ls.LSInput;
-import org.w3c.dom.ls.LSResourceResolver;
-import org.xml.sax.EntityResolver;
 
 /**
  * Test cases for {@code org.jomc.modlet.ModelContext} implementations.
@@ -620,6 +624,120 @@ public class ModelContextTest
         this.getModelContext().setModlets( null );
 
         assertNotNull( this.getModelContext().createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+    }
+
+    @Test
+    public final void testCreateServiceObject() throws Exception
+    {
+        try
+        {
+            this.getModelContext().createServiceObject( null, Object.class );
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createServiceObject( new Service(), null );
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        final Service illegalAccessService = new Service();
+        illegalAccessService.setIdentifier( ModelContext.class.getName() );
+        illegalAccessService.setClazz( IllegalAccessExceptionModelContext.class.getName() );
+
+        try
+        {
+            this.getModelContext().createServiceObject( illegalAccessService, ModelContext.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        final Service instantiationExceptionService = new Service();
+        instantiationExceptionService.setIdentifier( ModelContext.class.getName() );
+        instantiationExceptionService.setClazz( InstantiationExceptionModelContext.class.getName() );
+
+        try
+        {
+            this.getModelContext().createServiceObject( instantiationExceptionService, ModelContext.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        final Service legalService = new Service();
+        legalService.setIdentifier( ModletProvider.class.getName() );
+        legalService.setClazz( TestModletProvider.class.getName() );
+        assertNotNull( this.getModelContext().createServiceObject( legalService, ModletProvider.class ) );
+
+        final Property unsupportedTypeProperty = new Property();
+        unsupportedTypeProperty.setName( "unsupportedPropertyType" );
+        unsupportedTypeProperty.setValue( "UNSUPPORTED TYPE" );
+
+        final Property instantiationExceptionProperty = new Property();
+        instantiationExceptionProperty.setName( "instantiationExceptionProperty" );
+        instantiationExceptionProperty.setValue( "UNSUPPORTED TYPE" );
+
+        final Property invocationTargetExceptionProperty = new Property();
+        invocationTargetExceptionProperty.setName( "invocationTargetExceptionProperty" );
+        invocationTargetExceptionProperty.setValue( "UNSUPPORTED TYPE" );
+
+        legalService.getProperty().add( unsupportedTypeProperty );
+
+        try
+        {
+            this.getModelContext().createServiceObject( legalService, ModletProvider.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        legalService.getProperty().remove( unsupportedTypeProperty );
+        legalService.getProperty().add( instantiationExceptionProperty );
+
+        try
+        {
+            this.getModelContext().createServiceObject( legalService, ModletProvider.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        legalService.getProperty().remove( instantiationExceptionProperty );
+        legalService.getProperty().add( invocationTargetExceptionProperty );
+
+        try
+        {
+            this.getModelContext().createServiceObject( legalService, ModletProvider.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
     }
 
     @Test

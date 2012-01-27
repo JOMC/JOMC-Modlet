@@ -79,6 +79,12 @@ public final class TestModletProvider implements ModletProvider
 
     private Object objectProperty;
 
+    private Math unsupportedPropertyType;
+
+    private InstantiationExceptionPropertyType instantiationExceptionProperty;
+
+    private InvocationTargetExceptionPropertyType invocationTargetExceptionProperty;
+
     public TestModletProvider()
     {
         super();
@@ -240,6 +246,36 @@ public final class TestModletProvider implements ModletProvider
     public void setObjectProperty( final Object value )
     {
         this.objectProperty = value;
+    }
+
+    public Math getUnsupportedPropertyType()
+    {
+        return this.unsupportedPropertyType;
+    }
+
+    public void setUnsupportedPropertyType( final Math value )
+    {
+        this.unsupportedPropertyType = value;
+    }
+
+    public InstantiationExceptionPropertyType getInstantiationExceptionProperty()
+    {
+        return this.instantiationExceptionProperty;
+    }
+
+    public void setInstantiationExceptionProperty( final InstantiationExceptionPropertyType value )
+    {
+        this.instantiationExceptionProperty = value;
+    }
+
+    public InvocationTargetExceptionPropertyType getInvocationTargetExceptionProperty()
+    {
+        return this.invocationTargetExceptionProperty;
+    }
+
+    public void setInvocationTargetExceptionProperty( final InvocationTargetExceptionPropertyType value )
+    {
+        this.invocationTargetExceptionProperty = value;
     }
 
 }

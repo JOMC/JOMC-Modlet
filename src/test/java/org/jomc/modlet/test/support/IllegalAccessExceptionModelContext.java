@@ -53,6 +53,11 @@ import org.xml.sax.EntityResolver;
 public final class IllegalAccessExceptionModelContext extends ModelContext
 {
 
+    private IllegalAccessExceptionModelContext()
+    {
+        super();
+    }
+
     private IllegalAccessExceptionModelContext( final ClassLoader classLoader )
     {
         super( classLoader );

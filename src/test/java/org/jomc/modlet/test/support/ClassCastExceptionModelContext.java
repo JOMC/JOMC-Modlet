@@ -51,6 +51,11 @@ import org.xml.sax.EntityResolver;
 public final class ClassCastExceptionModelContext
 {
 
+    public ClassCastExceptionModelContext()
+    {
+        super();
+    }
+
     public ClassCastExceptionModelContext( final ClassLoader classLoader )
     {
         super();

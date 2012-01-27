@@ -52,6 +52,11 @@ import org.xml.sax.EntityResolver;
 public abstract class InstantiationExceptionModelContext extends ModelContext
 {
 
+    public InstantiationExceptionModelContext()
+    {
+        super();
+    }
+
     public InstantiationExceptionModelContext( final ClassLoader classLoader )
     {
         super( classLoader );
