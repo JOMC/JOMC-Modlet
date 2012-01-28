@@ -745,7 +745,7 @@ public class ModelContextTest
     {
         final String testLogLevel = System.getProperty( "org.jomc.modlet.ModelContext.defaultLogLevel" );
 
-        System.clearProperty( "org.jomc.modlet.ModelContext.defaulLogLevel" );
+        System.clearProperty( "org.jomc.modlet.ModelContext.defaultLogLevel" );
         ModelContext.setDefaultLogLevel( null );
         assertNotNull( ModelContext.getDefaultLogLevel() );
         ModelContext.setDefaultLogLevel( null );
@@ -754,11 +754,11 @@ public class ModelContextTest
 
         if ( testLogLevel != null )
         {
-            System.setProperty( "org.jomc.modlet.ModelContext.defaulLogLevel", testLogLevel );
+            System.setProperty( "org.jomc.modlet.ModelContext.defaultLogLevel", testLogLevel );
         }
         else
         {
-            System.clearProperty( "org.jomc.modlet.ModelContext.defaulLogLevel" );
+            System.clearProperty( "org.jomc.modlet.ModelContext.defaultLogLevel" );
         }
 
         ModelContext.setDefaultLogLevel( null );
@@ -767,13 +767,13 @@ public class ModelContextTest
     @Test
     public final void testDefaultModletSchemaSystemId() throws Exception
     {
-        System.clearProperty( "org.jomc.modlet.ModelContext.defaulModletSchemaSystemId" );
+        System.clearProperty( "org.jomc.modlet.ModelContext.defaultModletSchemaSystemId" );
         ModelContext.setDefaultModletSchemaSystemId( null );
         assertNotNull( ModelContext.getDefaultModletSchemaSystemId() );
         ModelContext.setDefaultModletSchemaSystemId( null );
         System.setProperty( "org.jomc.modlet.ModelContext.defaultModletSchemaSystemId", "TEST" );
         assertEquals( "TEST", ModelContext.getDefaultModletSchemaSystemId() );
-        System.clearProperty( "org.jomc.modlet.ModelContext.defaulModletSchemaSystemId" );
+        System.clearProperty( "org.jomc.modlet.ModelContext.defaultModletSchemaSystemId" );
         ModelContext.setDefaultModletSchemaSystemId( null );
         assertNotNull( ModelContext.getDefaultModletSchemaSystemId() );
     }
