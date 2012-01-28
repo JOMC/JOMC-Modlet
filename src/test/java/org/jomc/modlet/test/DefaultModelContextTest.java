@@ -378,6 +378,329 @@ public class DefaultModelContextTest extends ModelContextTest
     }
 
     @Test
+    public final void testFindModletsWithAttributes() throws Exception
+    {
+        final File tmpFile = File.createTempFile( this.getClass().getName(), ".properties" );
+        tmpFile.deleteOnExit();
+
+        final Properties properties = new Properties();
+        properties.setProperty( "org.jomc.modlet.ModletProvider.0", "DOES_NOT_EXIST" );
+        this.writePropertiesFile( properties, tmpFile );
+
+        try
+        {
+            DefaultModelContext.setDefaultPlatformProviderLocation( null );
+            DefaultModelContext.setDefaultProviderLocation( null );
+            this.getModelContext().setPlatformProviderLocation( null );
+            this.getModelContext().setProviderLocation( null );
+            this.getModelContext().setAttribute( DefaultModelContext.PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 tmpFile.getAbsolutePath() );
+
+            this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 "DOES_NOT_EXIST" );
+
+            this.getModelContext().findModlets();
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        properties.setProperty( "org.jomc.modlet.ModletProvider.0", "java.lang.Object" );
+        this.writePropertiesFile( properties, tmpFile );
+
+        try
+        {
+            DefaultModelContext.setDefaultPlatformProviderLocation( null );
+            DefaultModelContext.setDefaultProviderLocation( null );
+            this.getModelContext().setPlatformProviderLocation( null );
+            this.getModelContext().setProviderLocation( null );
+            this.getModelContext().setAttribute( DefaultModelContext.PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 tmpFile.getAbsolutePath() );
+
+            this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 "DOES_NOT_EXIST" );
+
+            this.getModelContext().findModlets();
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        properties.setProperty( "org.jomc.modlet.ModletProvider.0", TestModletProvider.class.getName() );
+        this.writePropertiesFile( properties, tmpFile );
+
+        DefaultModelContext.setDefaultPlatformProviderLocation( null );
+        DefaultModelContext.setDefaultProviderLocation( null );
+        this.getModelContext().setPlatformProviderLocation( null );
+        this.getModelContext().setProviderLocation( null );
+        this.getModelContext().setAttribute( DefaultModelContext.PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                             tmpFile.getAbsolutePath() );
+
+        this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                             "DOES_NOT_EXIST" );
+
+        assertNotNull( this.getModelContext().findModlets().getModlet( TestModletProvider.class.getName() ) );
+        tmpFile.delete();
+
+        try
+        {
+            DefaultModelContext.setDefaultPlatformProviderLocation( null );
+            DefaultModelContext.setDefaultProviderLocation( null );
+            this.getModelContext().setPlatformProviderLocation( null );
+            this.getModelContext().setProviderLocation( null );
+            this.getModelContext().clearAttribute( DefaultModelContext.PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
+            this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 "META-INF/non-existent-services" );
+
+            this.getModelContext().findModlets();
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        try
+        {
+            DefaultModelContext.setDefaultPlatformProviderLocation( null );
+            DefaultModelContext.setDefaultProviderLocation( null );
+            this.getModelContext().setPlatformProviderLocation( null );
+            this.getModelContext().setProviderLocation( null );
+            this.getModelContext().clearAttribute( DefaultModelContext.PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
+            this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 "META-INF/illegal-services" );
+
+            this.getModelContext().findModlets();
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e );
+        }
+
+        DefaultModelContext.setDefaultPlatformProviderLocation( null );
+        DefaultModelContext.setDefaultProviderLocation( null );
+        this.getModelContext().setPlatformProviderLocation( null );
+        this.getModelContext().setProviderLocation( null );
+        this.getModelContext().setModlets( null );
+        this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                             "META-INF/illegal-services-modlet" );
+
+        Modlets modlets = this.getModelContext().findModlets();
+        assertNotNull( modlets );
+
+        try
+        {
+            this.getModelContext().findModel( IllegalServicesModletProvider.class.getName() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        Model model = new Model();
+        model.setIdentifier( IllegalServicesModletProvider.class.getName() );
+
+        try
+        {
+            this.getModelContext().processModel( model );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().validateModel( model );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createMarshaller( model.getIdentifier() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createUnmarshaller( model.getIdentifier() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                             "META-INF/non-existent-services-modlet" );
+
+        this.getModelContext().setProviderLocation( null );
+        this.getModelContext().setModlets( null );
+        modlets = this.getModelContext().findModlets();
+        assertNotNull( modlets );
+
+        try
+        {
+            this.getModelContext().findModel( ServicesNotFoundModletProvider.class.getName() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        model = new Model();
+        model.setIdentifier( ServicesNotFoundModletProvider.class.getName() );
+
+        try
+        {
+            this.getModelContext().processModel( model );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().validateModel( model );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createMarshaller( model.getIdentifier() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createUnmarshaller( model.getIdentifier() );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                             "META-INF/extended-services" );
+
+        this.getModelContext().setProviderLocation( null );
+        this.getModelContext().setModlets( null );
+        modlets = this.getModelContext().findModlets();
+        assertNotNull( modlets );
+
+        final TestModletProvider testModletProvider =
+            (TestModletProvider) this.getModelContext().getAttribute( TestModletProvider.class.getName() );
+
+        assertNotNull( testModletProvider );
+        assertTrue( testModletProvider.isBooleanProperty() );
+        assertEquals( 'T', testModletProvider.getCharacterProperty() );
+        assertEquals( (byte) -1, testModletProvider.getByteProperty() );
+        assertEquals( (short) -1, testModletProvider.getShortProperty() );
+        assertEquals( -1, testModletProvider.getIntProperty() );
+        assertEquals( -1, testModletProvider.getLongProperty() );
+        assertEquals( -1, testModletProvider.getFloatProperty(), 0 );
+        assertEquals( -1, testModletProvider.getDoubleProperty(), 0 );
+        assertEquals( "TEST", testModletProvider.getStringProperty() );
+        assertEquals( new URL( "file:///tmp" ), testModletProvider.getUrlProperty() );
+        assertEquals( Thread.State.RUNNABLE, testModletProvider.getEnumProperty() );
+        assertNull( testModletProvider.getObjectProperty() );
+
+        try
+        {
+            this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 "META-INF/illegal-extended-services-1" );
+
+            this.getModelContext().setProviderLocation( null );
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModlets();
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 "META-INF/illegal-extended-services-2" );
+
+            this.getModelContext().setProviderLocation( null );
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModlets();
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
+                                                 "META-INF/illegal-extended-services-3" );
+
+            this.getModelContext().setProviderLocation( null );
+            this.getModelContext().setModlets( null );
+            this.getModelContext().findModlets();
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        DefaultModelContext.setDefaultPlatformProviderLocation( null );
+        DefaultModelContext.setDefaultProviderLocation( null );
+        this.getModelContext().setPlatformProviderLocation( null );
+        this.getModelContext().setProviderLocation( null );
+    }
+
+    @Test
     public final void testGetDefaultProviderLocation() throws Exception
     {
         System.clearProperty( "org.jomc.modlet.DefaultModelContext.defaultProviderLocation" );
