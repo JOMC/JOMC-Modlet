@@ -665,9 +665,26 @@ public class DefaultModelContext extends ModelContext
                 }
                 catch ( final ModelException e )
                 {
+                    String message = getMessage( e );
+                    if ( message == null )
+                    {
+                        message = "";
+                    }
+                    else if ( message.length() > 0 )
+                    {
+                        message = " " + message;
+                    }
+
+                    String resource = "";
+                    if ( publicId != null )
+                    {
+                        resource = publicId + ", ";
+                    }
+                    resource += systemId;
+
                     // JDK: As of JDK 6, "new IOException( message, cause )".
                     throw (IOException) new IOException( getMessage(
-                        "failedResolving", publicId, systemId, getMessage( e ) ) ).initCause( e );
+                        "failedResolving", resource, message ) ).initCause( e );
 
                 }
 

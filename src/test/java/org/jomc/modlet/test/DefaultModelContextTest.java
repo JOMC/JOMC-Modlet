@@ -51,14 +51,14 @@ import org.jomc.modlet.test.support.TestModelProvider;
 import org.jomc.modlet.test.support.TestModelValidator;
 import org.jomc.modlet.test.support.TestModletProvider;
 import org.junit.Test;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.EntityResolver;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.w3c.dom.ls.LSResourceResolver;
-import org.xml.sax.EntityResolver;
 
 /**
  * Test cases for class {@code org.jomc.modlet.DefaultModelContext}.

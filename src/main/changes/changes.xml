@@ -97,6 +97,10 @@
       <code>org.jomc.modlet.ModelContext</code> to update the system id of all schemas matching the
       <code>http://jomc.org/modlet</code> public id when used after modlets have been initialized.]]>
       </action>
+      <action dev="schulte2005" type="fix"><![CDATA[Corrected method <code>getModlets</code> of class
+      <code>org.jomc.modlet.ModelContext</code> to reset the modlets of the instance before throwing a
+      <code>ModelException</code>.]]>
+      </action>
       <action dev="schulte2005" type="update"><![CDATA[Updated methods <code>createMarshaller</code> and
       <code>createUnmarshaller</code> of class <code>org.jomc.modlet.DefaultModelContext</code> to support
       <code>Marshaller.Listener</code> and <code>Unmarshaller.Listener</code> services.]]>

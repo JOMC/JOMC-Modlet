@@ -618,10 +618,12 @@ public abstract class ModelContext
         }
         catch ( final IOException e )
         {
+            this.modlets = null;
             throw new ModelException( getMessage( e ), e );
         }
         catch ( final JAXBException e )
         {
+            this.modlets = null;
             String message = getMessage( e );
             if ( message == null && e.getLinkedException() != null )
             {
@@ -632,6 +634,7 @@ public abstract class ModelContext
         }
         catch ( final SAXException e )
         {
+            this.modlets = null;
             String message = getMessage( e );
             if ( message == null && e.getException() != null )
             {

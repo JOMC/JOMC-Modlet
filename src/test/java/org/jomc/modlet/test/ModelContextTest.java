@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Properties;
 import java.util.logging.Level;
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
@@ -305,6 +306,82 @@ public class ModelContextTest
         assertNotNull( modlets );
         assertNotNull( modlets.getModlet( DEFAULT_MODLET_NAME ) );
         DefaultModletProvider.setDefaultEnabled( null );
+    }
+
+    @Test
+    public final void testGetInvalidModlets() throws Exception
+    {
+        DefaultModletProvider.setDefaultEnabled( Boolean.TRUE );
+        DefaultModletProvider.setDefaultModletLocation( "META-INF/invalid-modlet/jomc-modlet.xml" );
+        this.getModelContext().setModlets( null );
+
+        try
+        {
+            this.getModelContext().createContext( ModletObject.MODEL_PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createMarshaller( ModletObject.MODEL_PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createSchema( ModletObject.MODEL_PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createUnmarshaller( ModletObject.MODEL_PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            final EntityResolver entityResolver =
+                this.getModelContext().createEntityResolver( ModletObject.MODEL_PUBLIC_ID );
+
+            entityResolver.resolveEntity( ModletObject.MODEL_PUBLIC_ID, "DOES_NOT_EXIST" );
+            fail( "Expected 'IOException' not thrown." );
+        }
+        catch ( final IOException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        final LSResourceResolver resourceResolver =
+            this.getModelContext().createResourceResolver( ModletObject.MODEL_PUBLIC_ID );
+
+        assertNull( resourceResolver.resolveResource(
+            XMLConstants.W3C_XML_SCHEMA_NS_URI, ModletObject.MODEL_PUBLIC_ID, null, null, null ) );
+
+        DefaultModletProvider.setDefaultEnabled( null );
+        DefaultModletProvider.setDefaultModletLocation( null );
+        this.getModelContext().setModlets( null );
     }
 
     @Test
