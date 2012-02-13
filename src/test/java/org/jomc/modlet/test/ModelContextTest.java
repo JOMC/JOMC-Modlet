@@ -33,9 +33,9 @@ package org.jomc.modlet.test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.Properties;
 import java.util.logging.Level;
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
@@ -328,7 +328,29 @@ public class ModelContextTest
 
         try
         {
+            this.getModelContext().createContext( ModletObject.PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
             this.getModelContext().createMarshaller( ModletObject.MODEL_PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createMarshaller( ModletObject.PUBLIC_ID );
             fail( "Expected 'ModelException' not thrown." );
         }
         catch ( final ModelException e )
@@ -350,6 +372,17 @@ public class ModelContextTest
 
         try
         {
+            this.getModelContext().createSchema( ModletObject.PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
             this.getModelContext().createUnmarshaller( ModletObject.MODEL_PUBLIC_ID );
             fail( "Expected 'ModelException' not thrown." );
         }
@@ -361,23 +394,58 @@ public class ModelContextTest
 
         try
         {
-            final EntityResolver entityResolver =
-                this.getModelContext().createEntityResolver( ModletObject.MODEL_PUBLIC_ID );
-
-            entityResolver.resolveEntity( ModletObject.MODEL_PUBLIC_ID, "DOES_NOT_EXIST" );
-            fail( "Expected 'IOException' not thrown." );
+            this.getModelContext().createUnmarshaller( ModletObject.PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
         }
-        catch ( final IOException e )
+        catch ( final ModelException e )
         {
             assertNotNull( e.getMessage() );
             System.out.println( e.toString() );
         }
 
-        final LSResourceResolver resourceResolver =
-            this.getModelContext().createResourceResolver( ModletObject.MODEL_PUBLIC_ID );
+        try
+        {
+            this.getModelContext().createEntityResolver( ModletObject.MODEL_PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
 
-        assertNull( resourceResolver.resolveResource(
-            XMLConstants.W3C_XML_SCHEMA_NS_URI, ModletObject.MODEL_PUBLIC_ID, null, null, null ) );
+        try
+        {
+            this.getModelContext().createEntityResolver( ModletObject.PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createResourceResolver( ModletObject.MODEL_PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createResourceResolver( ModletObject.PUBLIC_ID );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
 
         DefaultModletProvider.setDefaultEnabled( null );
         DefaultModletProvider.setDefaultModletLocation( null );
@@ -491,7 +559,7 @@ public class ModelContextTest
 
         try
         {
-            this.getModelContext().createEntityResolver( null );
+            this.getModelContext().createEntityResolver( (String) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -500,7 +568,18 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        final EntityResolver r = this.getModelContext().createEntityResolver( ModletObject.MODEL_PUBLIC_ID );
+        try
+        {
+            this.getModelContext().createEntityResolver( (URI) null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        EntityResolver r = this.getModelContext().createEntityResolver( ModletObject.MODEL_PUBLIC_ID );
         assertNotNull( r );
 
         try
@@ -516,6 +595,27 @@ public class ModelContextTest
 
         assertNull( r.resolveEntity( null, "DOES_NOT_EXIST" ) );
         assertNotNull( r.resolveEntity( "http://jomc.org/modlet", "DOES_NOT_EXIST" ) );
+        assertNull( r.resolveEntity( ":", "DOES_NOT_EXIST" ) );
+        assertNull( r.resolveEntity( null, ":" ) );
+
+        r = this.getModelContext().createEntityResolver( ModletObject.PUBLIC_ID );
+        assertNotNull( r );
+
+        try
+        {
+            r.resolveEntity( null, null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        assertNull( r.resolveEntity( null, "DOES_NOT_EXIST" ) );
+        assertNotNull( r.resolveEntity( "http://jomc.org/modlet", "DOES_NOT_EXIST" ) );
+        assertNull( r.resolveEntity( ":", "DOES_NOT_EXIST" ) );
+        assertNull( r.resolveEntity( null, ":" ) );
     }
 
     @Test
@@ -525,7 +625,7 @@ public class ModelContextTest
 
         try
         {
-            this.getModelContext().createResourceResolver( null );
+            this.getModelContext().createResourceResolver( (String) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -534,7 +634,18 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        final LSResourceResolver r = this.getModelContext().createResourceResolver( ModletObject.MODEL_PUBLIC_ID );
+        try
+        {
+            this.getModelContext().createResourceResolver( (URI) null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        LSResourceResolver r = this.getModelContext().createResourceResolver( ModletObject.MODEL_PUBLIC_ID );
 
         assertNotNull( r );
         assertNull( r.resolveResource( null, null, null, null, null ) );
@@ -543,8 +654,40 @@ public class ModelContextTest
         assertNotNull( r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, ModletObject.MODEL_PUBLIC_ID,
                                           ModelContext.getDefaultModletSchemaSystemId(), null ) );
 
-        final LSInput input = r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, null,
-                                                 ModelContext.getDefaultModletSchemaSystemId(), null );
+        LSInput input = r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, null,
+                                           ModelContext.getDefaultModletSchemaSystemId(), null );
+
+        assertNotNull( input );
+
+        input.getBaseURI();
+        input.getByteStream();
+        input.getCertifiedText();
+        input.getCharacterStream();
+        input.getEncoding();
+        input.getPublicId();
+        input.getStringData();
+        input.getSystemId();
+
+        input.setBaseURI( null );
+        input.setByteStream( null );
+        input.setCertifiedText( false );
+        input.setCharacterStream( null );
+        input.setEncoding( null );
+        input.setPublicId( null );
+        input.setStringData( null );
+        input.setSystemId( null );
+
+        r = this.getModelContext().createResourceResolver( ModletObject.PUBLIC_ID );
+
+        assertNotNull( r );
+        assertNull( r.resolveResource( null, null, null, null, null ) );
+        assertNull( r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, null, "DOES_NOT_EXIST", null ) );
+        assertNull( r.resolveResource( "UNSUPPORTED", null, ModletObject.MODEL_PUBLIC_ID, null, null ) );
+        assertNotNull( r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, ModletObject.MODEL_PUBLIC_ID,
+                                          ModelContext.getDefaultModletSchemaSystemId(), null ) );
+
+        input = r.resolveResource( W3C_XML_SCHEMA_NS_URI, null, null,
+                                   ModelContext.getDefaultModletSchemaSystemId(), null );
 
         assertNotNull( input );
 
@@ -574,7 +717,18 @@ public class ModelContextTest
 
         try
         {
-            this.getModelContext().createContext( null );
+            this.getModelContext().createContext( (String) null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createContext( (URI) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -596,9 +750,20 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        this.getModelContext().setModlets( null );
+        try
+        {
+            this.getModelContext().createContext( new URI( "DOES_NOT_EXIST" ) );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
 
+        this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createContext( ModletObject.MODEL_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createContext( ModletObject.PUBLIC_ID ) );
     }
 
     @Test
@@ -608,7 +773,18 @@ public class ModelContextTest
 
         try
         {
-            this.getModelContext().createMarshaller( null );
+            this.getModelContext().createMarshaller( (String) null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createMarshaller( (URI) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -630,9 +806,20 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        this.getModelContext().setModlets( null );
+        try
+        {
+            this.getModelContext().createMarshaller( new URI( "DOES_NOT_EXIST" ) );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
 
+        this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createMarshaller( ModletObject.MODEL_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createMarshaller( ModletObject.PUBLIC_ID ) );
     }
 
     @Test
@@ -642,7 +829,18 @@ public class ModelContextTest
 
         try
         {
-            this.getModelContext().createUnmarshaller( null );
+            this.getModelContext().createUnmarshaller( (String) null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createUnmarshaller( (URI) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -664,9 +862,20 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        this.getModelContext().setModlets( null );
+        try
+        {
+            this.getModelContext().createUnmarshaller( new URI( "DOES_NOT_EXIST" ) );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
 
+        this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createUnmarshaller( ModletObject.MODEL_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createUnmarshaller( ModletObject.PUBLIC_ID ) );
     }
 
     @Test
@@ -676,7 +885,18 @@ public class ModelContextTest
 
         try
         {
-            this.getModelContext().createSchema( null );
+            this.getModelContext().createSchema( (String) null );
+            fail( "Expected NullPointerException not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createSchema( (URI) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -698,9 +918,20 @@ public class ModelContextTest
             System.out.println( e.toString() );
         }
 
-        this.getModelContext().setModlets( null );
+        try
+        {
+            this.getModelContext().createSchema( new URI( "DOES_NOT_EXIST" ) );
+            fail( "Expected ModelException not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
 
+        this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+        assertNotNull( this.getModelContext().createSchema( ModletObject.PUBLIC_ID ) );
     }
 
     @Test

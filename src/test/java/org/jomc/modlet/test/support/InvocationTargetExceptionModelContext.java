@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test.support;
 
+import java.net.URI;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -139,6 +140,42 @@ public final class InvocationTargetExceptionModelContext extends ModelContext
 
     @Override
     public <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public EntityResolver createEntityResolver( final URI publicId ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public LSResourceResolver createResourceResolver( final URI publicId ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Schema createSchema( final URI publicId ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JAXBContext createContext( final URI publicId ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Marshaller createMarshaller( final URI publicId ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Unmarshaller createUnmarshaller( final URI publicId ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }

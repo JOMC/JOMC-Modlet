@@ -33,6 +33,7 @@ package org.jomc.modlet;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -60,12 +61,17 @@ import org.xml.sax.SAXException;
  * Model context interface.
  * <p><b>Use Cases:</b><br/><ul>
  * <li>{@link #createContext(java.lang.String) }</li>
+ * <li>{@link #createContext(java.net.URI) }</li>
  * <li>{@link #createEntityResolver(java.lang.String) }</li>
+ * <li>{@link #createEntityResolver(java.net.URI) }</li>
  * <li>{@link #createMarshaller(java.lang.String) }</li>
+ * <li>{@link #createMarshaller(java.net.URI) }</li>
  * <li>{@link #createResourceResolver(java.lang.String) }</li>
+ * <li>{@link #createResourceResolver(java.net.URI) }</li>
  * <li>{@link #createSchema(java.lang.String) }</li>
- * <li>{@link #createServiceObject(org.jomc.modlet.Service, java.lang.Class) }</li>
+ * <li>{@link #createSchema(java.net.URI) }</li>
  * <li>{@link #createUnmarshaller(java.lang.String) }</li>
+ * <li>{@link #createUnmarshaller(java.net.URI) }</li>
  * <li>{@link #findModel(java.lang.String) }</li>
  * <li>{@link #findModel(org.jomc.modlet.Model) }</li>
  * <li>{@link #processModel(org.jomc.modlet.Model) }</li>
@@ -411,6 +417,7 @@ public abstract class ModelContext
      */
     public final void setModletSchemaSystemId( final String value )
     {
+        final String oldModletSchemaSystemId = this.getModletSchemaSystemId();
         this.modletSchemaSystemId = value;
 
         if ( this.modlets != null )
@@ -421,11 +428,11 @@ public abstract class ModelContext
 
                 if ( m.getSchemas() != null )
                 {
-                    final Schema s = m.getSchemas().getSchemaByPublicId( ModletObject.MODEL_PUBLIC_ID );
+                    final Schema s = m.getSchemas().getSchemaBySystemId( oldModletSchemaSystemId );
 
                     if ( s != null )
                     {
-                        s.setSystemId( this.getModletSchemaSystemId() );
+                        s.setSystemId( value );
                     }
                 }
             }
@@ -952,6 +959,21 @@ public abstract class ModelContext
     public abstract EntityResolver createEntityResolver( String model ) throws ModelException;
 
     /**
+     * Creates a new SAX entity resolver instance for a given public identifier URI.
+     *
+     * @param publicId The public identifier URI to create a new SAX entity resolver for.
+     *
+     * @return A new SAX entity resolver instance for the public identifier URI {@code publicId}.
+     *
+     * @throws NullPointerException if {@code publicId} is {@code null}.
+     * @throws ModelException if creating a new SAX entity resolver instance fails.
+     *
+     * @see ModletObject#PUBLIC_ID
+     * @since 1.2
+     */
+    public abstract EntityResolver createEntityResolver( URI publicId ) throws ModelException;
+
+    /**
      * Creates a new L/S resource resolver instance of a given model.
      *
      * @param model The identifier of the model to create a new L/S resource resolver of.
@@ -964,6 +986,21 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract LSResourceResolver createResourceResolver( String model ) throws ModelException;
+
+    /**
+     * Creates a new L/S resource resolver instance for a given public identifier URI.
+     *
+     * @param publicId The public identifier URI to create a new L/S resource resolver for.
+     *
+     * @return A new L/S resource resolver instance for the public identifier URI {@code publicId}.
+     *
+     * @throws NullPointerException if {@code publicId} is {@code null}.
+     * @throws ModelException if creating a new L/S resource resolver instance fails.
+     *
+     * @see ModletObject#PUBLIC_ID
+     * @since 1.2
+     */
+    public abstract LSResourceResolver createResourceResolver( URI publicId ) throws ModelException;
 
     /**
      * Creates a new JAXP schema instance of a given model.
@@ -980,6 +1017,21 @@ public abstract class ModelContext
     public abstract javax.xml.validation.Schema createSchema( String model ) throws ModelException;
 
     /**
+     * Creates a new JAXP schema instance for a given public identifier URI.
+     *
+     * @param publicId The public identifier URI to create a new JAXP schema instance for.
+     *
+     * @return A new JAXP schema instance for the public identifier URI {@code publicId}.
+     *
+     * @throws NullPointerException if {@code publicId} is {@code null}.
+     * @throws ModelException if creating a new JAXP schema instance fails.
+     *
+     * @see ModletObject#PUBLIC_ID
+     * @since 1.2
+     */
+    public abstract javax.xml.validation.Schema createSchema( URI publicId ) throws ModelException;
+
+    /**
      * Creates a new JAXB context instance of a given model.
      *
      * @param model The identifier of the model to create a new JAXB context instance of.
@@ -992,6 +1044,21 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract JAXBContext createContext( String model ) throws ModelException;
+
+    /**
+     * Creates a new JAXB context instance for a given public identifier URI.
+     *
+     * @param publicId The public identifier URI to create a new JAXB context instance for.
+     *
+     * @return A new JAXB context instance for the public identifier URI {@code publicId}.
+     *
+     * @throws NullPointerException if {@code publicId} is {@code null}.
+     * @throws ModelException if creating a new JAXB context instance fails.
+     *
+     * @see ModletObject#PUBLIC_ID
+     * @since 1.2
+     */
+    public abstract JAXBContext createContext( URI publicId ) throws ModelException;
 
     /**
      * Creates a new JAXB marshaller instance of a given model.
@@ -1008,6 +1075,21 @@ public abstract class ModelContext
     public abstract Marshaller createMarshaller( String model ) throws ModelException;
 
     /**
+     * Creates a new JAXB marshaller instance for a given public identifier URI.
+     *
+     * @param publicId The public identifier URI to create a new JAXB marshaller instance for.
+     *
+     * @return A new JAXB marshaller instance for the public identifier URI {@code publicId}.
+     *
+     * @throws NullPointerException if {@code publicId} is {@code null}.
+     * @throws ModelException if creating a new JAXB marshaller instance fails.
+     *
+     * @see ModletObject#PUBLIC_ID
+     * @since 1.2
+     */
+    public abstract Marshaller createMarshaller( URI publicId ) throws ModelException;
+
+    /**
      * Creates a new JAXB unmarshaller instance of a given model.
      *
      * @param model The identifier of the model to create a new JAXB unmarshaller instance of.
@@ -1020,6 +1102,21 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Unmarshaller createUnmarshaller( String model ) throws ModelException;
+
+    /**
+     * Creates a new JAXB unmarshaller instance for a given given public identifier URI.
+     *
+     * @param publicId The public identifier URI to create a new JAXB unmarshaller instance for.
+     *
+     * @return A new JAXB unmarshaller instance for the public identifier URI {@code publicId}.
+     *
+     * @throws NullPointerException if {@code publicId} is {@code null}.
+     * @throws ModelException if creating a new JAXB unmarshaller instance fails.
+     *
+     * @see ModletObject#PUBLIC_ID
+     * @since 1.2
+     */
+    public abstract Unmarshaller createUnmarshaller( URI publicId ) throws ModelException;
 
     /**
      * Processes a {@code Model}.

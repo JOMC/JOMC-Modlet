@@ -114,13 +114,6 @@ The 'Model' type defines attribute 'identifier' holding an identifier uniquely i
       <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
       <xsd:field xpath="@system-id"/>
     </xsd:key>
-    <xsd:key name="schemas-public-id-key">
-      <xsd:annotation>
-        <xsd:documentation xml:lang="en">Public id key of a schema from the list of modlets.</xsd:documentation>
-      </xsd:annotation>
-      <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
-      <xsd:field xpath="@public-id"/>
-    </xsd:key>
     <xsd:key name="services-identifier-class-key">
       <xsd:annotation>
         <xsd:documentation xml:lang="en">Identifier class key of a service from the list of modlets.</xsd:documentation>
@@ -178,13 +171,6 @@ of the modlet.
       <xsd:selector xpath="modlet:schema"/>
       <xsd:field xpath="@system-id"/>
     </xsd:key>
-    <xsd:key name="schema-public-id-key">
-      <xsd:annotation>
-        <xsd:documentation xml:lang="en">Public id key of a schema.</xsd:documentation>
-      </xsd:annotation>
-      <xsd:selector xpath="modlet:schema"/>
-      <xsd:field xpath="@public-id"/>
-    </xsd:key>
   </xsd:element>
   <xsd:complexType name="Schemas">
     <xsd:annotation>
@@ -216,8 +202,8 @@ schema. Attribute 'classpath-id' holds the Java classpath location of the refere
         <xsd:sequence>
           <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="public-id" type="modlet:Identifier" use="required"/>
-        <xsd:attribute name="system-id" type="modlet:Identifier" use="required"/>
+        <xsd:attribute name="public-id" type="modlet:URI" use="required"/>
+        <xsd:attribute name="system-id" type="modlet:URI" use="required"/>
         <xsd:attribute name="context-id" type="modlet:Identifier" use="optional"/>
         <xsd:attribute name="classpath-id" type="modlet:Identifier" use="optional"/>
       </xsd:extension>
@@ -294,6 +280,10 @@ schema. Attribute 'classpath-id' holds the Java classpath location of the refere
   <!-- ************************************************************************************************************* -->
   <xsd:simpleType name="String">
     <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <!-- ************************************************************************************************************* -->
+  <xsd:simpleType name="URI">
+    <xsd:restriction base="xsd:anyURI"/>
   </xsd:simpleType>
   <!-- ************************************************************************************************************* -->
   <xsd:simpleType name="Version">
