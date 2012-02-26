@@ -139,6 +139,19 @@
       </action>
     </release>
     <!-- *********************************************************************************************************** -->
-    <release version="2.0"/>
+    <release version="2.0">
+      <action dev="schulte2005" type="add"><![CDATA[Added the <code>jomc-modlet-2.0.xsd</code> schema deprecating
+      the <code>jomc-modlet-1.2.xsd</code> schema.]]>
+      </action>
+      <action dev="schulte2005" type="update"><![CDATA[Removed the <code>services-identifier-class-key</code> key from
+      the <code>modlets</code> element of the <code>jomc-modlet-2.0.xsd</code> schema.]]>
+      </action>
+      <action dev="schulte2005" type="update"><![CDATA[Removed the <code>service-identifier-class-key</code> key from
+      the <code>services</code> element of the <code>jomc-modlet-2.0.xsd</code> schema.]]>
+      </action>
+      <action dev="schulte2005" type="remove"><![CDATA[Removed the <code>jomc-modlet-1.2.xsd</code> schema deprecated
+      by the <code>jomc-modlet-2.0.xsd</code> schema.]]>
+      </action>
+    </release>
   </body>
 </document>
