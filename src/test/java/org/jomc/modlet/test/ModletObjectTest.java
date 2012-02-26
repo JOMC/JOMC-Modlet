@@ -58,13 +58,6 @@ public class ModletObjectTest
     {
 
         @Override
-        @SuppressWarnings( "deprecation" )
-        public JAXBElement getAnyElement( final List<Object> any, final String namespaceURI, final String localPart )
-        {
-            return super.getAnyElement( any, namespaceURI, localPart );
-        }
-
-        @Override
         public <T> JAXBElement<T> getAnyElement( final List<Object> any, final String namespaceURI,
                                                  final String localPart, final Class<T> type )
         {
@@ -88,17 +81,6 @@ public class ModletObjectTest
         final JAXBElement<Object> element = new JAXBElement<Object>( name, Object.class, null, null );
         any.add( element );
         any.add( element );
-
-        try
-        {
-            modletObject.getAnyElement( any, "http://jomc.org/modlet", "test" );
-            fail( "Expected 'IllegalStateException' not thrown." );
-        }
-        catch ( final IllegalStateException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
 
         try
         {

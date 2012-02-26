@@ -31,8 +31,6 @@
 package org.jomc.modlet;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -134,10 +132,6 @@ public abstract class ModelContext
 
     /** Default {@code http://jomc.org/model/modlet} namespace schema system id. */
     private static volatile String defaultModletSchemaSystemId;
-
-    /** Class name of the {@code ModelContext} implementation. */
-    @Deprecated
-    private static volatile String modelContextClassName;
 
     /** The attributes of the instance. */
     private final Map<String, Object> attributes = new HashMap<String, Object>();
@@ -806,123 +800,6 @@ public abstract class ModelContext
      * @since 1.2
      */
     public abstract Model findModel( Model model ) throws ModelException;
-
-    /**
-     * Gets the name of the class providing the default {@code ModelContext} implementation.
-     * <p>The name of the class providing the default {@code ModelContext} implementation returned by method
-     * {@link #createModelContext(java.lang.ClassLoader)} is controlled by system property
-     * {@code org.jomc.modlet.ModelContext.className}. If that property is not set, the name of the
-     * {@link org.jomc.modlet.DefaultModelContext} class is returned.</p>
-     *
-     * @return The name of the class providing the default {@code ModelContext} implementation.
-     *
-     * @see #setModelContextClassName(java.lang.String)
-     *
-     * @deprecated As of JOMC 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in version
-     * 2.0.
-     */
-    @Deprecated
-    public static String getModelContextClassName()
-    {
-        if ( modelContextClassName == null )
-        {
-            modelContextClassName = System.getProperty( "org.jomc.modlet.ModelContext.className",
-                                                        DefaultModelContext.class.getName() );
-
-        }
-
-        return modelContextClassName;
-    }
-
-    /**
-     * Sets the name of the class providing the default {@code ModelContext} implementation.
-     *
-     * @param value The new name of the class providing the default {@code ModelContext} implementation or {@code null}.
-     *
-     * @see #getModelContextClassName()
-     *
-     * @deprecated As of JOMC 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in version
-     * 2.0.
-     */
-    @Deprecated
-    public static void setModelContextClassName( final String value )
-    {
-        modelContextClassName = value;
-    }
-
-    /**
-     * Creates a new default {@code ModelContext} instance.
-     *
-     * @param classLoader The class loader to create a new default {@code ModelContext} instance with or {@code null},
-     * to create a new context using the platform's bootstrap class loader.
-     *
-     * @return A new {@code ModelContext} instance.
-     *
-     * @throws ModelException if creating a new {@code ModelContext} instance fails.
-     *
-     * @see #getModelContextClassName()
-     *
-     * @deprecated As of JOMC 1.2, replaced by method {@link ModelContextFactory#newModelContext(java.lang.ClassLoader)}.
-     * This method will be removed in version 2.0.
-     */
-    public static ModelContext createModelContext( final ClassLoader classLoader ) throws ModelException
-    {
-        if ( getModelContextClassName().equals( DefaultModelContext.class.getName() ) )
-        {
-            return new DefaultModelContext( classLoader );
-        }
-
-        try
-        {
-            final Class<?> clazz = Class.forName( getModelContextClassName(), false, classLoader );
-
-            if ( !ModelContext.class.isAssignableFrom( clazz ) )
-            {
-                throw new ModelException( getMessage( "illegalContextImplementation", getModelContextClassName(),
-                                                      ModelContext.class.getName() ) );
-
-            }
-
-            final Constructor<? extends ModelContext> ctor =
-                clazz.asSubclass( ModelContext.class ).getDeclaredConstructor( ClassLoader.class );
-
-            return ctor.newInstance( classLoader );
-        }
-        catch ( final ClassNotFoundException e )
-        {
-            throw new ModelException( getMessage( "contextClassNotFound", getModelContextClassName() ), e );
-        }
-        catch ( final NoSuchMethodException e )
-        {
-            throw new ModelException( getMessage( "contextConstructorNotFound", getModelContextClassName() ), e );
-        }
-        catch ( final InstantiationException e )
-        {
-            final String message = getMessage( e );
-            throw new ModelException( getMessage( "contextInstantiationException", getModelContextClassName(),
-                                                  message != null ? " " + message : "" ), e );
-
-        }
-        catch ( final IllegalAccessException e )
-        {
-            final String message = getMessage( e );
-            throw new ModelException( getMessage( "contextConstructorAccessDenied", getModelContextClassName(),
-                                                  message != null ? " " + message : "" ), e );
-
-        }
-        catch ( final InvocationTargetException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getTargetException() != null )
-            {
-                message = getMessage( e.getTargetException() );
-            }
-
-            throw new ModelException( getMessage( "contextConstructorException", getModelContextClassName(),
-                                                  message != null ? " " + message : "" ), e );
-
-        }
-    }
 
     /**
      * Creates a new service object.

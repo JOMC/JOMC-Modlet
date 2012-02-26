@@ -49,11 +49,8 @@ import org.jomc.modlet.ModletProvider;
 import org.jomc.modlet.Modlets;
 import org.jomc.modlet.Property;
 import org.jomc.modlet.Service;
-import org.jomc.modlet.test.support.ClassCastExceptionModelContext;
 import org.jomc.modlet.test.support.IllegalAccessExceptionModelContext;
 import org.jomc.modlet.test.support.InstantiationExceptionModelContext;
-import org.jomc.modlet.test.support.InvocationTargetExceptionModelContext;
-import org.jomc.modlet.test.support.NoSuchMethodExceptionModelContext;
 import org.jomc.modlet.test.support.TestModletProvider;
 import org.junit.Test;
 import org.w3c.dom.ls.LSInput;
@@ -450,106 +447,6 @@ public class ModelContextTest
         DefaultModletProvider.setDefaultEnabled( null );
         DefaultModletProvider.setDefaultModletLocation( null );
         this.getModelContext().setModlets( null );
-    }
-
-    @Test
-    @SuppressWarnings( "deprecation" )
-    public final void testCreateModelContext() throws Exception
-    {
-        ModelContext.setModelContextClassName( null );
-        assertNotNull( ModelContext.createModelContext( null ) );
-        assertNotNull( ModelContext.createModelContext( this.getClass().getClassLoader() ) );
-
-        ModelContext.setModelContextClassName( "DOES_NOT_EXIST" );
-
-        try
-        {
-            ModelContext.createModelContext( null );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        try
-        {
-            ModelContext.createModelContext( this.getClass().getClassLoader() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        ModelContext.setModelContextClassName( InstantiationExceptionModelContext.class.getName() );
-
-        try
-        {
-            ModelContext.createModelContext( this.getClass().getClassLoader() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        ModelContext.setModelContextClassName( IllegalAccessExceptionModelContext.class.getName() );
-
-        try
-        {
-            ModelContext.createModelContext( this.getClass().getClassLoader() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        ModelContext.setModelContextClassName( ClassCastExceptionModelContext.class.getName() );
-
-        try
-        {
-            ModelContext.createModelContext( this.getClass().getClassLoader() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        ModelContext.setModelContextClassName( NoSuchMethodExceptionModelContext.class.getName() );
-
-        try
-        {
-            ModelContext.createModelContext( this.getClass().getClassLoader() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        ModelContext.setModelContextClassName( InvocationTargetExceptionModelContext.class.getName() );
-
-        try
-        {
-            ModelContext.createModelContext( this.getClass().getClassLoader() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        ModelContext.setModelContextClassName( null );
     }
 
     @Test
