@@ -29,7 +29,7 @@
  *
  */
 @XmlSchema( namespace = "http://jomc.org/modlet", elementFormDefault = XmlNsForm.QUALIFIED,
-            location = "http://jomc.sourceforge.net/modlet/jomc-modlet-2.0.xsd", xmlns =
+            location = "http://jomc.sourceforge.net/modlet/jomc-modlet-1.3.xsd", xmlns =
 {
     @XmlNs( prefix = "modlet", namespaceURI = "http://jomc.org/modlet" )
 } )

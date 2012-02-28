@@ -51,7 +51,7 @@ System Properties Reference
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.ModelContext.defaultLogLevel>>> | <<<java.util.logging.Level>>> | <<<WARNING>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
-| <<<org.jomc.modlet.ModelContext.defaultModletSchemaSystemId>>> | <<<java.lang.String>>> | <<<http://jomc.sourceforge.net/modlet/jomc-modlet-2.0.xsd>>> |
+| <<<org.jomc.modlet.ModelContext.defaultModletSchemaSystemId>>> | <<<java.lang.String>>> | <<<http://jomc.sourceforge.net/modlet/jomc-modlet-1.3.xsd>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.ModelContextFactory>>> | <<<java.lang.String>>> | <<<org.jomc.modlet.DefaultModelContextFactory>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
