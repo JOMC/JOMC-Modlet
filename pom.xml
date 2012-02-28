@@ -52,7 +52,7 @@
         <directory>src/main/schemas</directory>
         <targetPath>org/jomc/modlet</targetPath>
         <includes>
-          <include>jomc-modlet-1.2.xsd</include>
+          <include>jomc-modlet-1.3.xsd</include>
         </includes>
       </resource>
       <resource>
@@ -130,6 +130,13 @@
                     <groupId>org.jomc</groupId>
                     <artifactId>jomc-modlet</artifactId>
                     <version>1.0</version>
+                    <classifier>schemas</classifier>
+                    <outputDirectory>${project.build.directory}/deprecated-schemas</outputDirectory>
+                  </artifactItem>
+                  <artifactItem>
+                    <groupId>org.jomc</groupId>
+                    <artifactId>jomc-modlet</artifactId>
+                    <version>1.2</version>
                     <classifier>schemas</classifier>
                     <outputDirectory>${project.build.directory}/deprecated-schemas</outputDirectory>
                   </artifactItem>

@@ -37,7 +37,7 @@
                xmlns:ci="http://jaxb.dev.java.net/plugin/code-injector"
                version="2.0">
 
-  <jaxb:bindings schemaLocation="jomc-modlet-1.2.xsd">
+  <jaxb:bindings schemaLocation="jomc-modlet-1.3.xsd">
     <!-- *********************************************************************************************************** -->
     <jaxb:bindings node="xs:complexType[@name='ModletObject']">
       <ci:code><![CDATA[
