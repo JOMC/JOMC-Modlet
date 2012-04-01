@@ -139,6 +139,14 @@
       </action>
     </release>
     <!-- *********************************************************************************************************** -->
+    <release version="1.2.1" date="2012-04-01">
+      <action dev="schulte2005" type="fix"><![CDATA[Updated methods <code>createEntityResolver(java.lang.String)</code>,
+      <code>createEntityResolver(java.net.URI)</code>, <code>createResourceResolver(java.lang.String)</code> and
+      <code>createResourceResolver(java.net.URI)</code> of class <code>org.jomc.modlet.DefaultModelContext</code> to
+      correctly resolve schema resources from the classpath instead of opening remote connections.]]>
+      </action>
+    </release>
+    <!-- *********************************************************************************************************** -->
     <release version="2.0">
       <action dev="schulte2005" type="add"><![CDATA[Added the <code>jomc-modlet-1.3.xsd</code> schema deprecating
       the <code>jomc-modlet-1.2.xsd</code> schema.]]>
