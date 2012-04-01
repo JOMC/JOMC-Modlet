@@ -1448,7 +1448,8 @@ public class DefaultModelContext extends ModelContext
 
                             for ( URI uri : getSchemaResources() )
                             {
-                                if ( uri.getPath() != null && uri.getPath().endsWith( schemaName ) )
+                                if ( uri.getSchemeSpecificPart() != null
+                                     && uri.getSchemeSpecificPart().endsWith( schemaName ) )
                                 {
                                     schemaSource = new InputSource();
                                     schemaSource.setPublicId( publicId );
