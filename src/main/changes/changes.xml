@@ -147,7 +147,7 @@
       </action>
     </release>
     <!-- *********************************************************************************************************** -->
-    <release version="1.3">
+    <release version="1.3" date="2012-06-03">
       <action dev="schulte2005" type="add"><![CDATA[Added the <code>jomc-modlet-1.3.xsd</code> schema deprecating
       the <code>jomc-modlet-1.2.xsd</code> schema.]]>
       </action>
