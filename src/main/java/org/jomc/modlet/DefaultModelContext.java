@@ -82,7 +82,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Default {@code ModelContext} implementation.
  *
- * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
  * @see ModelContextFactory
  */
@@ -2127,7 +2127,7 @@ public class DefaultModelContext extends ModelContext
 /**
  * {@code ErrorHandler} collecting {@code ModelValidationReport} details.
  *
- * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
  */
 class ModelErrorHandler extends DefaultHandler
@@ -2244,7 +2244,7 @@ class ModelErrorHandler extends DefaultHandler
 /**
  * List of {@code Marshaller.Listener}s.
  *
- * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
  * @since 1.2
  */
@@ -2301,7 +2301,7 @@ class MarshallerListenerList extends Marshaller.Listener
 /**
  * List of {@code Unmarshaller.Listener}s.
  *
- * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
  * @since 1.2
  */

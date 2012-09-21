@@ -33,7 +33,7 @@ package org.jomc.modlet;
 /**
  * Gets thrown whenever a {@code ModelContextFactory} fails to operate.
  *
- * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
  * @see ModelContextFactory
  * @since 1.2
