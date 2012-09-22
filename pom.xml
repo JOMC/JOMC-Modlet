@@ -210,9 +210,9 @@
               <configuration>
                 <fromDir>${basedir}/src/main/schemas</fromDir>
                 <includes>*.xsd</includes>
-                <serverId>jomc.sourceforge.net</serverId>
+                <serverId>${jomc.xsd.distribution.id}</serverId>
                 <toDir>modlet</toDir>
-                <url>${jomc.artifacts.distribution.base.url}</url>
+                <url>${jomc.xsd.distribution.url}</url>
               </configuration>
             </execution>
           </executions>
@@ -220,6 +220,10 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.jvnet.jaxb2.maven2</groupId>
         <artifactId>maven-jaxb21-plugin</artifactId>
@@ -239,8 +243,8 @@
   </dependencies>
   <distributionManagement>
     <site>
-      <id>jomc.sourceforge.net</id>
-      <name>JOMC Site</name>
+      <id>${jomc.artifacts.distribution.id}</id>
+      <name>${jomc.artifacts.distribution.name}</name>
       <url>${jomc.artifacts.distribution.url}/${project.artifactId}-${project.version}</url>
     </site>
   </distributionManagement>

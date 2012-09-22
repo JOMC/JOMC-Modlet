@@ -79,7 +79,7 @@ import org.xml.sax.SAXException;
  * <li>{@link #validateModel(java.lang.String, javax.xml.transform.Source) }</li>
  * </ul>
  *
- * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a>
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
  *
  * @see ModelContextFactory
@@ -121,7 +121,7 @@ public abstract class ModelContext
      * @see #getDefaultModletSchemaSystemId()
      */
     private static final String DEFAULT_MODLET_SCHEMA_SYSTEM_ID =
-        "http://jomc.sourceforge.net/modlet/jomc-modlet-1.3.xsd";
+        "http://xml.jomc.org/modlet/jomc-modlet-1.3.xsd";
 
     /**
      * Log level events are logged at by default.
@@ -352,7 +352,7 @@ public abstract class ModelContext
      * Gets the default {@code http://jomc.org/modlet} namespace schema system id.
      * <p>The default {@code http://jomc.org/modlet} namespace schema system id is controlled by system property
      * {@code org.jomc.modlet.ModelContext.defaultModletSchemaSystemId} holding a system id URI.
-     * If that property is not set, the {@code http://jomc.sourceforge.net/modlet/jomc-modlet-1.2.xsd} default is
+     * If that property is not set, the {@code http://xml.jomc.org/modlet/jomc-modlet-1.3.xsd} default is
      * returned.</p>
      *
      * @return The default system id of the {@code http://jomc.org/modlet} namespace schema.

@@ -36,7 +36,7 @@ import javax.xml.bind.Unmarshaller;
 /**
  * {@code Unmarshaller.Listener} test implementation.
  *
- * @author <a href="mailto:schulte2005@users.sourceforge.net">Christian Schulte</a> 1.0
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a> 1.0
  * @version $JOMC$
  */
 public final class TestUnmarshallerListener extends Unmarshaller.Listener
