@@ -1115,6 +1115,7 @@ public class DefaultModelContext extends ModelContext
 
             final Class<?> propertyType = getterMethod.getReturnType();
             Class<?> boxedPropertyType = propertyType;
+            Class<?> unboxedPropertyType = propertyType;
 
             if ( Boolean.TYPE.equals( propertyType ) )
             {
@@ -1149,11 +1150,44 @@ public class DefaultModelContext extends ModelContext
                 boxedPropertyType = Double.class;
             }
 
+            if ( Boolean.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Boolean.TYPE;
+            }
+            else if ( Character.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Character.TYPE;
+            }
+            else if ( Byte.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Byte.TYPE;
+            }
+            else if ( Short.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Short.TYPE;
+            }
+            else if ( Integer.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Integer.TYPE;
+            }
+            else if ( Long.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Long.TYPE;
+            }
+            else if ( Float.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Float.TYPE;
+            }
+            else if ( Double.class.equals( propertyType ) )
+            {
+                unboxedPropertyType = Double.TYPE;
+            }
+
             Method setterMethod = null;
 
             try
             {
-                setterMethod = object.getClass().getMethod( "set" + methodNameSuffix, propertyType );
+                setterMethod = object.getClass().getMethod( "set" + methodNameSuffix, boxedPropertyType );
             }
             catch ( final NoSuchMethodException e )
             {
@@ -1163,6 +1197,23 @@ public class DefaultModelContext extends ModelContext
                 }
 
                 setterMethod = null;
+            }
+
+            if ( setterMethod == null && !boxedPropertyType.equals( unboxedPropertyType ) )
+            {
+                try
+                {
+                    setterMethod = object.getClass().getMethod( "set" + methodNameSuffix, unboxedPropertyType );
+                }
+                catch ( final NoSuchMethodException e )
+                {
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, null, e );
+                    }
+
+                    setterMethod = null;
+                }
             }
 
             if ( setterMethod == null )
@@ -1187,7 +1238,7 @@ public class DefaultModelContext extends ModelContext
 
             if ( propertyValue != null )
             {
-                if ( propertyType.equals( String.class ) )
+                if ( boxedPropertyType.equals( String.class ) )
                 {
                     setterMethod.invoke( object, propertyValue );
                     return;
@@ -1213,8 +1264,8 @@ public class DefaultModelContext extends ModelContext
                     final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
 
                     if ( Modifier.isStatic( valueOf.getModifiers() )
-                         && ( valueOf.getReturnType().equals( propertyType )
-                              || valueOf.getReturnType().equals( boxedPropertyType ) ) )
+                         && ( valueOf.getReturnType().equals( boxedPropertyType )
+                              || valueOf.getReturnType().equals( unboxedPropertyType ) ) )
                     {
                         setterMethod.invoke( object, valueOf.invoke( null, propertyValue ) );
                         return;
