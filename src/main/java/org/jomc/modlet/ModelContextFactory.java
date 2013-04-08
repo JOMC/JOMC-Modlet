@@ -160,7 +160,12 @@ public abstract class ModelContextFactory
 
     private static String getMessage( final Throwable t )
     {
-        return t != null ? t.getMessage() != null ? t.getMessage() : getMessage( t.getCause() ) : null;
+        return t != null
+               ? t.getMessage() != null && t.getMessage().trim().length() > 0
+                 ? t.getMessage()
+                 : getMessage( t.getCause() )
+               : null;
+
     }
 
 }
