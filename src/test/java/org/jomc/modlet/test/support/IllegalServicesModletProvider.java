@@ -30,6 +30,8 @@
  */
 package org.jomc.modlet.test.support;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModelProcessor;
@@ -55,8 +57,24 @@ public final class IllegalServicesModletProvider implements ModletProvider
         super();
     }
 
+    public int getOrdinal()
+    {
+        return 30;
+    }
+
+    @SuppressWarnings( "deprecation" )
     public Modlets findModlets( final ModelContext context ) throws ModelException
     {
+        List<Class> sortedProviders = (List<Class>) context.getAttribute( "SORTING_TEST" );
+
+        if ( sortedProviders == null )
+        {
+            sortedProviders = new LinkedList<Class>();
+            context.setAttribute( "SORTING_TEST", sortedProviders );
+        }
+
+        sortedProviders.add( this.getClass() );
+
         final Modlets modlets = new Modlets();
         final Modlet modlet = new Modlet();
         modlets.getModlet().add( modlet );
@@ -91,6 +109,13 @@ public final class IllegalServicesModletProvider implements ModletProvider
 
         context.setAttribute( IllegalServicesModletProvider.class.getName(), this );
         return modlets;
+    }
+
+    public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
+    {
+        final Modlets provided = modlets.clone();
+        provided.getModlet().addAll( this.findModlets( context ).getModlet() );
+        return provided;
     }
 
 }

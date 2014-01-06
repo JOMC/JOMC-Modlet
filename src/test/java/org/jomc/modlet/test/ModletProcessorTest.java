@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) Christian Schulte, 2005-206
+ *   Copyright (C) Christian Schulte, 2013-005
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,68 +30,68 @@
  */
 package org.jomc.modlet.test;
 
-import org.jomc.modlet.DefaultModletProvider;
+import org.jomc.modlet.DefaultModletProcessor;
 import org.jomc.modlet.ModelContextFactory;
-import org.jomc.modlet.ModletProvider;
+import org.jomc.modlet.ModletProcessor;
 import org.jomc.modlet.Modlets;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
- * Test cases for {@code org.jomc.modlet.ModletProvider} implementations.
+ * Test cases for {@code org.jomc.modlet.ModletProcessor} implementations.
  *
- * @author <a href="mailto:cs@schulte.it">Christian Schulte</a> 1.0
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
+ * @since 1.6
  */
-public class ModletProviderTest
+public class ModletProcessorTest
 {
 
-    /** The {@code ModletProvider} instance tests are performed with. */
-    private ModletProvider modletProvider;
+    /** The {@code ModletProcessor} instance tests are performed with. */
+    private ModletProcessor modletProcessor;
 
-    /** Creates a new {@code ModletProviderTest} instance. */
-    public ModletProviderTest()
+    /** Creates a new {@code ModletProcessorTest} instance. */
+    public ModletProcessorTest()
     {
         super();
     }
 
     /**
-     * Gets the {@code ModletProvider} instance tests are performed with.
+     * Gets the {@code ModletProcessor} instance tests are performed with.
      *
-     * @return The {@code ModletProvider} instance tests are performed with.
+     * @return The {@code ModletProcessor} instance tests are performed with.
      *
      * @see #newModletProvider()
      */
-    public ModletProvider getModletProvider()
+    public ModletProcessor getModletProcessor()
     {
-        if ( this.modletProvider == null )
+        if ( this.modletProcessor == null )
         {
-            this.modletProvider = this.newModletProvider();
+            this.modletProcessor = this.newModletProcessor();
         }
 
-        return this.modletProvider;
+        return this.modletProcessor;
     }
 
     /**
-     * Creates a new {@code ModletProvider} instance to test.
+     * Creates a new {@code ModletProcessor} instance to test.
      *
-     * @return A new {@code ModletProvider} instance to test.
+     * @return A new {@code ModletProcessor} instance to test.
      *
-     * @see #getModletProvider()
+     * @see #getModletProcessor()
      */
-    protected ModletProvider newModletProvider()
+    protected ModletProcessor newModletProcessor()
     {
-        return new DefaultModletProvider();
+        return new DefaultModletProcessor();
     }
 
     @Test
-    @SuppressWarnings( "deprecation" )
-    public final void testFindModlets() throws Exception
+    public final void testProcessModlets() throws Exception
     {
         try
         {
-            this.getModletProvider().findModlets( null );
+            this.getModletProcessor().processModlets( null, new Modlets() );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -102,18 +102,7 @@ public class ModletProviderTest
 
         try
         {
-            this.getModletProvider().findModlets( null, new Modlets() );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModletProvider().findModlets( ModelContextFactory.newInstance().newModelContext(), null );
+            this.getModletProcessor().processModlets( ModelContextFactory.newInstance().newModelContext(), null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )

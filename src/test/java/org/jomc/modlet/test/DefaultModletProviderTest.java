@@ -84,7 +84,7 @@ public class DefaultModletProviderTest extends ModletProviderTest
 
         try
         {
-            this.getModletProvider().findModlets( ModelContextFactory.newInstance().newModelContext(), null );
+            this.getModletProvider().findModlets( ModelContextFactory.newInstance().newModelContext(), (String) null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
