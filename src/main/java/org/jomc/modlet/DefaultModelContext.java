@@ -363,8 +363,7 @@ public class DefaultModelContext extends ModelContext
     @Deprecated
     public Modlets findModlets() throws ModelException
     {
-        this.setModlets( null );
-        return this.getModlets();
+        return this.findModlets( new Modlets() );
     }
 
     /**
