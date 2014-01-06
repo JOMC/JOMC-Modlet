@@ -356,12 +356,37 @@ public class DefaultModelContext extends ModelContext
      * @see #getProviderLocation()
      * @see #getPlatformProviderLocation()
      * @see ModletProvider#findModlets(org.jomc.modlet.ModelContext)
+     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
+     * removed in JOMC 2.0.
      */
     @Override
+    @Deprecated
     public Modlets findModlets() throws ModelException
     {
-        final Modlets modlets = new Modlets();
-        final Collection<ModletProvider> providers = this.loadProviders( ModletProvider.class );
+        this.setModlets( null );
+        return this.getModlets();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>This method loads {@code ModletProvider} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ModletProvider} resources to return a list of {@code Modlets}.</p>
+     *
+     * @see #getProviderLocation()
+     * @see #getPlatformProviderLocation()
+     * @see ModletProvider#findModlets(org.jomc.modlet.ModelContext)
+     * @since 1.6
+     */
+    @Override
+    public Modlets findModlets( final Modlets modlets ) throws ModelException
+    {
+        if ( modlets == null )
+        {
+            throw new NullPointerException( "modlets" );
+        }
+
+        Modlets found = modlets.clone();
+        final Collection<ModletProvider> providers = this.loadModletServices( ModletProvider.class );
 
         for ( ModletProvider provider : providers )
         {
@@ -370,52 +395,91 @@ public class DefaultModelContext extends ModelContext
                 this.log( Level.FINER, getMessage( "creatingModlets", provider.toString() ), null );
             }
 
-            final Modlets provided = provider.findModlets( this );
+            final Modlets provided = provider.findModlets( this, found );
 
             if ( provided != null )
             {
-                if ( this.isLoggable( Level.FINEST ) )
-                {
-                    for ( Modlet m : provided.getModlet() )
-                    {
-                        this.log( Level.FINEST,
-                                  getMessage( "modletInfo", m.getName(), m.getModel(),
-                                              m.getVendor() != null
-                                              ? m.getVendor() : getMessage( "noVendor" ),
-                                              m.getVersion() != null
-                                              ? m.getVersion() : getMessage( "noVersion" ) ), null );
-
-                        if ( m.getSchemas() != null )
-                        {
-                            for ( Schema s : m.getSchemas().getSchema() )
-                            {
-                                this.log( Level.FINEST,
-                                          getMessage( "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
-                                                      s.getContextId() != null
-                                                      ? s.getContextId() : getMessage( "noContext" ),
-                                                      s.getClasspathId() != null
-                                                      ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
-
-                            }
-                        }
-
-                        if ( m.getServices() != null )
-                        {
-                            for ( Service s : m.getServices().getService() )
-                            {
-                                this.log( Level.FINEST, getMessage( "modletServiceInfo", m.getName(), s.getOrdinal(),
-                                                                    s.getIdentifier(), s.getClazz() ), null );
-
-                            }
-                        }
-                    }
-                }
-
-                modlets.getModlet().addAll( provided.getModlet() );
+                found = provided;
             }
         }
 
-        return modlets;
+        if ( this.isLoggable( Level.FINEST ) )
+        {
+            for ( Modlet m : found.getModlet() )
+            {
+                this.log( Level.FINEST,
+                          getMessage( "modletInfo", m.getName(), m.getModel(),
+                                      m.getVendor() != null
+                                      ? m.getVendor() : getMessage( "noVendor" ),
+                                      m.getVersion() != null
+                                      ? m.getVersion() : getMessage( "noVersion" ) ), null );
+
+                if ( m.getSchemas() != null )
+                {
+                    for ( Schema s : m.getSchemas().getSchema() )
+                    {
+                        this.log( Level.FINEST,
+                                  getMessage( "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
+                                              s.getContextId() != null
+                                              ? s.getContextId() : getMessage( "noContext" ),
+                                              s.getClasspathId() != null
+                                              ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
+
+                    }
+                }
+
+                if ( m.getServices() != null )
+                {
+                    for ( Service s : m.getServices().getService() )
+                    {
+                        this.log( Level.FINEST, getMessage( "modletServiceInfo", m.getName(), s.getOrdinal(),
+                                                            s.getIdentifier(), s.getClazz() ), null );
+
+                    }
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>This method loads {@code ModletProcessor} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ModletProcessor} resources to process a list of {@code Modlets}.</p>
+     *
+     * @see #getProviderLocation()
+     * @see #getPlatformProviderLocation()
+     * @see ModletProcessor#processModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
+     * @since 1.6
+     */
+    @Override
+    public Modlets processModlets( final Modlets modlets ) throws ModelException
+    {
+        if ( modlets == null )
+        {
+            throw new NullPointerException( "modlets" );
+        }
+
+        Modlets result = modlets.clone();
+        final Collection<ModletProcessor> processors = this.loadModletServices( ModletProcessor.class );
+
+        for ( final ModletProcessor processor : processors )
+        {
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                this.log( Level.FINER, getMessage( "processingModlets", processor.toString() ), null );
+            }
+
+            final Modlets processed = processor.processModlets( this, result );
+
+            if ( processed != null )
+            {
+                result = processed;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -820,12 +884,12 @@ public class DefaultModelContext extends ModelContext
         return modelErrorHandler.getReport();
     }
 
-    private <T> Collection<T> loadProviders( final Class<T> providerClass ) throws ModelException
+    private <T> Collection<T> loadModletServices( final Class<T> serviceClass ) throws ModelException
     {
         try
         {
-            final String providerNamePrefix = providerClass.getName() + ".";
-            final Map<String, T> providers = new TreeMap<String, T>( new Comparator<String>()
+            final String serviceNamePrefix = serviceClass.getName() + ".";
+            final Map<String, T> sortedPlatformServices = new TreeMap<String, T>( new Comparator<String>()
             {
 
                 public int compare( final String key1, final String key2 )
@@ -835,13 +899,13 @@ public class DefaultModelContext extends ModelContext
 
             } );
 
-            final File platformProviders = new File( this.getPlatformProviderLocation() );
+            final File platformServices = new File( this.getPlatformProviderLocation() );
 
-            if ( platformProviders.exists() )
+            if ( platformServices.exists() )
             {
                 if ( this.isLoggable( Level.FINEST ) )
                 {
-                    this.log( Level.FINEST, getMessage( "processing", platformProviders.getAbsolutePath() ), null );
+                    this.log( Level.FINEST, getMessage( "processing", platformServices.getAbsolutePath() ), null );
                 }
 
                 InputStream in = null;
@@ -850,7 +914,7 @@ public class DefaultModelContext extends ModelContext
 
                 try
                 {
-                    in = new FileInputStream( platformProviders );
+                    in = new FileInputStream( platformServices );
                     p.load( in );
                     suppressExceptionOnClose = false;
                 }
@@ -878,35 +942,36 @@ public class DefaultModelContext extends ModelContext
 
                 for ( Map.Entry<Object, Object> e : p.entrySet() )
                 {
-                    if ( e.getKey().toString().startsWith( providerNamePrefix ) )
+                    if ( e.getKey().toString().startsWith( serviceNamePrefix ) )
                     {
                         final String configuration = e.getValue().toString();
 
                         if ( this.isLoggable( Level.FINEST ) )
                         {
-                            this.log( Level.FINEST, getMessage( "providerInfo", platformProviders.getAbsolutePath(),
-                                                                providerClass.getName(), configuration ), null );
+                            this.log( Level.FINEST, getMessage( "serviceInfo", platformServices.getAbsolutePath(),
+                                                                serviceClass.getName(), configuration ), null );
 
                         }
 
-                        providers.put( e.getKey().toString(),
-                                       this.createProviderObject( providerClass, configuration,
-                                                                  platformProviders.toURI().toURL() ) );
+                        sortedPlatformServices.put( e.getKey().toString(),
+                                                    this.createServiceObject( serviceClass, configuration,
+                                                                              platformServices.toURI().toURL() ) );
 
                     }
                 }
             }
 
-            final Enumeration<URL> classpathProviders =
-                this.findResources( this.getProviderLocation() + '/' + providerClass.getName() );
+            final Enumeration<URL> classpathServices =
+                this.findResources( this.getProviderLocation() + '/' + serviceClass.getName() );
 
             int count = 0;
             final long t0 = System.currentTimeMillis();
+            final Map<Integer, T> sortedClasspathServices = new TreeMap<Integer, T>();
 
-            while ( classpathProviders.hasMoreElements() )
+            while ( classpathServices.hasMoreElements() )
             {
                 count++;
-                final URL url = classpathProviders.nextElement();
+                final URL url = classpathServices.nextElement();
 
                 if ( this.isLoggable( Level.FINEST ) )
                 {
@@ -930,14 +995,29 @@ public class DefaultModelContext extends ModelContext
 
                         if ( this.isLoggable( Level.FINEST ) )
                         {
-                            this.log( Level.FINEST, getMessage( "providerInfo", url.toExternalForm(),
-                                                                providerClass.getName(), line ), null );
+                            this.log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
+                                                                serviceClass.getName(), line ), null );
 
                         }
 
-                        providers.put( providerNamePrefix + providers.size(),
-                                       this.createProviderObject( providerClass, line, url ) );
+                        final T serviceObject = this.createServiceObject( serviceClass, line, url );
 
+                        if ( serviceObject instanceof ModletProvider )
+                        {
+                            sortedClasspathServices.put( ( (ModletProvider) serviceObject ).getOrdinal(),
+                                                         serviceObject );
+
+                        }
+                        else if ( serviceObject instanceof ModletProcessor )
+                        {
+                            sortedClasspathServices.put( ( (ModletProcessor) serviceObject ).getOrdinal(),
+                                                         serviceObject );
+
+                        }
+                        else
+                        {
+                            sortedClasspathServices.put( sortedClasspathServices.size(), serviceObject );
+                        }
                     }
 
                     suppressExceptionOnClose = false;
@@ -968,12 +1048,18 @@ public class DefaultModelContext extends ModelContext
             if ( this.isLoggable( Level.FINE ) )
             {
                 this.log( Level.FINE, getMessage( "contextReport", count,
-                                                  this.getProviderLocation() + '/' + providerClass.getName(),
+                                                  this.getProviderLocation() + '/' + serviceClass.getName(),
                                                   Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
 
             }
 
-            return providers.values();
+            final List<T> services =
+                new ArrayList<T>( sortedPlatformServices.size() + sortedClasspathServices.size() );
+
+            services.addAll( sortedPlatformServices.values() );
+            services.addAll( sortedClasspathServices.values() );
+
+            return services;
         }
         catch ( final IOException e )
         {
@@ -981,7 +1067,7 @@ public class DefaultModelContext extends ModelContext
         }
     }
 
-    private <T> T createProviderObject( final Class<T> providerClass, final String configuration, final URL location )
+    private <T> T createServiceObject( final Class<T> serviceClass, final String configuration, final URL location )
         throws ModelException
     {
         String className = configuration;
@@ -1016,23 +1102,23 @@ public class DefaultModelContext extends ModelContext
                 }
             }
 
-            final Class<?> provider = this.findClass( className );
+            final Class<?> service = this.findClass( className );
 
-            if ( provider == null )
+            if ( service == null )
             {
-                throw new ModelException( getMessage( "implementationNotFound", providerClass.getName(), className,
+                throw new ModelException( getMessage( "implementationNotFound", serviceClass.getName(), className,
                                                       location.toExternalForm() ) );
 
             }
 
-            if ( !providerClass.isAssignableFrom( provider ) )
+            if ( !serviceClass.isAssignableFrom( service ) )
             {
-                throw new ModelException( getMessage( "illegalImplementation", providerClass.getName(), className,
+                throw new ModelException( getMessage( "illegalImplementation", serviceClass.getName(), className,
                                                       location.toExternalForm() ) );
 
             }
 
-            final T o = provider.asSubclass( providerClass ).newInstance();
+            final T o = service.asSubclass( serviceClass ).newInstance();
 
             for ( final Map.Entry<String, String> property : properties.entrySet() )
             {

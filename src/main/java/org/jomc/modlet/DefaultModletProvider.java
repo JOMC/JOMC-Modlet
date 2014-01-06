@@ -46,14 +46,14 @@ import javax.xml.bind.Unmarshaller;
  *
  * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
- * @see ModelContext#findModlets()
+ * @see ModelContext#findModlets(org.jomc.modlet.Modlets)
  */
 public class DefaultModletProvider implements ModletProvider
 {
 
     /**
      * Constant for the name of the model context attribute backing property {@code enabled}.
-     * @see #findModlets(org.jomc.modlet.ModelContext)
+     * @see #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
      * @see ModelContext#getAttribute(java.lang.String)
      * @since 1.2
      */
@@ -82,7 +82,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Constant for the name of the model context attribute backing property {@code modletLocation}.
-     * @see #findModlets(org.jomc.modlet.ModelContext)
+     * @see #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
      * @see ModelContext#getAttribute(java.lang.String)
      * @since 1.2
      */
@@ -144,6 +144,33 @@ public class DefaultModletProvider implements ModletProvider
      * @since 1.2
      */
     private Boolean validating;
+
+    /**
+     * Constant for the name of the system property controlling property {@code defaultOrdinal}.
+     * @see #getDefaultOrdinal()
+     * @since 1.6
+     */
+    private static final String DEFAULT_ORDINAL_PROPERTY_NAME =
+        "org.jomc.modlet.DefaultModletProvider.defaultOrdinal";
+
+    /**
+     * Default value of the ordinal number of the provider.
+     * @see #getDefaultOrdinal()
+     * @since 1.6
+     */
+    private static final Integer DEFAULT_ORDINAL = 0;
+
+    /**
+     * Default ordinal number of the provider.
+     * @since 1.6
+     */
+    private static volatile Integer defaultOrdinal;
+
+    /**
+     * Ordinal number of the provider.
+     * @since 1.6
+     */
+    private Integer ordinal;
 
     /** Creates a new {@code DefaultModletProvider} instance. */
     public DefaultModletProvider()
@@ -359,6 +386,76 @@ public class DefaultModletProvider implements ModletProvider
     }
 
     /**
+     * Gets the default ordinal number of the provider.
+     * <p>The default ordinal number is controlled by system property
+     * {@code org.jomc.modlet.DefaultModletProvider.defaultOrdinal} holding the default ordinal number of the provider.
+     * If that property is not set, the {@code 0} default is returned.</p>
+     *
+     * @return The default ordinal number of the provider.
+     *
+     * @see #setDefaultOrdinal(java.lang.Integer)
+     *
+     * @since 1.6
+     */
+    public static int getDefaultOrdinal()
+    {
+        if ( defaultOrdinal == null )
+        {
+            defaultOrdinal = Integer.getInteger( DEFAULT_ORDINAL_PROPERTY_NAME, DEFAULT_ORDINAL );
+        }
+
+        return defaultOrdinal;
+    }
+
+    /**
+     * Sets the default ordinal number of the provider.
+     *
+     * @param value The new default ordinal number of the provider or {@code null}.
+     *
+     * @see #getDefaultOrdinal()
+     *
+     * @since 1.6
+     */
+    public static void setDefaultOrdinal( final Integer value )
+    {
+        defaultOrdinal = value;
+    }
+
+    /**
+     * Gets the ordinal number of the provider.
+     *
+     * @return The ordinal number of the provider.
+     *
+     * @see #getDefaultOrdinal()
+     * @see #setOrdinal(java.lang.Integer)
+     *
+     * @since 1.6
+     */
+    public final int getOrdinal()
+    {
+        if ( this.ordinal == null )
+        {
+            this.ordinal = getDefaultOrdinal();
+        }
+
+        return this.ordinal;
+    }
+
+    /**
+     * Sets the ordinal number of the provider.
+     *
+     * @param value The new ordinal number of the provider or {@code null}.
+     *
+     * @see #getOrdinal()
+     *
+     * @since 1.6
+     */
+    public final void setOrdinal( final Integer value )
+    {
+        this.ordinal = value;
+    }
+
+    /**
      * Searches a given context for {@code Modlets}.
      *
      * @param context The context to search for {@code Modlets}.
@@ -485,7 +582,10 @@ public class DefaultModletProvider implements ModletProvider
      * @see #findModlets(org.jomc.modlet.ModelContext, java.lang.String)
      * @see #ENABLED_ATTRIBUTE_NAME
      * @see #MODLET_LOCATION_ATTRIBUTE_NAME
+     * @deprecated As of JOMC 1.6, this method has been replaced by {@link #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)}.
+     * This method will be removed in JOMC 2.0.
      */
+    @Deprecated
     public Modlets findModlets( final ModelContext context ) throws ModelException
     {
         if ( context == null )
@@ -493,7 +593,34 @@ public class DefaultModletProvider implements ModletProvider
             throw new NullPointerException( "context" );
         }
 
-        Modlets found = null;
+        return this.findModlets( context, new Modlets() );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found or the provider
+     * is disabled.
+     *
+     * @see #isEnabled()
+     * @see #getModletLocation()
+     * @see #findModlets(org.jomc.modlet.ModelContext, java.lang.String)
+     * @see #ENABLED_ATTRIBUTE_NAME
+     * @see #MODLET_LOCATION_ATTRIBUTE_NAME
+     * @since 1.6
+     */
+    public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
+    {
+        if ( context == null )
+        {
+            throw new NullPointerException( "context" );
+        }
+        if ( modlets == null )
+        {
+            throw new NullPointerException( "context" );
+        }
+
+        Modlets provided = null;
 
         boolean contextEnabled = this.isEnabled();
         if ( DEFAULT_ENABLED == contextEnabled && context.getAttribute( ENABLED_ATTRIBUTE_NAME ) instanceof Boolean )
@@ -510,14 +637,20 @@ public class DefaultModletProvider implements ModletProvider
 
         if ( contextEnabled )
         {
-            found = this.findModlets( context, contextModletLocation );
+            final Modlets found = this.findModlets( context, contextModletLocation );
+
+            if ( found != null )
+            {
+                provided = modlets.clone();
+                provided.getModlet().addAll( found.getModlet() );
+            }
         }
         else if ( context.isLoggable( Level.FINER ) )
         {
             context.log( Level.FINER, getMessage( "disabled", this.getClass().getSimpleName() ), null );
         }
 
-        return found;
+        return provided;
     }
 
     private static String getMessage( final String key, final Object... arguments )
