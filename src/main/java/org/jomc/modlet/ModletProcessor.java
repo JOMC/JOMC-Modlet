@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) Christian Schulte, 2005-206
+ *   Copyright (C) Christian Schulte, 2013-005
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -31,50 +31,34 @@
 package org.jomc.modlet;
 
 /**
- * {@code Modlet} provider interface.
+ * {@code Modlet} processor interface.
  *
  * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
- * @see ModelContext#findModlets(org.jomc.modlet.Modlets)
+ * @see ModelContext#processModlets(org.jomc.modlet.Modlets)
+ * @since 1.6
  */
-public interface ModletProvider
+public interface ModletProcessor
 {
 
     /**
-     * Gets the ordinal number of the provider.
+     * Gets the ordinal number of the processor.
      *
-     * @return The ordinal number of the provider.
-     * @since 1.6
+     * @return The ordinal number of the processor.
      */
     int getOrdinal();
 
     /**
-     * Searches a given context for {@code Modlets}.
+     * Processes a given list of {@code Modlet}s with a context.
      *
-     * @param context The context to search for {@code Modlets}.
+     * @param context The context to process {@code Modlets} with.
+     * @param modlets The {@code Modlets} currently being processed.
      *
-     * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found.
-     *
-     * @throws NullPointerException if {@code context} is {@code null}.
-     * @throws ModelException if searching the context fails.
-     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)}.
-     * This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    Modlets findModlets( ModelContext context ) throws NullPointerException, ModelException;
-
-    /**
-     * Searches a given context for {@code Modlets}.
-     *
-     * @param context The context to search for {@code Modlets}.
-     * @param modlets The {@code Modlets} currently being searched.
-     *
-     * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found.
+     * @return The processed {@code Modlets} or {@code null}.
      *
      * @throws NullPointerException if {@code context} or {@code modlets} is {@code null}.
-     * @throws ModelException if searching the context fails.
-     * @since 1.6
+     * @throws ModelException if processing {@code Modlets} fails.
      */
-    Modlets findModlets( ModelContext context, Modlets modlets ) throws NullPointerException, ModelException;
+    Modlets processModlets( ModelContext context, Modlets modlets ) throws NullPointerException, ModelException;
 
 }

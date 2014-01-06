@@ -565,7 +565,8 @@ public abstract class ModelContext
     /**
      * Gets the {@code Modlets} of the context.
      * <p>If no {@code Modlets} have been set using the {@code setModlets} method, this method calls the
-     * {@code findModlets} method to initialize the {@code Modlets} of the context.</p>
+     * {@code findModlets} method and the {@code processModlets} method to initialize the {@code Modlets} of the
+     * context.</p>
      * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
      * to the returned list will be present inside the object.</p>
      *
@@ -574,7 +575,8 @@ public abstract class ModelContext
      * @throws ModelException if getting the {@code Modlets} of the context fails.
      *
      * @see #setModlets(org.jomc.modlet.Modlets)
-     * @see #findModlets()
+     * @see #findModlets(org.jomc.modlet.Modlets)
+     * @see #processModlets(org.jomc.modlet.Modlets)
      */
     public final Modlets getModlets() throws ModelException
     {
@@ -600,18 +602,18 @@ public abstract class ModelContext
                 this.modlets = new Modlets();
                 this.modlets.getModlet().add( modlet );
 
-                final Modlets provided = this.findModlets();
+                final Modlets provided = this.findModlets( this.modlets );
 
-                for ( Modlet m : provided.getModlet() )
+                if ( provided != null )
                 {
-                    if ( this.modlets.getModlet( m.getName() ) == null )
-                    {
-                        this.modlets.getModlet().add( m );
-                    }
-                    else if ( this.isLoggable( Level.WARNING ) )
-                    {
-                        this.log( Level.WARNING, getMessage( "ignoringRedundantModlet", m.getName() ), null );
-                    }
+                    this.modlets = provided;
+                }
+
+                final Modlets processed = this.processModlets( this.modlets );
+
+                if ( processed != null )
+                {
+                    this.modlets = processed;
                 }
 
                 final javax.xml.validation.Schema modletSchema = this.createSchema( ModletObject.MODEL_PUBLIC_ID );
@@ -767,14 +769,49 @@ public abstract class ModelContext
     /**
      * Searches the context for {@code Modlets}.
      *
-     * @return The {@code Modlets} found in the context.
+     * @return The {@code Modlets} found in the context or {@code null}.
      *
      * @throws ModelException if searching {@code Modlets} fails.
      *
      * @see ModletProvider META-INF/services/org.jomc.modlet.ModletProvider
      * @see #getModlets()
+     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
+     * removed in JOMC 2.0.
      */
+    @Deprecated
     public abstract Modlets findModlets() throws ModelException;
+
+    /**
+     * Searches the context for {@code Modlets}.
+     *
+     * @param modlets The {@code Modlets} currently being searched.
+     *
+     * @return The {@code Modlets} found in the context or {@code null}.
+     *
+     * @throws NullPointerException if {@code modlets} is {@code null}.
+     * @throws ModelException if searching {@code Modlets} fails.
+     *
+     * @see ModletProvider META-INF/services/org.jomc.modlet.ModletProvider
+     * @see #getModlets()
+     * @since 1.6
+     */
+    public abstract Modlets findModlets( Modlets modlets ) throws ModelException;
+
+    /**
+     * Processes a list of {@code Modlet}s.
+     *
+     * @param modlets The {@code Modlets} currently being processed.
+     *
+     * @return The processed {@code Modlets} or {@code null}.
+     *
+     * @throws NullPointerException if {@code modlets} is {@code null}.
+     * @throws ModelException if processing {@code Modlets} fails.
+     *
+     * @see ModletProcessor META-INF/services/org.jomc.modlet.ModletProcessor
+     * @see #getModlets()
+     * @since 1.6
+     */
+    public abstract Modlets processModlets( Modlets modlets ) throws ModelException;
 
     /**
      * Creates a new {@code Model} instance.
