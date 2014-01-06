@@ -43,6 +43,10 @@ Model Context Attributes Reference
 *--------------------------------------------------------------------------------*-------------------------------------*
 | <<<org.jomc.modlet.DefaultModelContext.providerLocationAttribute>>>            | <<<java.lang.String>>>              |
 *--------------------------------------------------------------------------------*-------------------------------------*
+| <<<org.jomc.modlet.DefaultModletProcessor.enabledAttribute>>>                  | <<<java.lang.Boolean>>>             |
+*--------------------------------------------------------------------------------*-------------------------------------*
+| <<<org.jomc.modlet.DefaultModletProcessor.transformerLocationAttribute>>>      | <<<java.lang.String>>>              |
+*--------------------------------------------------------------------------------*-------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProvider.enabledAttribute>>>                   | <<<java.lang.Boolean>>>             |
 *--------------------------------------------------------------------------------*-------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProvider.modletLocationAttribute>>>            | <<<java.lang.String>>>              |
