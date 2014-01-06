@@ -43,11 +43,19 @@ System Properties Reference
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModelContext.defaultProviderLocation>>> | <<<java.lang.String>>> | <<<META-INF/services>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
+| <<<org.jomc.modlet.DefaultModletProcessor.defaultEnabled>>> | <<<java.lang.Boolean>>> | <<<true>>> |
+*---------------------------------------------*-------------------------------*----------------------------------------*
+| <<<org.jomc.modlet.DefaultModletProcessor.defaultOrdinal>>> | <<<java.lang.Integer>>> | <<<0>>> |
+*---------------------------------------------*-------------------------------*----------------------------------------*
+| <<<org.jomc.modlet.DefaultModletProcessor.defaultTransformerLocation>>> | <<<java.lang.String>>> | <<<META-INF/jomc-modlet.xsl>>> |
+*---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProvider.defaultModletLocation>>> | <<<java.lang.String>>> | <<<META-INF/jomc-modlet.xml>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProvider.defaultEnabled>>> | <<<java.lang.Boolean>>> | <<<true>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProvider.defaultValidating>>> | <<<java.lang.Boolean>>> | <<<true>>> |
+*---------------------------------------------*-------------------------------*----------------------------------------*
+| <<<org.jomc.modlet.DefaultModletProvider.defaultOrdinal>>> | <<<java.lang.Integer>>> | <<<0>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.ModelContext.defaultLogLevel>>> | <<<java.util.logging.Level>>> | <<<WARNING>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
