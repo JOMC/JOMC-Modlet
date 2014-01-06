@@ -355,7 +355,7 @@ public class DefaultModelContext extends ModelContext
      *
      * @see #getProviderLocation()
      * @see #getPlatformProviderLocation()
-     * @see ModletProvider#findModlets(org.jomc.modlet.ModelContext)
+     * @see ModletProvider#findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
      * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
      * removed in JOMC 2.0.
      */
@@ -374,7 +374,7 @@ public class DefaultModelContext extends ModelContext
      *
      * @see #getProviderLocation()
      * @see #getPlatformProviderLocation()
-     * @see ModletProvider#findModlets(org.jomc.modlet.ModelContext)
+     * @see ModletProvider#findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
      * @since 1.6
      */
     @Override
