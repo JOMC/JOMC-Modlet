@@ -86,20 +86,8 @@ public class ModletProviderTest
     }
 
     @Test
-    @SuppressWarnings( "deprecation" )
     public final void testFindModlets() throws Exception
     {
-        try
-        {
-            this.getModletProvider().findModlets( null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
         try
         {
             this.getModletProvider().findModlets( null, new Modlets() );

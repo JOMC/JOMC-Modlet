@@ -94,7 +94,6 @@ public class DefaultModelContextTest extends ModelContextTest
     }
 
     @Test
-    @SuppressWarnings( "deprecation" )
     public final void testFindModlets() throws Exception
     {
         final File tmpFile = File.createTempFile( this.getClass().getName(), ".properties" );
@@ -108,19 +107,6 @@ public class DefaultModelContextTest extends ModelContextTest
         DefaultModelContext.setDefaultProviderLocation( "DOES_NOT_EXIST" );
         this.getModelContext().setPlatformProviderLocation( null );
         this.getModelContext().setProviderLocation( null );
-        this.getModelContext().setModlets( null );
-
-        try
-        {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
         this.getModelContext().setModlets( null );
 
         try
@@ -145,19 +131,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected ModelException not thrown." );
         }
@@ -176,10 +149,6 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        assertNotNull( this.getModelContext().findModlets().getModlet( TestModletProvider.class.getName() ) );
-
-        this.getModelContext().setModlets( null );
-
         assertNotNull( this.getModelContext().findModlets( new Modlets() ).
             getModlet( TestModletProvider.class.getName() ) );
 
@@ -189,19 +158,6 @@ public class DefaultModelContextTest extends ModelContextTest
         DefaultModelContext.setDefaultProviderLocation( "META-INF/non-existent-services" );
         this.getModelContext().setPlatformProviderLocation( null );
         this.getModelContext().setProviderLocation( null );
-        this.getModelContext().setModlets( null );
-
-        try
-        {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
         this.getModelContext().setModlets( null );
 
         try
@@ -223,19 +179,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected ModelException not thrown." );
         }
@@ -253,8 +196,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         this.getModelContext().setProviderLocation( "META-INF/illegal-services-modlet" );
         Modlets modlets = this.getModelContext().findModlets( new Modlets() );
-        assertNotNull( modlets );
-        modlets = this.getModelContext().findModlets();
         assertNotNull( modlets );
 
         try
@@ -319,8 +260,6 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setModlets( null );
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
-        modlets = this.getModelContext().findModlets();
-        assertNotNull( modlets );
 
         try
         {
@@ -384,8 +323,6 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setModlets( null );
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
-        modlets = this.getModelContext().findModlets();
-        assertNotNull( modlets );
 
         final TestModletProvider testModletProvider =
             (TestModletProvider) this.getModelContext().getAttribute( TestModletProvider.class.getName() );
@@ -409,19 +346,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected 'ModelException' not thrown." );
         }
@@ -436,19 +360,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected 'ModelException' not thrown." );
         }
@@ -459,19 +370,6 @@ public class DefaultModelContextTest extends ModelContextTest
         }
 
         this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-3" );
-        this.getModelContext().setModlets( null );
-
-        try
-        {
-            this.getModelContext().findModlets();
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
         this.getModelContext().setModlets( null );
 
         try
@@ -504,7 +402,6 @@ public class DefaultModelContextTest extends ModelContextTest
     }
 
     @Test
-    @SuppressWarnings( "deprecation" )
     public final void testFindModletsWithAttributes() throws Exception
     {
         final File tmpFile = File.createTempFile( this.getClass().getName(), ".properties" );
@@ -524,19 +421,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "DOES_NOT_EXIST" );
-
-        try
-        {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        this.getModelContext().setModlets( null );
 
         try
         {
@@ -565,19 +449,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected ModelException not thrown." );
         }
@@ -601,10 +472,6 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "DOES_NOT_EXIST" );
 
-        assertNotNull( this.getModelContext().findModlets().getModlet( TestModletProvider.class.getName() ) );
-
-        this.getModelContext().setModlets( null );
-
         assertNotNull( this.getModelContext().findModlets( new Modlets() ).
             getModlet( TestModletProvider.class.getName() ) );
 
@@ -618,19 +485,6 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().clearAttribute( DefaultModelContext.PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/non-existent-services" );
-
-        try
-        {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        this.getModelContext().setModlets( null );
 
         try
         {
@@ -654,19 +508,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected ModelException not thrown." );
         }
@@ -685,11 +526,6 @@ public class DefaultModelContextTest extends ModelContextTest
                                              "META-INF/illegal-services-modlet" );
 
         Modlets modlets = this.getModelContext().findModlets( new Modlets() );
-        assertNotNull( modlets );
-
-        this.getModelContext().setModlets( null );
-
-        modlets = this.getModelContext().findModlets();
         assertNotNull( modlets );
 
         try
@@ -758,11 +594,6 @@ public class DefaultModelContextTest extends ModelContextTest
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        this.getModelContext().setModlets( null );
-
-        modlets = this.getModelContext().findModlets();
-        assertNotNull( modlets );
-
         try
         {
             this.getModelContext().findModel( ServicesNotFoundModletProvider.class.getName() );
@@ -829,11 +660,6 @@ public class DefaultModelContextTest extends ModelContextTest
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        this.getModelContext().setModlets( null );
-
-        modlets = this.getModelContext().findModlets();
-        assertNotNull( modlets );
-
         final TestModletProvider testModletProvider =
             (TestModletProvider) this.getModelContext().getAttribute( TestModletProvider.class.getName() );
 
@@ -859,19 +685,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected 'ModelException' not thrown." );
         }
@@ -889,19 +702,6 @@ public class DefaultModelContextTest extends ModelContextTest
 
         try
         {
-            this.getModelContext().findModlets();
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        this.getModelContext().setModlets( null );
-
-        try
-        {
             this.getModelContext().findModlets( new Modlets() );
             fail( "Expected 'ModelException' not thrown." );
         }
@@ -915,19 +715,6 @@ public class DefaultModelContextTest extends ModelContextTest
                                              "META-INF/illegal-extended-services-3" );
 
         this.getModelContext().setProviderLocation( null );
-        this.getModelContext().setModlets( null );
-
-        try
-        {
-            this.getModelContext().findModlets();
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
         this.getModelContext().setModlets( null );
 
         try
@@ -1198,22 +985,9 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setModlets( null );
         this.getModelContext().clearAttribute( "SORTING_TEST" );
 
-        this.getModelContext().findModlets();
-
-        List<Class> sortedProviders = (List<Class>) this.getModelContext().getAttribute( "SORTING_TEST" );
-        assertNotNull( sortedProviders );
-        assertEquals( 4, sortedProviders.size() );
-        assertEquals( NullModletProvider.class, sortedProviders.get( 0 ) );
-        assertEquals( TestModletProvider.class, sortedProviders.get( 1 ) );
-        assertEquals( IllegalServicesModletProvider.class, sortedProviders.get( 2 ) );
-        assertEquals( ServicesNotFoundModletProvider.class, sortedProviders.get( 3 ) );
-
-        this.getModelContext().setModlets( null );
-        this.getModelContext().clearAttribute( "SORTING_TEST" );
-
         this.getModelContext().findModlets( new Modlets() );
 
-        sortedProviders = (List<Class>) this.getModelContext().getAttribute( "SORTING_TEST" );
+        List<Class> sortedProviders = (List<Class>) this.getModelContext().getAttribute( "SORTING_TEST" );
         assertNotNull( sortedProviders );
         assertEquals( 4, sortedProviders.size() );
         assertEquals( NullModletProvider.class, sortedProviders.get( 0 ) );

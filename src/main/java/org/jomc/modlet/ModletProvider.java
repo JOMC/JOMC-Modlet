@@ -52,21 +52,6 @@ public interface ModletProvider
      * Searches a given context for {@code Modlets}.
      *
      * @param context The context to search for {@code Modlets}.
-     *
-     * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found.
-     *
-     * @throws NullPointerException if {@code context} is {@code null}.
-     * @throws ModelException if searching the context fails.
-     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)}.
-     * This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    Modlets findModlets( ModelContext context ) throws NullPointerException, ModelException;
-
-    /**
-     * Searches a given context for {@code Modlets}.
-     *
-     * @param context The context to search for {@code Modlets}.
      * @param modlets The {@code Modlets} currently being searched.
      *
      * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found.

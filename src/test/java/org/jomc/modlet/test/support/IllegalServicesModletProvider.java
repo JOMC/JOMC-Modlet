@@ -62,9 +62,10 @@ public final class IllegalServicesModletProvider implements ModletProvider
         return 30;
     }
 
-    @SuppressWarnings( "deprecation" )
-    public Modlets findModlets( final ModelContext context ) throws ModelException
+    public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
     {
+        final Modlets provided = modlets.clone();
+
         List<Class> sortedProviders = (List<Class>) context.getAttribute( "SORTING_TEST" );
 
         if ( sortedProviders == null )
@@ -75,7 +76,6 @@ public final class IllegalServicesModletProvider implements ModletProvider
 
         sortedProviders.add( this.getClass() );
 
-        final Modlets modlets = new Modlets();
         final Modlet modlet = new Modlet();
         modlets.getModlet().add( modlet );
         modlet.setName( IllegalServicesModletProvider.class.getName() );
@@ -108,13 +108,8 @@ public final class IllegalServicesModletProvider implements ModletProvider
         modlet.getServices().getService().add( s );
 
         context.setAttribute( IllegalServicesModletProvider.class.getName(), this );
-        return modlets;
-    }
 
-    public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
-    {
-        final Modlets provided = modlets.clone();
-        provided.getModlet().addAll( this.findModlets( context ).getModlet() );
+        provided.getModlet().add( modlet );
         return provided;
     }
 

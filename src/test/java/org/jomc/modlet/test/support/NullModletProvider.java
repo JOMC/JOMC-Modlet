@@ -56,21 +56,6 @@ public final class NullModletProvider implements ModletProvider
         return 10;
     }
 
-    @SuppressWarnings( "deprecation" )
-    public Modlets findModlets( final ModelContext context ) throws ModelException
-    {
-        List<Class> sortedProviders = (List<Class>) context.getAttribute( "SORTING_TEST" );
-
-        if ( sortedProviders == null )
-        {
-            sortedProviders = new LinkedList<Class>();
-            context.setAttribute( "SORTING_TEST", sortedProviders );
-        }
-
-        sortedProviders.add( this.getClass() );
-        return null;
-    }
-
     public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
     {
         List<Class> sortedProviders = (List<Class>) context.getAttribute( "SORTING_TEST" );

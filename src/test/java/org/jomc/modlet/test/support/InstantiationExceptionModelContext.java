@@ -63,7 +63,7 @@ public abstract class InstantiationExceptionModelContext extends ModelContext
     }
 
     @Override
-    public Modlets findModlets() throws ModelException
+    public Modlets findModlets( final Modlets modlets ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }

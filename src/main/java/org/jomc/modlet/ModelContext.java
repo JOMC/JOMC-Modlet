@@ -764,21 +764,6 @@ public abstract class ModelContext
     /**
      * Searches the context for {@code Modlets}.
      *
-     * @return The {@code Modlets} found in the context or {@code null}.
-     *
-     * @throws ModelException if searching {@code Modlets} fails.
-     *
-     * @see ModletProvider META-INF/services/org.jomc.modlet.ModletProvider
-     * @see #getModlets()
-     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
-     * removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract Modlets findModlets() throws ModelException;
-
-    /**
-     * Searches the context for {@code Modlets}.
-     *
      * @param modlets The {@code Modlets} currently being searched.
      *
      * @return The {@code Modlets} found in the context or {@code null}.

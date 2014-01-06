@@ -60,13 +60,6 @@ public final class NoSuchMethodExceptionModelContext extends ModelContext
     }
 
     @Override
-    @SuppressWarnings( "deprecation" )
-    public Modlets findModlets() throws ModelException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Modlets findModlets( final Modlets modlets ) throws ModelException
     {
         throw new UnsupportedOperationException();
