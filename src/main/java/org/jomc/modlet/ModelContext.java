@@ -585,6 +585,7 @@ public abstract class ModelContext
             if ( this.modlets == null )
             {
                 final Modlet modlet = new Modlet();
+                modlet.setModel( ModletObject.MODEL_PUBLIC_ID );
                 modlet.setName( getMessage( "projectName" ) );
                 modlet.setVendor( getMessage( "projectVendor" ) );
                 modlet.setVersion( getMessage( "projectVersion" ) );
