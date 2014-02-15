@@ -48,6 +48,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -224,7 +225,7 @@ public class DefaultModelContext extends ModelContext
             this.providerLocation = getDefaultProviderLocation();
 
             if ( DEFAULT_PROVIDER_LOCATION.equals( this.providerLocation )
-                 && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+                     && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
             {
                 final String contextProviderLocation = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
 
@@ -310,7 +311,7 @@ public class DefaultModelContext extends ModelContext
             this.platformProviderLocation = getDefaultPlatformProviderLocation();
 
             if ( DEFAULT_PLATFORM_PROVIDER_LOCATION.equals( this.platformProviderLocation )
-                 && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+                     && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
             {
                 final String contextPlatformProviderLocation =
                     (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
@@ -409,9 +410,9 @@ public class DefaultModelContext extends ModelContext
                 this.log( Level.FINEST,
                           getMessage( "modletInfo", m.getName(), m.getModel(),
                                       m.getVendor() != null
-                                      ? m.getVendor() : getMessage( "noVendor" ),
+                                          ? m.getVendor() : getMessage( "noVendor" ),
                                       m.getVersion() != null
-                                      ? m.getVersion() : getMessage( "noVersion" ) ), null );
+                                          ? m.getVersion() : getMessage( "noVersion" ) ), null );
 
                 if ( m.getSchemas() != null )
                 {
@@ -420,9 +421,9 @@ public class DefaultModelContext extends ModelContext
                         this.log( Level.FINEST,
                                   getMessage( "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
                                               s.getContextId() != null
-                                              ? s.getContextId() : getMessage( "noContext" ),
+                                                  ? s.getContextId() : getMessage( "noContext" ),
                                               s.getClasspathId() != null
-                                              ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
+                                                  ? s.getClasspathId() : getMessage( "noClasspathId" ) ), null );
 
                     }
                 }
@@ -939,7 +940,7 @@ public class DefaultModelContext extends ModelContext
                     }
                 }
 
-                for ( Map.Entry<Object, Object> e : p.entrySet() )
+                for ( final Map.Entry<Object, Object> e : p.entrySet() )
                 {
                     if ( e.getKey().toString().startsWith( serviceNamePrefix ) )
                     {
@@ -965,7 +966,7 @@ public class DefaultModelContext extends ModelContext
 
             int count = 0;
             final long t0 = System.currentTimeMillis();
-            final Map<Integer, T> sortedClasspathServices = new TreeMap<Integer, T>();
+            final List<T> sortedClasspathServices = new ArrayList<T>();
 
             while ( classpathServices.hasMoreElements() )
             {
@@ -984,7 +985,7 @@ public class DefaultModelContext extends ModelContext
                 {
                     reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
 
-                    String line = null;
+                    String line;
                     while ( ( line = reader.readLine() ) != null )
                     {
                         if ( line.contains( "#" ) )
@@ -1000,24 +1001,39 @@ public class DefaultModelContext extends ModelContext
                         }
 
                         final T serviceObject = this.createServiceObject( serviceClass, line, url );
-
-                        if ( serviceObject instanceof ModletProvider )
-                        {
-                            sortedClasspathServices.put( ( (ModletProvider) serviceObject ).getOrdinal(),
-                                                         serviceObject );
-
-                        }
-                        else if ( serviceObject instanceof ModletProcessor )
-                        {
-                            sortedClasspathServices.put( ( (ModletProcessor) serviceObject ).getOrdinal(),
-                                                         serviceObject );
-
-                        }
-                        else
-                        {
-                            sortedClasspathServices.put( sortedClasspathServices.size(), serviceObject );
-                        }
+                        sortedClasspathServices.add( serviceObject );
                     }
+
+                    Collections.sort( sortedClasspathServices,
+                                      new Comparator<Object>()
+                                      {
+
+                                          public int compare( final Object o1, final Object o2 )
+                                          {
+                                              int ordinal1 = 0;
+                                              int ordinal2 = 0;
+
+                                              if ( o1 instanceof ModletProvider )
+                                              {
+                                                  ordinal1 = ( (ModletProvider) o1 ).getOrdinal();
+                                              }
+                                              if ( o1 instanceof ModletProcessor )
+                                              {
+                                                  ordinal1 = ( (ModletProcessor) o1 ).getOrdinal();
+                                              }
+                                              if ( o2 instanceof ModletProvider )
+                                              {
+                                                  ordinal2 = ( (ModletProvider) o2 ).getOrdinal();
+                                              }
+                                              if ( o2 instanceof ModletProcessor )
+                                              {
+                                                  ordinal2 = ( (ModletProcessor) o2 ).getOrdinal();
+                                              }
+
+                                              return ordinal1 - ordinal2;
+                                          }
+
+                                      } );
 
                     suppressExceptionOnClose = false;
                 }
@@ -1048,7 +1064,7 @@ public class DefaultModelContext extends ModelContext
             {
                 this.log( Level.FINE, getMessage( "contextReport", count,
                                                   this.getProviderLocation() + '/' + serviceClass.getName(),
-                                                  Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
+                                                  System.currentTimeMillis() - t0 ), null );
 
             }
 
@@ -1056,7 +1072,7 @@ public class DefaultModelContext extends ModelContext
                 new ArrayList<T>( sortedPlatformServices.size() + sortedClasspathServices.size() );
 
             services.addAll( sortedPlatformServices.values() );
-            services.addAll( sortedClasspathServices.values() );
+            services.addAll( sortedClasspathServices );
 
             return services;
         }
@@ -1349,8 +1365,8 @@ public class DefaultModelContext extends ModelContext
                     final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
 
                     if ( Modifier.isStatic( valueOf.getModifiers() )
-                         && ( valueOf.getReturnType().equals( boxedPropertyType )
-                              || valueOf.getReturnType().equals( unboxedPropertyType ) ) )
+                             && ( valueOf.getReturnType().equals( boxedPropertyType )
+                                  || valueOf.getReturnType().equals( unboxedPropertyType ) ) )
                     {
                         setterMethod.invoke( object, valueOf.invoke( null, propertyValue ) );
                         return;
@@ -1564,7 +1580,7 @@ public class DefaultModelContext extends ModelContext
                         {
                             log( Level.FINEST, getMessage( "resolutionInfo", publicId + ", " + systemId,
                                                            schemaSource.getPublicId() + ", "
-                                                           + schemaSource.getSystemId() ), null );
+                                                               + schemaSource.getSystemId() ), null );
 
                         }
                     }
@@ -1585,7 +1601,7 @@ public class DefaultModelContext extends ModelContext
                             for ( URI uri : getSchemaResources() )
                             {
                                 if ( uri.getSchemeSpecificPart() != null
-                                     && uri.getSchemeSpecificPart().endsWith( schemaName ) )
+                                         && uri.getSchemeSpecificPart().endsWith( schemaName ) )
                                 {
                                     schemaSource = new InputSource();
                                     schemaSource.setPublicId( publicId );
@@ -1693,8 +1709,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setCharacterStream",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setCharacterStream",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -1709,8 +1725,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setByteStream",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setByteStream",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -1725,8 +1741,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setStringData",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setStringData",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -1741,8 +1757,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setSystemId",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setSystemId",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -1757,8 +1773,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setPublicId",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setPublicId",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -1773,8 +1789,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setBaseURI",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setBaseURI",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -1789,8 +1805,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setEncoding",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setEncoding",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -1805,8 +1821,8 @@ public class DefaultModelContext extends ModelContext
                                     if ( isLoggable( Level.WARNING ) )
                                     {
                                         log( Level.WARNING, getMessage(
-                                            "unsupportedOperation", "setCertifiedText",
-                                            DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+                                             "unsupportedOperation", "setCertifiedText",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
 
                                     }
                                 }
@@ -2256,10 +2272,10 @@ public class DefaultModelContext extends ModelContext
     private static String getMessage( final Throwable t )
     {
         return t != null
-               ? t.getMessage() != null && t.getMessage().trim().length() > 0
-                 ? t.getMessage()
-                 : getMessage( t.getCause() )
-               : null;
+                   ? t.getMessage() != null && t.getMessage().trim().length() > 0
+                         ? t.getMessage()
+                         : getMessage( t.getCause() )
+                   : null;
 
     }
 
@@ -2378,10 +2394,10 @@ class ModelErrorHandler extends DefaultHandler
     private static String getMessage( final Throwable t )
     {
         return t != null
-               ? t.getMessage() != null && t.getMessage().trim().length() > 0
-                 ? t.getMessage()
-                 : getMessage( t.getCause() )
-               : null;
+                   ? t.getMessage() != null && t.getMessage().trim().length() > 0
+                         ? t.getMessage()
+                         : getMessage( t.getCause() )
+                   : null;
 
     }
 
