@@ -996,6 +996,23 @@ public class DefaultModelContextTest extends ModelContextTest
         assertEquals( ServicesNotFoundModletProvider.class, sortedProviders.get( 3 ) );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
+        DefaultModelContext.setDefaultProviderLocation( "META-INF/redundant-ordinal-modlet-providers" );
+        this.getModelContext().setPlatformProviderLocation( null );
+        this.getModelContext().setProviderLocation( null );
+        this.getModelContext().setModlets( null );
+        this.getModelContext().clearAttribute( "SORTING_TEST" );
+
+        this.getModelContext().findModlets( new Modlets() );
+
+        sortedProviders = (List<Class>) this.getModelContext().getAttribute( "SORTING_TEST" );
+        assertNotNull( sortedProviders );
+        assertEquals( 4, sortedProviders.size() );
+        assertEquals( TestModletProvider.class, sortedProviders.get( 0 ) );
+        assertEquals( TestModletProvider.class, sortedProviders.get( 1 ) );
+        assertEquals( TestModletProvider.class, sortedProviders.get( 2 ) );
+        assertEquals( TestModletProvider.class, sortedProviders.get( 3 ) );
+
+        DefaultModelContext.setDefaultPlatformProviderLocation( null );
         DefaultModelContext.setDefaultProviderLocation( null );
         this.getModelContext().setPlatformProviderLocation( null );
         this.getModelContext().setProviderLocation( null );

@@ -119,6 +119,8 @@ public final class TestModletProvider implements ModletProvider
 
     private InvocationTargetExceptionPropertyType invocationTargetExceptionProperty;
 
+    private int ordinal = 20;
+
     public TestModletProvider()
     {
         super();
@@ -126,7 +128,12 @@ public final class TestModletProvider implements ModletProvider
 
     public int getOrdinal()
     {
-        return 20;
+        return this.ordinal;
+    }
+
+    public void setOrdinal( final int value )
+    {
+        this.ordinal = value;
     }
 
     public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
