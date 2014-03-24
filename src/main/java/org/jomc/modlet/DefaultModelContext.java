@@ -523,6 +523,7 @@ public class DefaultModelContext extends ModelContext
         }
 
         Model m = model.clone();
+        final long t0 = System.currentTimeMillis();
         final Services services = this.getModlets().getServices( m.getIdentifier() );
 
         if ( services != null )
@@ -545,6 +546,13 @@ public class DefaultModelContext extends ModelContext
                     m = provided;
                 }
             }
+        }
+
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "findModelReport", m.getIdentifier(), System.currentTimeMillis() - t0 ),
+                      null );
+
         }
 
         return m;
@@ -761,6 +769,7 @@ public class DefaultModelContext extends ModelContext
         }
 
         Model processed = model;
+        final long t0 = System.currentTimeMillis();
         final Services services = this.getModlets().getServices( model.getIdentifier() );
 
         if ( services != null )
@@ -785,6 +794,13 @@ public class DefaultModelContext extends ModelContext
             }
         }
 
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "processModelReport", model.getIdentifier(),
+                                              System.currentTimeMillis() - t0 ), null );
+
+        }
+
         return processed;
     }
 
@@ -804,6 +820,7 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
+        final long t0 = System.currentTimeMillis();
         final Services services = this.getModlets().getServices( model.getIdentifier() );
         final ModelValidationReport report = new ModelValidationReport();
 
@@ -829,6 +846,13 @@ public class DefaultModelContext extends ModelContext
             }
         }
 
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "validateModelReport", model.getIdentifier(),
+                                              System.currentTimeMillis() - t0 ), null );
+
+        }
+
         return report;
     }
 
@@ -849,6 +873,7 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "source" );
         }
 
+        final long t0 = System.currentTimeMillis();
         final javax.xml.validation.Schema schema = this.createSchema( model );
         final Validator validator = schema.newValidator();
         final ModelErrorHandler modelErrorHandler = new ModelErrorHandler( this );
@@ -879,6 +904,11 @@ public class DefaultModelContext extends ModelContext
         catch ( final IOException e )
         {
             throw new ModelException( getMessage( e ), e );
+        }
+
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "validateModelReport", model, System.currentTimeMillis() - t0 ), null );
         }
 
         return modelErrorHandler.getReport();
@@ -1910,6 +1940,7 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
+            final long t0 = System.currentTimeMillis();
             final SchemaFactory f = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
             final List<Source> sources = new ArrayList<Source>( schemas != null ? schemas.getSchema().size() : 0 );
 
@@ -1969,7 +2000,9 @@ public class DefaultModelContext extends ModelContext
 
             } );
 
-            if ( this.isLoggable( Level.FINEST ) )
+            final javax.xml.validation.Schema schema = f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
+
+            if ( this.isLoggable( Level.FINE ) )
             {
                 final StringBuilder schemaInfo = new StringBuilder( sources.size() * 50 );
 
@@ -1978,10 +2011,12 @@ public class DefaultModelContext extends ModelContext
                     schemaInfo.append( ", " ).append( s.getSystemId() );
                 }
 
-                this.log( Level.FINEST, getMessage( "creatingSchema", schemaInfo.substring( 2 ) ), null );
+                this.log( Level.FINE, getMessage( "creatingSchema", schemaInfo.substring( 2 ),
+                                                  System.currentTimeMillis() - t0 ), null );
+
             }
 
-            return f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
+            return schema;
         }
         catch ( final IOException e )
         {
@@ -2010,6 +2045,7 @@ public class DefaultModelContext extends ModelContext
         try
         {
             StringBuilder packageNames = null;
+            final long t0 = System.currentTimeMillis();
 
             if ( schemas != null )
             {
@@ -2036,12 +2072,15 @@ public class DefaultModelContext extends ModelContext
                 }
             }
 
-            if ( this.isLoggable( Level.FINEST ) )
+            final JAXBContext context = JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() );
+
+            if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINEST, getMessage( "creatingContext", packageNames.substring( 1 ) ), null );
+                this.log( Level.FINE, getMessage( "creatingContext", packageNames.substring( 1 ),
+                                                  System.currentTimeMillis() - t0 ), null );
             }
 
-            return JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() );
+            return context;
         }
         catch ( final JAXBException e )
         {
@@ -2067,6 +2106,7 @@ public class DefaultModelContext extends ModelContext
         {
             StringBuilder packageNames = null;
             StringBuilder schemaLocation = null;
+            final long t0 = System.currentTimeMillis();
 
             if ( schemas != null )
             {
@@ -2128,12 +2168,13 @@ public class DefaultModelContext extends ModelContext
                 m.setListener( listenerList );
             }
 
-            if ( this.isLoggable( Level.FINEST ) )
+            if ( this.isLoggable( Level.FINE ) )
             {
                 if ( listenerList == null )
                 {
-                    this.log( Level.FINEST, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
-                                                        schemaLocation.substring( 1 ) ), null );
+                    this.log( Level.FINE, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
+                                                      schemaLocation.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
 
                 }
                 else
@@ -2145,8 +2186,9 @@ public class DefaultModelContext extends ModelContext
                         b.append( ',' ).append( listenerList.getListeners().get( i ) );
                     }
 
-                    this.log( Level.FINEST, getMessage( "creatingMarshallerWithListeners", packageNames.substring( 1 ),
-                                                        schemaLocation.substring( 1 ), b.substring( 1 ) ), null );
+                    this.log( Level.FINE, getMessage( "creatingMarshallerWithListeners", packageNames.substring( 1 ),
+                                                      schemaLocation.substring( 1 ), b.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
 
                 }
             }
@@ -2176,6 +2218,7 @@ public class DefaultModelContext extends ModelContext
         try
         {
             StringBuilder packageNames = null;
+            final long t0 = System.currentTimeMillis();
 
             if ( schemas != null )
             {
@@ -2225,12 +2268,12 @@ public class DefaultModelContext extends ModelContext
                 u.setListener( listenerList );
             }
 
-            if ( this.isLoggable( Level.FINEST ) )
+            if ( this.isLoggable( Level.FINE ) )
             {
                 if ( listenerList == null )
                 {
-                    this.log( Level.FINEST,
-                              getMessage( "creatingUnmarshaller", packageNames.substring( 1 ) ), null );
+                    this.log( Level.FINE, getMessage( "creatingUnmarshaller", packageNames.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
 
                 }
                 else
@@ -2242,8 +2285,9 @@ public class DefaultModelContext extends ModelContext
                         b.append( ',' ).append( listenerList.getListeners().get( i ) );
                     }
 
-                    this.log( Level.FINEST, getMessage( "creatingUnmarshallerWithListeners",
-                                                        packageNames.substring( 1 ), b.substring( 1 ) ), null );
+                    this.log( Level.FINE, getMessage( "creatingUnmarshallerWithListeners",
+                                                      packageNames.substring( 1 ), b.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
 
                 }
             }

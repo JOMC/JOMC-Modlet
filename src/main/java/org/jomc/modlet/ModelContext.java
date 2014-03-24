@@ -596,32 +596,56 @@ public abstract class ModelContext
                 schema.setSystemId( this.getModletSchemaSystemId() );
                 schema.setContextId( ModletObject.class.getPackage().getName() );
                 schema.setClasspathId( ModletObject.class.getPackage().getName().replace( '.', '/' )
-                                       + "/jomc-modlet-1.3.xsd" );
+                                           + "/jomc-modlet-1.3.xsd" );
 
                 modlet.getSchemas().getSchema().add( schema );
 
                 this.modlets = new Modlets();
                 this.modlets.getModlet().add( modlet );
 
+                long t0 = System.currentTimeMillis();
                 final Modlets provided = this.findModlets( this.modlets );
+
+                if ( this.isLoggable( Level.FINE ) )
+                {
+                    this.log( Level.FINE, getMessage( "findModletsReport",
+                                                      provided != null ? provided.getModlet().size() : 0,
+                                                      System.currentTimeMillis() - t0 ), null );
+
+                }
 
                 if ( provided != null )
                 {
                     this.modlets = provided;
                 }
 
+                t0 = System.currentTimeMillis();
                 final Modlets processed = this.processModlets( this.modlets );
+
+                if ( this.isLoggable( Level.FINE ) )
+                {
+                    this.log( Level.FINE, getMessage( "processModletsReport",
+                                                      processed != null ? processed.getModlet().size() : 0,
+                                                      System.currentTimeMillis() - t0 ), null );
+                }
 
                 if ( processed != null )
                 {
                     this.modlets = processed;
                 }
 
+                t0 = System.currentTimeMillis();
                 final javax.xml.validation.Schema modletSchema = this.createSchema( ModletObject.MODEL_PUBLIC_ID );
                 final Validator validator = modletSchema.newValidator();
                 validator.validate( new JAXBSource( this.createContext( ModletObject.MODEL_PUBLIC_ID ),
                                                     new ObjectFactory().createModlets( this.modlets ) ) );
 
+                if ( this.isLoggable( Level.FINE ) )
+                {
+                    this.log( Level.FINE, getMessage( "validateModletsReport",
+                                                      this.modlets.getModlet().size(),
+                                                      System.currentTimeMillis() - t0 ), null );
+                }
             }
 
             return this.modlets;
@@ -720,14 +744,17 @@ public abstract class ModelContext
             throw new NullPointerException( "name" );
         }
 
-        if ( this.getClassLoader() == null )
+        final long t0 = System.currentTimeMillis();
+        final URL resource = this.getClassLoader() == null
+                                 ? ClassLoader.getSystemResource( name )
+                                 : this.getClassLoader().getResource( name );
+
+        if ( this.isLoggable( Level.FINE ) )
         {
-            return ClassLoader.getSystemResource( name );
+            this.log( Level.FINE, getMessage( "resourcesReport", name, System.currentTimeMillis() - t0 ), null );
         }
-        else
-        {
-            return this.getClassLoader().getResource( name );
-        }
+
+        return resource;
     }
 
     /**
@@ -752,14 +779,17 @@ public abstract class ModelContext
 
         try
         {
-            if ( this.getClassLoader() == null )
+            final long t0 = System.currentTimeMillis();
+            final Enumeration<URL> resources = this.getClassLoader() == null
+                                                   ? ClassLoader.getSystemResources( name )
+                                                   : this.getClassLoader().getResources( name );
+
+            if ( this.isLoggable( Level.FINE ) )
             {
-                return ClassLoader.getSystemResources( name );
+                this.log( Level.FINE, getMessage( "resourcesReport", name, System.currentTimeMillis() - t0 ), null );
             }
-            else
-            {
-                return this.getClassLoader().getResources( name );
-            }
+
+            return resources;
         }
         catch ( final IOException e )
         {
