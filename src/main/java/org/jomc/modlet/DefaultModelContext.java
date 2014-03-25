@@ -1508,7 +1508,7 @@ public class DefaultModelContext extends ModelContext
             if ( this.isLoggable( Level.FINE ) )
             {
                 this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF",
-                                                  Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
+                                                  System.currentTimeMillis() - t0 ), null );
 
             }
 
