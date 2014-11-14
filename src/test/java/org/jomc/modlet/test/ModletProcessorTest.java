@@ -62,7 +62,7 @@ public class ModletProcessorTest
      *
      * @return The {@code ModletProcessor} instance tests are performed with.
      *
-     * @see #newModletProvider()
+     * @see #newModletProcessor()
      */
     public ModletProcessor getModletProcessor()
     {
