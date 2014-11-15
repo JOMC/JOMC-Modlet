@@ -59,19 +59,14 @@ import org.xml.sax.SAXException;
 
 /**
  * Model context interface.
- * <p><b>Use Cases:</b><br/><ul>
+ * <p>
+ * <b>Use Cases:</b><br/><ul>
  * <li>{@link #createContext(java.lang.String) }</li>
- * <li>{@link #createContext(java.net.URI) }</li>
  * <li>{@link #createEntityResolver(java.lang.String) }</li>
- * <li>{@link #createEntityResolver(java.net.URI) }</li>
  * <li>{@link #createMarshaller(java.lang.String) }</li>
- * <li>{@link #createMarshaller(java.net.URI) }</li>
  * <li>{@link #createResourceResolver(java.lang.String) }</li>
- * <li>{@link #createResourceResolver(java.net.URI) }</li>
  * <li>{@link #createSchema(java.lang.String) }</li>
- * <li>{@link #createSchema(java.net.URI) }</li>
  * <li>{@link #createUnmarshaller(java.lang.String) }</li>
- * <li>{@link #createUnmarshaller(java.net.URI) }</li>
  * <li>{@link #findModel(java.lang.String) }</li>
  * <li>{@link #findModel(org.jomc.modlet.Model) }</li>
  * <li>{@link #processModel(org.jomc.modlet.Model) }</li>
@@ -121,7 +116,7 @@ public abstract class ModelContext
      * @see #getDefaultModletSchemaSystemId()
      */
     private static final String DEFAULT_MODLET_SCHEMA_SYSTEM_ID =
-        "http://xml.jomc.org/modlet/jomc-modlet-1.3.xsd";
+        "http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd";
 
     /**
      * Log level events are logged at by default.
@@ -352,7 +347,7 @@ public abstract class ModelContext
      * Gets the default {@code http://jomc.org/modlet} namespace schema system id.
      * <p>The default {@code http://jomc.org/modlet} namespace schema system id is controlled by system property
      * {@code org.jomc.modlet.ModelContext.defaultModletSchemaSystemId} holding a system id URI.
-     * If that property is not set, the {@code http://xml.jomc.org/modlet/jomc-modlet-1.3.xsd} default is
+     * If that property is not set, the {@code http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd} default is
      * returned.</p>
      *
      * @return The default system id of the {@code http://jomc.org/modlet} namespace schema.
@@ -596,7 +591,7 @@ public abstract class ModelContext
                 schema.setSystemId( this.getModletSchemaSystemId() );
                 schema.setContextId( ModletObject.class.getPackage().getName() );
                 schema.setClasspathId( ModletObject.class.getPackage().getName().replace( '.', '/' )
-                                           + "/jomc-modlet-1.3.xsd" );
+                                           + "/jomc-modlet-1.8.xsd" );
 
                 modlet.getSchemas().getSchema().add( schema );
 
@@ -1038,7 +1033,9 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
+     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
+    @Deprecated
     public abstract EntityResolver createEntityResolver( URI publicId ) throws ModelException;
 
     /**
@@ -1067,7 +1064,9 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
+     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
+    @Deprecated
     public abstract LSResourceResolver createResourceResolver( URI publicId ) throws ModelException;
 
     /**
@@ -1096,7 +1095,9 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
+     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
+    @Deprecated
     public abstract javax.xml.validation.Schema createSchema( URI publicId ) throws ModelException;
 
     /**
@@ -1125,7 +1126,9 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
+     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
+    @Deprecated
     public abstract JAXBContext createContext( URI publicId ) throws ModelException;
 
     /**
@@ -1154,7 +1157,9 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
+     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
+    @Deprecated
     public abstract Marshaller createMarshaller( URI publicId ) throws ModelException;
 
     /**
@@ -1183,7 +1188,9 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
+     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
+    @Deprecated
     public abstract Unmarshaller createUnmarshaller( URI publicId ) throws ModelException;
 
     /**
@@ -1242,10 +1249,10 @@ public abstract class ModelContext
     private static String getMessage( final Throwable t )
     {
         return t != null
-               ? t.getMessage() != null && t.getMessage().trim().length() > 0
-                 ? t.getMessage()
-                 : getMessage( t.getCause() )
-               : null;
+                   ? t.getMessage() != null && t.getMessage().trim().length() > 0
+                         ? t.getMessage()
+                         : getMessage( t.getCause() )
+                   : null;
 
     }
 

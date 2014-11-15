@@ -32,8 +32,10 @@
 -->
 <modlet xmlns="http://jomc.org/modlet"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://jomc.org/modlet http://xml.jomc.org/modlet/jomc-modlet-1.3.xsd"
-        name="${project.name} Tests" model="http://jomc.org/modlet/test" vendor="${project.organization.name}"
+        xsi:schemaLocation="http://jomc.org/modlet http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd"
+        name="${project.name} Tests" 
+        model="http://jomc.org/modlet/test"
+        vendor="${project.organization.name}"
         version="${project.version}">
 
   <schemas>

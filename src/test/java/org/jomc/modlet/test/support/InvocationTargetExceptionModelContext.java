@@ -158,36 +158,42 @@ public final class InvocationTargetExceptionModelContext extends ModelContext
     }
 
     @Override
+    @SuppressWarnings( "deprecation" )
     public EntityResolver createEntityResolver( final URI publicId ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @SuppressWarnings( "deprecation" )
     public LSResourceResolver createResourceResolver( final URI publicId ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @SuppressWarnings( "deprecation" )
     public Schema createSchema( final URI publicId ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @SuppressWarnings( "deprecation" )
     public JAXBContext createContext( final URI publicId ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @SuppressWarnings( "deprecation" )
     public Marshaller createMarshaller( final URI publicId ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @SuppressWarnings( "deprecation" )
     public Unmarshaller createUnmarshaller( final URI publicId ) throws ModelException
     {
         throw new UnsupportedOperationException();

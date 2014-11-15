@@ -309,6 +309,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testGetInvalidModlets() throws Exception
     {
         DefaultModletProvider.setDefaultEnabled( Boolean.TRUE );
@@ -619,6 +620,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testCreateResourceResolver() throws Exception
     {
         this.getModelContext().setModlets( null );
@@ -711,6 +713,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testCreateContext() throws Exception
     {
         this.getModelContext().setModlets( null );
@@ -767,6 +770,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testCreateMarshaller() throws Exception
     {
         this.getModelContext().setModlets( null );
@@ -823,6 +827,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testCreateUnmarshaller() throws Exception
     {
         this.getModelContext().setModlets( null );
@@ -879,6 +884,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testCreateSchema() throws Exception
     {
         this.getModelContext().setModlets( null );

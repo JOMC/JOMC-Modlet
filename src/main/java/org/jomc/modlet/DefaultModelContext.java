@@ -624,6 +624,7 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
+    @Deprecated
     public EntityResolver createEntityResolver( final URI publicId ) throws ModelException
     {
         if ( publicId == null )
@@ -646,6 +647,7 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
+    @Deprecated
     public LSResourceResolver createResourceResolver( final URI publicId ) throws ModelException
     {
         if ( publicId == null )
@@ -670,6 +672,7 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
+    @Deprecated
     public javax.xml.validation.Schema createSchema( final URI publicId ) throws ModelException
     {
         if ( publicId == null )
@@ -694,6 +697,7 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
+    @Deprecated
     public JAXBContext createContext( final URI publicId ) throws ModelException
     {
         if ( publicId == null )
@@ -718,6 +722,7 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
+    @Deprecated
     public Marshaller createMarshaller( final URI publicId ) throws ModelException
     {
         if ( publicId == null )
@@ -742,6 +747,7 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
+    @Deprecated
     public Unmarshaller createUnmarshaller( final URI publicId ) throws ModelException
     {
         if ( publicId == null )
@@ -1562,26 +1568,11 @@ public class DefaultModelContext extends ModelContext
 
                         if ( s == null && publicId != null )
                         {
-                            try
+                            final List<Schema> schemasByPublicId = schemas.getSchemasByPublicId( publicId );
+
+                            if ( schemasByPublicId.size() == 1 )
                             {
-                                final List<Schema> schemasByPublicId =
-                                    schemas.getSchemasByPublicId( new URI( publicId ) );
-
-                                if ( schemasByPublicId.size() == 1 )
-                                {
-                                    s = schemasByPublicId.get( 0 );
-                                }
-                            }
-                            catch ( final URISyntaxException e )
-                            {
-                                if ( isLoggable( Level.WARNING ) )
-                                {
-                                    log( Level.WARNING, getMessage( "unsupportedIdUri", publicId, getMessage( e ) ),
-                                         null );
-
-                                }
-
-                                s = null;
+                                s = schemasByPublicId.get( 0 );
                             }
                         }
                     }

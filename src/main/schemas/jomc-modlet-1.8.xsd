@@ -29,7 +29,7 @@
 
   $JOMC$
 
-  Location: http://xml.jomc.org/modlet/jomc-modlet-1.3.xsd
+  Location: http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd
 
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -68,7 +68,7 @@
 
   $JOMC$
 
-  Location: http://xml.jomc.org/modlet/jomc-modlet-1.3.xsd
+  Location: http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd
 
 ]]>
     </xsd:documentation>
@@ -84,9 +84,9 @@
   <xsd:complexType name="Model">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
-        Model.
+Model.
 
-        The 'Model' type defines attribute 'identifier' holding an identifier uniquely identifying the model in a set of models.
+The 'Model' type defines attribute 'identifier' holding an identifier uniquely identifying the model in a set of models.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:complexContent>
@@ -132,12 +132,12 @@
   <xsd:complexType name="Modlet">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
-        Modlet.
+Modlet.
 
-        The 'Modlet' type defines attributes 'name', 'model', 'vendor' and 'version'. Attribute 'name' holds an identifier
-        uniquely identifying the modlet in a set of modlets. Attribute 'model' holds an identifier of the model the modlet is
-        part of. Attribute 'vendor' holds information regarding the vendor of the modlet. Attribute 'version' holds the version
-        of the modlet.
+The 'Modlet' type defines attributes 'name', 'model', 'vendor' and 'version'. Attribute 'name' holds an identifier
+uniquely identifying the modlet in a set of modlets. Attribute 'model' holds an identifier of the model the modlet is
+part of. Attribute 'vendor' holds information regarding the vendor of the modlet. Attribute 'version' holds the version
+of the modlet.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:complexContent>
@@ -148,7 +148,7 @@
           <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="name" type="modlet:String" use="required"/>
-        <xsd:attribute name="model" type="modlet:Identifier" use="optional"/>
+        <xsd:attribute name="model" type="modlet:Identifier" use="required"/>
         <xsd:attribute name="vendor" type="modlet:String" use="optional"/>
         <xsd:attribute name="version" type="modlet:Version" use="optional"/>
       </xsd:extension>
@@ -181,12 +181,12 @@
   <xsd:complexType name="Schema">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
-        Reference to a schema.
+Reference to a schema.
 
-        The 'Schema' type defines attributes 'public-id', 'system-id', 'context-id' and 'classpath-id'. Attribute 'public-id'
-        holds the public identifier of the referenced schema. Attribute 'system-id' holds the system identifier of the
-        referenced schema. Attribute 'context-id' holds the name of the Java package containing JAXB classes of the referenced
-        schema. Attribute 'classpath-id' holds the Java classpath location of the referenced schema.
+The 'Schema' type defines attributes 'public-id', 'system-id', 'context-id' and 'classpath-id'. Attribute 'public-id'
+holds the public identifier of the referenced schema. Attribute 'system-id' holds the system identifier of the
+referenced schema. Attribute 'context-id' holds the name of the Java package containing JAXB classes of the referenced
+schema. Attribute 'classpath-id' holds the Java classpath location of the referenced schema.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:complexContent>
