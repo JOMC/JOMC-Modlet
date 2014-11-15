@@ -45,24 +45,6 @@
     public static final String MODEL_PUBLIC_ID = "http://jomc.org/modlet";
 
     /**
-     * Public identifier of the modlet schema.
-     * @since 1.2
-     */
-    public static final java.net.URI PUBLIC_ID;
-
-    static
-    {
-        try
-        {
-            PUBLIC_ID = new java.net.URI( MODEL_PUBLIC_ID );
-        }
-        catch ( final java.net.URISyntaxException e )
-        {
-            throw new AssertionError( e );
-        }
-    }
-
-    /**
      * Gets a single {@code JAXBElement} matching a namespace URI and local part from a given list of objects.
      *
      * @param any The list to search.
@@ -571,44 +553,6 @@
     }
 
     /**
-     * Gets schemas for a public identifier from this list of modlets.
-     *
-     * @param publicId The public identifier of the schemas to return.
-     *
-     * @return A list of schemas matching {@code publicId} or {@code null}, if no such schemas are found.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     *
-     * @see #getModlet()
-     * @see Modlet#getSchemas()
-     * @see Schemas#getSchemasByPublicId(java.net.URI)
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public Schemas getSchemas( final java.net.URI publicId )
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        final Schemas schemas = new Schemas();
-
-        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
-        {
-            final Modlet m = this.getModlet().get( i );
-
-            if ( m.getSchemas() != null )
-            {
-                schemas.getSchema().addAll( m.getSchemas().getSchemasByPublicId( publicId ) );
-            }
-        }
-
-        return schemas.getSchema().isEmpty() ? null : schemas;
-    }
-
-    /**
      * Gets services for a model from this list of modlets.
      *
      * @param model The identifier of the model to return services of.
@@ -803,44 +747,6 @@
      * @throws NullPointerException if {@code publicId} is {@code null}.
      *
      * @see #getSchema()
-     * @see Schema#getPublicIdUri()
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, replaced by method {@link #getSchemasByPublicId(java.lang.String)} This method will
-     * be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public List<Schema> getSchemasByPublicId( final java.net.URI publicId )
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        final List<Schema> schemas = new ArrayList<Schema>( this.getSchema().size() );
-
-        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
-        {
-            final Schema s = this.getSchema().get( i );
-
-            if ( publicId.equals( s.getPublicIdUri() ) )
-            {
-                schemas.add( s );
-            }
-        }
-
-        return java.util.Collections.unmodifiableList( schemas );
-    }
-
-    /**
-     * Gets a list of schemas for a given public identifier from the list of schemas.
-     *
-     * @param publicId The public identifier of the schemas to return.
-     *
-     * @return An unmodifiable list of schemas matching {@code publicId} or an empty list, if no such schemas are found.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     *
-     * @see #getSchema()
      * @see Schema#getPublicId()
      * @since 1.8
      */
@@ -975,62 +881,6 @@
     public <T> java.util.List<T> getAnyObjects( final Class<T> clazz )
     {
         return this.getAnyObjects( this.getAny(), clazz );
-    }
-
-    /**
-     * Gets the public identifier of the referenced schema as an {@code URI}.
-     *
-     * @return The public identifier of the referenced schema as an {@code URI} or {@code null}.
-     *
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public java.net.URI getPublicIdUri()
-    {
-        java.net.URI uri = null;
-
-        if ( this.getPublicId() != null )
-        {
-            try
-            {
-                uri = new java.net.URI( this.getPublicId() );
-            }
-            catch ( final java.net.URISyntaxException e )
-            {
-                throw new AssertionError( e );
-            }
-        }
-
-        return uri;
-    }
-
-    /**
-     * Gets the system identifier of the referenced schema as an {@code URI}.
-     *
-     * @return The system identifier of the referenced schema as an {@code URI} or {@code null}.
-     *
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public java.net.URI getSystemIdUri()
-    {
-        java.net.URI uri = null;
-
-        if ( this.getSystemId() != null )
-        {
-            try
-            {
-                uri = new java.net.URI( this.getSystemId() );
-            }
-            catch ( final java.net.URISyntaxException e )
-            {
-                throw new AssertionError( e );
-            }
-        }
-
-        return uri;
     }]]>
       </ci:code>
     </jaxb:bindings>

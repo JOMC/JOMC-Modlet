@@ -31,7 +31,6 @@
 package org.jomc.modlet;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -884,23 +883,6 @@ public abstract class ModelContext
     public abstract EntityResolver createEntityResolver( String model ) throws ModelException;
 
     /**
-     * Creates a new SAX entity resolver instance for a given public identifier URI.
-     *
-     * @param publicId The public identifier URI to create a new SAX entity resolver for.
-     *
-     * @return A new SAX entity resolver instance for the public identifier URI {@code publicId}.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     * @throws ModelException if creating a new SAX entity resolver instance fails.
-     *
-     * @see ModletObject#PUBLIC_ID
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract EntityResolver createEntityResolver( URI publicId ) throws ModelException;
-
-    /**
      * Creates a new L/S resource resolver instance of a given model.
      *
      * @param model The identifier of the model to create a new L/S resource resolver of.
@@ -913,23 +895,6 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract LSResourceResolver createResourceResolver( String model ) throws ModelException;
-
-    /**
-     * Creates a new L/S resource resolver instance for a given public identifier URI.
-     *
-     * @param publicId The public identifier URI to create a new L/S resource resolver for.
-     *
-     * @return A new L/S resource resolver instance for the public identifier URI {@code publicId}.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     * @throws ModelException if creating a new L/S resource resolver instance fails.
-     *
-     * @see ModletObject#PUBLIC_ID
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract LSResourceResolver createResourceResolver( URI publicId ) throws ModelException;
 
     /**
      * Creates a new JAXP schema instance of a given model.
@@ -946,23 +911,6 @@ public abstract class ModelContext
     public abstract javax.xml.validation.Schema createSchema( String model ) throws ModelException;
 
     /**
-     * Creates a new JAXP schema instance for a given public identifier URI.
-     *
-     * @param publicId The public identifier URI to create a new JAXP schema instance for.
-     *
-     * @return A new JAXP schema instance for the public identifier URI {@code publicId}.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     * @throws ModelException if creating a new JAXP schema instance fails.
-     *
-     * @see ModletObject#PUBLIC_ID
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract javax.xml.validation.Schema createSchema( URI publicId ) throws ModelException;
-
-    /**
      * Creates a new JAXB context instance of a given model.
      *
      * @param model The identifier of the model to create a new JAXB context instance of.
@@ -975,23 +923,6 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract JAXBContext createContext( String model ) throws ModelException;
-
-    /**
-     * Creates a new JAXB context instance for a given public identifier URI.
-     *
-     * @param publicId The public identifier URI to create a new JAXB context instance for.
-     *
-     * @return A new JAXB context instance for the public identifier URI {@code publicId}.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     * @throws ModelException if creating a new JAXB context instance fails.
-     *
-     * @see ModletObject#PUBLIC_ID
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract JAXBContext createContext( URI publicId ) throws ModelException;
 
     /**
      * Creates a new JAXB marshaller instance of a given model.
@@ -1008,23 +939,6 @@ public abstract class ModelContext
     public abstract Marshaller createMarshaller( String model ) throws ModelException;
 
     /**
-     * Creates a new JAXB marshaller instance for a given public identifier URI.
-     *
-     * @param publicId The public identifier URI to create a new JAXB marshaller instance for.
-     *
-     * @return A new JAXB marshaller instance for the public identifier URI {@code publicId}.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     * @throws ModelException if creating a new JAXB marshaller instance fails.
-     *
-     * @see ModletObject#PUBLIC_ID
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract Marshaller createMarshaller( URI publicId ) throws ModelException;
-
-    /**
      * Creates a new JAXB unmarshaller instance of a given model.
      *
      * @param model The identifier of the model to create a new JAXB unmarshaller instance of.
@@ -1037,23 +951,6 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Unmarshaller createUnmarshaller( String model ) throws ModelException;
-
-    /**
-     * Creates a new JAXB unmarshaller instance for a given given public identifier URI.
-     *
-     * @param publicId The public identifier URI to create a new JAXB unmarshaller instance for.
-     *
-     * @return A new JAXB unmarshaller instance for the public identifier URI {@code publicId}.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     * @throws ModelException if creating a new JAXB unmarshaller instance fails.
-     *
-     * @see ModletObject#PUBLIC_ID
-     * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract Unmarshaller createUnmarshaller( URI publicId ) throws ModelException;
 
     /**
      * Processes a {@code Model}.

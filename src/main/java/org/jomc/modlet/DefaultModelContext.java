@@ -606,18 +606,6 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
-    @Deprecated
-    public EntityResolver createEntityResolver( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createEntityResolver( this.getModlets().getSchemas( publicId ) );
-    }
-
-    @Override
     public LSResourceResolver createResourceResolver( final String model ) throws ModelException
     {
         if ( model == null )
@@ -626,18 +614,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return this.createResourceResolver( this.createEntityResolver( model ) );
-    }
-
-    @Override
-    @Deprecated
-    public LSResourceResolver createResourceResolver( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createResourceResolver( this.createEntityResolver( publicId ) );
     }
 
     @Override
@@ -654,20 +630,6 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
-    @Deprecated
-    public javax.xml.validation.Schema createSchema( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createSchema( this.getModlets().getSchemas( publicId ), this.createEntityResolver( publicId ),
-                                  this.createResourceResolver( publicId ), null, publicId );
-
-    }
-
-    @Override
     public JAXBContext createContext( final String model ) throws ModelException
     {
         if ( model == null )
@@ -676,18 +638,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return this.createContext( this.getModlets().getSchemas( model ), model, null );
-    }
-
-    @Override
-    @Deprecated
-    public JAXBContext createContext( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createContext( this.getModlets().getSchemas( publicId ), null, publicId );
     }
 
     @Override
@@ -704,18 +654,6 @@ public class DefaultModelContext extends ModelContext
     }
 
     @Override
-    @Deprecated
-    public Marshaller createMarshaller( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createMarshaller( this.getModlets().getSchemas( publicId ), null, null, publicId );
-    }
-
-    @Override
     public Unmarshaller createUnmarshaller( final String model ) throws ModelException
     {
         if ( model == null )
@@ -726,18 +664,6 @@ public class DefaultModelContext extends ModelContext
         return this.createUnmarshaller( this.getModlets().getSchemas( model ), this.getModlets().getServices( model ),
                                         model, null );
 
-    }
-
-    @Override
-    @Deprecated
-    public Unmarshaller createUnmarshaller( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createUnmarshaller( this.getModlets().getSchemas( publicId ), null, null, publicId );
     }
 
     /**
