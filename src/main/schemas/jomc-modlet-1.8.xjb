@@ -47,7 +47,9 @@
     /**
      * Public identifier of the modlet schema.
      * @since 1.2
+     * @deprecated As of JOMC 1.8, removed without replacement.
      */
+    @Deprecated
     public static final java.net.URI PUBLIC_ID;
 
     static
