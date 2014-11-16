@@ -583,40 +583,12 @@ public class ModelContextTest
         EntityResolver r = this.getModelContext().createEntityResolver( ModletObject.MODEL_PUBLIC_ID );
         assertNotNull( r );
 
-        try
-        {
-            r.resolveEntity( null, null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
         assertNull( r.resolveEntity( null, "DOES_NOT_EXIST" ) );
-        assertNotNull( r.resolveEntity( "http://jomc.org/modlet", "DOES_NOT_EXIST" ) );
+        assertNull( r.resolveEntity( "http://jomc.org/modlet", "DOES_NOT_EXIST" ) );
         assertNull( r.resolveEntity( ":", "DOES_NOT_EXIST" ) );
         assertNull( r.resolveEntity( null, ":" ) );
-
-        r = this.getModelContext().createEntityResolver( ModletObject.PUBLIC_ID );
-        assertNotNull( r );
-
-        try
-        {
-            r.resolveEntity( null, null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        assertNull( r.resolveEntity( null, "DOES_NOT_EXIST" ) );
-        assertNotNull( r.resolveEntity( "http://jomc.org/modlet", "DOES_NOT_EXIST" ) );
-        assertNull( r.resolveEntity( ":", "DOES_NOT_EXIST" ) );
-        assertNull( r.resolveEntity( null, ":" ) );
+        assertNull( r.resolveEntity( "", null ) );
+        assertNull( r.resolveEntity( null, "" ) );
     }
 
     @Test

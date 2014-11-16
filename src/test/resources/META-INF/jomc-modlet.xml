@@ -33,7 +33,7 @@
 <modlet xmlns="http://jomc.org/modlet"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://jomc.org/modlet http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd"
-        name="${project.name} Tests" 
+        name="${project.name} ⁑ Tests"
         model="http://jomc.org/modlet/test"
         vendor="${project.organization.name}"
         version="${project.version}">
@@ -41,11 +41,14 @@
   <schemas>
     <schema public-id="http://jomc.org/modlet/test"
             system-id="http://xml.jomc.org/modlet/test/jomc-modlet-test-1.0.xsd"
-            context-id="org.jomc.modlet.test" classpath-id="org/jomc/modlet/test/jomc-modlet-test-1.0.xsd"/>
-
-    <schema public-id="http://jomc.org/modlet/test/does-not-exist" system-id="DOES_NOT_EXIST"
-            classpath-id="DOES_NOT_EXIST"/>
-
+            context-id="org.jomc.modlet.test"
+            classpath-id="org/jomc/modlet/test/jomc-modlet-test-1.0.xsd">
+    </schema>
+    <schema public-id="http://jomc.org/modlet/test/imported"
+            system-id="http://xml.jomc.org/modlet/test/jomc-modlet-test-imported-1.0.xsd"
+            context-id="org.jomc.modlet.test.imported"
+            classpath-id="org/jomc/modlet/test/jomc-modlet-test-imported-1.0.xsd">
+    </schema>
   </schemas>
   <services>
     <service identifier="org.jomc.modlet.ModelProcessor" class="org.jomc.modlet.test.support.TestModelProcessor">

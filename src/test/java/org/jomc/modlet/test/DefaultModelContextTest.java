@@ -40,6 +40,7 @@ import java.util.Properties;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
 import org.jomc.modlet.DefaultModelContext;
 import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.Model;
@@ -1055,16 +1056,9 @@ public class DefaultModelContextTest extends ModelContextTest
         assertNotNull( model );
         assertEquals( MODLET_TEST_NS, model.getIdentifier() );
 
-        try
-        {
-            this.getModelContext().createSchema( MODLET_TEST_NS );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        this.getModelContext().setModlets( null );
+        final Schema schema = this.getModelContext().createSchema( MODLET_TEST_NS );
+        assertNotNull( schema );
 
         this.getModelContext().setModlets( null );
         final JAXBContext context = this.getModelContext().createContext( MODLET_TEST_NS );

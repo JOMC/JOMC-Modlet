@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-  Copyright (C) Christian Schulte, 2005-206
+  Copyright (C) Christian Schulte, 2014-320
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,13 @@
 
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://jomc.org/modlet/test"
+            targetNamespace="http://jomc.org/modlet/test/imported"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
   <xsd:annotation>
     <xsd:documentation xml:lang="en"><![CDATA[
 
-  Copyright (C) Christian Schulte, 2005-206
+  Copyright (C) Christian Schulte, 2014-320
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,9 @@
     </xsd:documentation>
   </xsd:annotation>
 
-  <xsd:import namespace="http://jomc.org/modlet/test/imported"/>
-  <xsd:include schemaLocation="jomc-modlet-test-1.0-included.xsd"/>
-
+  <xsd:complexType name="ImportedComplexType">
+    <xsd:sequence>
+      <xsd:any minOccurs="0" maxOccurs="unbounded" namespace="##other" processContents="lax"/>
+    </xsd:sequence>
+  </xsd:complexType>
 </xsd:schema>
