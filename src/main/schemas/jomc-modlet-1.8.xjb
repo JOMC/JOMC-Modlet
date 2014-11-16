@@ -989,10 +989,7 @@
      *
      * @see #getSchema()
      * @see Schema#getPublicId()
-     * @deprecated As of JOMC 1.2, replaced by method {@link #getSchemasByPublicId(java.lang.String)}. This method will
-     * be removed in version 2.0.
      */
-    @Deprecated
     public Schema getSchemaByPublicId( final String publicId )
     {
         if ( publicId == null )
@@ -1057,8 +1054,7 @@
      * @see #getSchema()
      * @see Schema#getPublicIdUri()
      * @since 1.2
-     * @deprecated As of JOMC 1.8, replaced by method {@link #getSchemasByPublicId(java.lang.String)}. This method will
-     * be removed in JOMC 2.0.
+     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
     @Deprecated
     public List<Schema> getSchemasByPublicId( final java.net.URI publicId )
@@ -1075,41 +1071,6 @@
             final Schema s = this.getSchema().get( i );
 
             if ( publicId.equals( s.getPublicIdUri() ) )
-            {
-                schemas.add( s );
-            }
-        }
-
-        return java.util.Collections.unmodifiableList( schemas );
-    }
-
-    /**
-     * Gets a list of schemas for a given public identifier from the list of schemas.
-     *
-     * @param publicId The public identifier of the schemas to return.
-     *
-     * @return An unmodifiable list of schemas matching {@code publicId} or an empty list, if no such schemas are found.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     *
-     * @see #getSchema()
-     * @see Schema#getPublicId()
-     * @since 1.8
-     */
-    public List<Schema> getSchemasByPublicId( final String publicId )
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        final List<Schema> schemas = new ArrayList<Schema>( this.getSchema().size() );
-
-        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
-        {
-            final Schema s = this.getSchema().get( i );
-
-            if ( publicId.equals( s.getPublicId() ) )
             {
                 schemas.add( s );
             }

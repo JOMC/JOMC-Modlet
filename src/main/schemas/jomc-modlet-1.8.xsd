@@ -114,6 +114,13 @@ The 'Model' type defines attribute 'identifier' holding an identifier uniquely i
       <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
       <xsd:field xpath="@system-id"/>
     </xsd:key>
+    <xsd:key name="schemas-public-id-key">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">Public id key of a schema from the list of modlets.</xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
+      <xsd:field xpath="@public-id"/>
+    </xsd:key>
   </xsd:element>
   <xsd:complexType name="Modlets">
     <xsd:annotation>
@@ -162,6 +169,13 @@ of the modlet.
       </xsd:annotation>
       <xsd:selector xpath="modlet:schema"/>
       <xsd:field xpath="@system-id"/>
+    </xsd:key>
+    <xsd:key name="schema-public-id-key">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">Public id key of a schema.</xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="modlet:schema"/>
+      <xsd:field xpath="@public-id"/>
     </xsd:key>
   </xsd:element>
   <xsd:complexType name="Schemas">
