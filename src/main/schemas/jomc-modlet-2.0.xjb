@@ -706,6 +706,38 @@
     <jaxb:bindings node="xs:complexType[@name='Schemas']">
       <ci:code><![CDATA[
     /**
+     * Gets a schema for a given public identifier from the list of schemas.
+     *
+     * @param publicId The public identifier of the schema to return.
+     *
+     * @return The first matching schema or {@code null}, if no such schema is found.
+     *
+     * @throws NullPointerException if {@code publicId} is {@code null}.
+     *
+     * @see #getSchema()
+     * @see Schema#getPublicId()
+     */
+    public Schema getSchemaByPublicId( final String publicId )
+    {
+        if ( publicId == null )
+        {
+            throw new NullPointerException( "publicId" );
+        }
+
+        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
+        {
+            final Schema s = this.getSchema().get( i );
+
+            if ( publicId.equals( s.getPublicId() ) )
+            {
+                return s;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Gets a schema for a given system identifier from the list of schemas.
      *
      * @param systemId The system identifier of the schema to return.
@@ -735,41 +767,6 @@
         }
 
         return null;
-    }
-
-    /**
-     * Gets a list of schemas for a given public identifier from the list of schemas.
-     *
-     * @param publicId The public identifier of the schemas to return.
-     *
-     * @return An unmodifiable list of schemas matching {@code publicId} or an empty list, if no such schemas are found.
-     *
-     * @throws NullPointerException if {@code publicId} is {@code null}.
-     *
-     * @see #getSchema()
-     * @see Schema#getPublicId()
-     * @since 1.8
-     */
-    public List<Schema> getSchemasByPublicId( final String publicId )
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        final List<Schema> schemas = new ArrayList<Schema>( this.getSchema().size() );
-
-        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
-        {
-            final Schema s = this.getSchema().get( i );
-
-            if ( publicId.equals( s.getPublicId() ) )
-            {
-                schemas.add( s );
-            }
-        }
-
-        return java.util.Collections.unmodifiableList( schemas );
     }]]>
       </ci:code>
     </jaxb:bindings>

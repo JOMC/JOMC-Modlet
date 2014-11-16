@@ -1476,12 +1476,7 @@ public class DefaultModelContext extends ModelContext
 
                         if ( s == null && publicId != null )
                         {
-                            final List<Schema> schemasByPublicId = schemas.getSchemasByPublicId( publicId );
-
-                            if ( schemasByPublicId.size() == 1 )
-                            {
-                                s = schemasByPublicId.get( 0 );
-                            }
+                            s = schemas.getSchemaByPublicId( publicId );
                         }
                     }
 
