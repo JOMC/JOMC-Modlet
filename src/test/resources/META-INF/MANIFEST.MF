@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+
+Name: org/jomc/modlet/test/jomc-modlet-test-1.0.xsd
+
+Name: org/jomc/modlet/test/jomc-modlet-test-1.0-included.xsd
+
+Name: org/jomc/modlet/test/jomc-modlet-test-imported-1.0.xsd

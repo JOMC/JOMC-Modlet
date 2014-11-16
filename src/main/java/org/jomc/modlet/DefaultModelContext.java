@@ -1459,11 +1459,6 @@ public class DefaultModelContext extends ModelContext
             public InputSource resolveEntity( final String publicId, final String systemId )
                 throws SAXException, IOException
             {
-                if ( systemId == null )
-                {
-                    throw new NullPointerException( "systemId" );
-                }
-
                 InputSource schemaSource = null;
 
                 try
@@ -1472,9 +1467,11 @@ public class DefaultModelContext extends ModelContext
 
                     if ( schemas != null )
                     {
-                        s = schemas.getSchemaBySystemId( systemId );
-
-                        if ( s == null && publicId != null )
+                        if ( systemId != null && !"".equals( systemId ) )
+                        {
+                            s = schemas.getSchemaBySystemId( systemId );
+                        }
+                        else if ( publicId != null )
                         {
                             s = schemas.getSchemaByPublicId( publicId );
                         }
@@ -1483,7 +1480,7 @@ public class DefaultModelContext extends ModelContext
                     if ( s != null )
                     {
                         schemaSource = new InputSource();
-                        schemaSource.setPublicId( s.getPublicId() != null ? s.getPublicId() : publicId );
+                        schemaSource.setPublicId( s.getPublicId() );
                         schemaSource.setSystemId( s.getSystemId() );
 
                         if ( s.getClasspathId() != null )
@@ -1509,7 +1506,7 @@ public class DefaultModelContext extends ModelContext
                         }
                     }
 
-                    if ( schemaSource == null )
+                    if ( schemaSource == null && systemId != null && !"".equals( systemId ) )
                     {
                         final URI systemUri = new URI( systemId );
                         String schemaName = systemUri.getPath();
