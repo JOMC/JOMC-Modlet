@@ -554,6 +554,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testCreateEntityResolver() throws Exception
     {
         this.getModelContext().setModlets( null );

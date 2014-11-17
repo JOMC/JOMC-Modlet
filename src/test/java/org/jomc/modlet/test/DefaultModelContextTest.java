@@ -1183,6 +1183,7 @@ public class DefaultModelContextTest extends ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testProviderSorting() throws Exception
     {
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
