@@ -125,6 +125,7 @@
                 <goal>unpack</goal>
               </goals>
               <configuration>
+                <includes>**/*.xsd,**/*.xjb</includes>
                 <artifactItems>
                   <artifactItem>
                     <groupId>org.jomc</groupId>
