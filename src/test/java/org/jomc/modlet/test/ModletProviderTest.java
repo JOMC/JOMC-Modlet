@@ -47,10 +47,14 @@ import static org.junit.Assert.fail;
 public class ModletProviderTest
 {
 
-    /** The {@code ModletProvider} instance tests are performed with. */
+    /**
+     * The {@code ModletProvider} instance tests are performed with.
+     */
     private ModletProvider modletProvider;
 
-    /** Creates a new {@code ModletProviderTest} instance. */
+    /**
+     * Creates a new {@code ModletProviderTest} instance.
+     */
     public ModletProviderTest()
     {
         super();

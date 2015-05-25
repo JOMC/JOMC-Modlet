@@ -74,20 +74,26 @@ public class DefaultModelContextTest extends ModelContextTest
 
     private static final String MODLET_TEST_NS = "http://jomc.org/modlet/test";
 
-    /** Creates a new {@code DefaultModelContextTest} instance. */
+    /**
+     * Creates a new {@code DefaultModelContextTest} instance.
+     */
     public DefaultModelContextTest()
     {
         super();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DefaultModelContext getModelContext() throws ModelException
     {
         return (DefaultModelContext) super.getModelContext();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected DefaultModelContext newModelContext()
     {

@@ -72,10 +72,14 @@ import static org.junit.Assert.fail;
 public class ModelContextTest
 {
 
-    /** Constant for the name of a modlet provided without {@code ModletProvider}. */
+    /**
+     * Constant for the name of a modlet provided without {@code ModletProvider}.
+     */
     public static final String DEFAULT_MODLET_NAME;
 
-    /** Constant for the absolute location of an existing test resource. */
+    /**
+     * Constant for the absolute location of an existing test resource.
+     */
     private static final String TEST_RESOURCE_LOCATION =
         ModelContextTest.class.getName().replace( '.', '/' ) + ".properties";
 
@@ -120,10 +124,14 @@ public class ModelContextTest
         }
     }
 
-    /** The {@code ModelContext} instance tests are performed with. */
+    /**
+     * The {@code ModelContext} instance tests are performed with.
+     */
     private ModelContext modelContext;
 
-    /** Creates a new {@code ModelContextTest} instance. */
+    /**
+     * Creates a new {@code ModelContextTest} instance.
+     */
     public ModelContextTest()
     {
         super();

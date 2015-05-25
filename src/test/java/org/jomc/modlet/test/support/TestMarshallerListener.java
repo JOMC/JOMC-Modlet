@@ -108,7 +108,9 @@ public final class TestMarshallerListener extends Marshaller.Listener
 
     private InvocationTargetExceptionPropertyType invocationTargetExceptionProperty;
 
-    /** Creates a new {@code TestMarshallerListener}. */
+    /**
+     * Creates a new {@code TestMarshallerListener}.
+     */
     public TestMarshallerListener()
     {
         super();

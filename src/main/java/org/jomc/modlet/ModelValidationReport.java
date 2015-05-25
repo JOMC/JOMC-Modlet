@@ -46,33 +46,41 @@ import javax.xml.bind.JAXBElement;
 public class ModelValidationReport implements Serializable
 {
 
-    /** Report detail. */
+    /**
+     * Report detail.
+     */
     public static class Detail implements Serializable
     {
 
-        /** Serial version UID for backwards compatibility with 1.0.x object streams. */
+        /**
+         * Serial version UID for backwards compatibility with 1.0.x object streams.
+         */
         private static final long serialVersionUID = -2466230076806042116L;
 
         /**
          * The detail identifier.
+         *
          * @serial
          */
         private String identifier;
 
         /**
          * The detail level.
+         *
          * @serial
          */
         private Level level;
 
         /**
          * The detail message.
+         *
          * @serial
          */
         private String message;
 
         /**
          * The JAXB element this detail is associated with.
+         *
          * @serial
          */
         private JAXBElement<?> element;
@@ -161,16 +169,21 @@ public class ModelValidationReport implements Serializable
 
     }
 
-    /** Serial version UID for backwards compatibility with 1.0.x object streams. */
+    /**
+     * Serial version UID for backwards compatibility with 1.0.x object streams.
+     */
     private static final long serialVersionUID = 6688024709865043122L;
 
     /**
      * Details of the instance.
+     *
      * @serial
      */
     private List<Detail> details;
 
-    /** Creates a new {@code ModelValidationReport} instance. */
+    /**
+     * Creates a new {@code ModelValidationReport} instance.
+     */
     public ModelValidationReport()
     {
         super();
@@ -178,9 +191,11 @@ public class ModelValidationReport implements Serializable
 
     /**
      * Gets all details of the instance.
-     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * <p>
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
      * to the returned list will be present inside the object. This is why there is no {@code set} method for the
-     * details property.</p>
+     * details property.
+     * </p>
      *
      * @return All details of the instance.
      */

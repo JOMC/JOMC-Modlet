@@ -40,7 +40,9 @@ package org.jomc.modlet;
 class DefaultModelContextFactory extends ModelContextFactory
 {
 
-    /** Creates a new {@code DefaultModelContextFactory} instance. */
+    /**
+     * Creates a new {@code DefaultModelContextFactory} instance.
+     */
     DefaultModelContextFactory()
     {
         super();

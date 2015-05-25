@@ -48,20 +48,26 @@ import static org.junit.Assert.fail;
 public class DefaultModletProviderTest extends ModletProviderTest
 {
 
-    /** Creates a new {@code DefaultModletProviderTest} instance. */
+    /**
+     * Creates a new {@code DefaultModletProviderTest} instance.
+     */
     public DefaultModletProviderTest()
     {
         super();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DefaultModletProvider getModletProvider()
     {
         return (DefaultModletProvider) super.getModletProvider();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DefaultModletProvider newModletProvider()
     {

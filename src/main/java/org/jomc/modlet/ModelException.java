@@ -39,10 +39,14 @@ package org.jomc.modlet;
 public class ModelException extends Exception
 {
 
-    /** Serial version UID for backwards compatibility with 1.0.x object streams. */
+    /**
+     * Serial version UID for backwards compatibility with 1.0.x object streams.
+     */
     private static final long serialVersionUID = -5676226264482808681L;
 
-    /** Creates a new {@code ModelException} instance. */
+    /**
+     * Creates a new {@code ModelException} instance.
+     */
     public ModelException()
     {
         super();

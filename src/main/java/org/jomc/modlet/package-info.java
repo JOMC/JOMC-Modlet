@@ -30,9 +30,9 @@
  */
 @XmlSchema( namespace = "http://jomc.org/modlet", elementFormDefault = XmlNsForm.QUALIFIED,
             location = "http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd", xmlns =
-{
-    @XmlNs( prefix = "modlet", namespaceURI = "http://jomc.org/modlet" )
-} )
+            {
+                @XmlNs( prefix = "modlet", namespaceURI = "http://jomc.org/modlet" )
+    } )
 package org.jomc.modlet;
 
 import javax.xml.bind.annotation.XmlNs;
