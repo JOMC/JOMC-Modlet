@@ -32,15 +32,17 @@
 -->
 <modlet xmlns="http://jomc.org/modlet"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://jomc.org/modlet http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd"
+        xsi:schemaLocation="http://jomc.org/modlet http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd"
         name="${project.name} Tests"
-        model="http://jomc.org/modlet/test"
+        model="http://jomc.org/modlet"
         vendor="${project.organization.name}"
         version="${project.version}">
 
   <schemas>
-    <schema public-id="http://jomc.org/modlet" system-id="http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd"
-            context-id="org.jomc.modlet" classpath-id="org/jomc/modlet/jomc-modlet-1.8.xsd"/>
-
+    <schema public-id="http://jomc.org/modlet"
+            system-id="http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd"
+            context-id="org.jomc.modlet" 
+            classpath-id="org/jomc/modlet/jomc-modlet-1.9.xsd">
+    </schema>
   </schemas>
 </modlet>

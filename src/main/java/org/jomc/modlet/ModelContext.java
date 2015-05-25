@@ -33,6 +33,7 @@ package org.jomc.modlet;
 import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -44,15 +45,11 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.util.JAXBSource;
 import javax.xml.transform.Source;
-import javax.xml.validation.Validator;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
-import org.xml.sax.SAXException;
 
 /**
  * Model context interface.
@@ -118,7 +115,7 @@ public abstract class ModelContext
      * @see #getDefaultModletSchemaSystemId()
      */
     private static final String DEFAULT_MODLET_SCHEMA_SYSTEM_ID =
-        "http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd";
+        "http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd";
 
     /**
      * Log level events are logged at by default.
@@ -367,7 +364,7 @@ public abstract class ModelContext
      * <p>
      * The default {@code http://jomc.org/modlet} namespace schema system id is controlled by system property
      * {@code org.jomc.modlet.ModelContext.defaultModletSchemaSystemId} holding a system id URI.
-     * If that property is not set, the {@code http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd} default is
+     * If that property is not set, the {@code http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd} default is
      * returned.
      * </p>
      *
@@ -599,106 +596,88 @@ public abstract class ModelContext
      * @see #setModlets(org.jomc.modlet.Modlets)
      * @see #findModlets(org.jomc.modlet.Modlets)
      * @see #processModlets(org.jomc.modlet.Modlets)
+     * @see #validateModlets(org.jomc.modlet.Modlets)
      */
     public final Modlets getModlets() throws ModelException
     {
-        try
+        if ( this.modlets == null )
         {
-            if ( this.modlets == null )
+            final Modlet modlet = new Modlet();
+            modlet.setModel( ModletObject.MODEL_PUBLIC_ID );
+            modlet.setName( getMessage( "projectName" ) );
+            modlet.setVendor( getMessage( "projectVendor" ) );
+            modlet.setVersion( getMessage( "projectVersion" ) );
+            modlet.setSchemas( new Schemas() );
+
+            final Schema schema = new Schema();
+            schema.setPublicId( ModletObject.MODEL_PUBLIC_ID );
+            schema.setSystemId( this.getModletSchemaSystemId() );
+            schema.setContextId( ModletObject.class.getPackage().getName() );
+            schema.setClasspathId( ModletObject.class.getPackage().getName().replace( '.', '/' )
+                                       + "/jomc-modlet-1.9.xsd" );
+
+            modlet.getSchemas().getSchema().add( schema );
+
+            this.modlets = new Modlets();
+            this.modlets.getModlet().add( modlet );
+
+            long t0 = System.currentTimeMillis();
+            final Modlets provided = this.findModlets( this.modlets );
+
+            if ( this.isLoggable( Level.FINE ) )
             {
-                final Modlet modlet = new Modlet();
-                modlet.setModel( ModletObject.MODEL_PUBLIC_ID );
-                modlet.setName( getMessage( "projectName" ) );
-                modlet.setVendor( getMessage( "projectVendor" ) );
-                modlet.setVersion( getMessage( "projectVersion" ) );
-                modlet.setSchemas( new Schemas() );
+                this.log( Level.FINE, getMessage( "findModletsReport",
+                                                  provided != null ? provided.getModlet().size() : 0,
+                                                  System.currentTimeMillis() - t0 ), null );
 
-                final Schema schema = new Schema();
-                schema.setPublicId( ModletObject.MODEL_PUBLIC_ID );
-                schema.setSystemId( this.getModletSchemaSystemId() );
-                schema.setContextId( ModletObject.class.getPackage().getName() );
-                schema.setClasspathId( ModletObject.class.getPackage().getName().replace( '.', '/' )
-                                           + "/jomc-modlet-1.8.xsd" );
+            }
 
-                modlet.getSchemas().getSchema().add( schema );
+            if ( provided != null )
+            {
+                this.modlets = provided;
+            }
 
-                this.modlets = new Modlets();
-                this.modlets.getModlet().add( modlet );
+            t0 = System.currentTimeMillis();
+            final Modlets processed = this.processModlets( this.modlets );
 
-                long t0 = System.currentTimeMillis();
-                final Modlets provided = this.findModlets( this.modlets );
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                this.log( Level.FINE, getMessage( "processModletsReport",
+                                                  processed != null ? processed.getModlet().size() : 0,
+                                                  System.currentTimeMillis() - t0 ), null );
+            }
 
-                if ( this.isLoggable( Level.FINE ) )
+            if ( processed != null )
+            {
+                this.modlets = processed;
+            }
+
+            t0 = System.currentTimeMillis();
+            final ModelValidationReport report = this.validateModlets( this.modlets );
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                this.log( Level.FINE, getMessage( "validateModletsReport",
+                                                  this.modlets.getModlet().size(),
+                                                  System.currentTimeMillis() - t0 ), null );
+            }
+
+            for ( final ModelValidationReport.Detail detail : report.getDetails() )
+            {
+                if ( this.isLoggable( detail.getLevel() ) )
                 {
-                    this.log( Level.FINE, getMessage( "findModletsReport",
-                                                      provided != null ? provided.getModlet().size() : 0,
-                                                      System.currentTimeMillis() - t0 ), null );
-
-                }
-
-                if ( provided != null )
-                {
-                    this.modlets = provided;
-                }
-
-                t0 = System.currentTimeMillis();
-                final Modlets processed = this.processModlets( this.modlets );
-
-                if ( this.isLoggable( Level.FINE ) )
-                {
-                    this.log( Level.FINE, getMessage( "processModletsReport",
-                                                      processed != null ? processed.getModlet().size() : 0,
-                                                      System.currentTimeMillis() - t0 ), null );
-                }
-
-                if ( processed != null )
-                {
-                    this.modlets = processed;
-                }
-
-                t0 = System.currentTimeMillis();
-                final javax.xml.validation.Schema modletSchema = this.createSchema( ModletObject.MODEL_PUBLIC_ID );
-                final Validator validator = modletSchema.newValidator();
-                validator.validate( new JAXBSource( this.createContext( ModletObject.MODEL_PUBLIC_ID ),
-                                                    new ObjectFactory().createModlets( this.modlets ) ) );
-
-                if ( this.isLoggable( Level.FINE ) )
-                {
-                    this.log( Level.FINE, getMessage( "validateModletsReport",
-                                                      this.modlets.getModlet().size(),
-                                                      System.currentTimeMillis() - t0 ), null );
+                    this.log( detail.getLevel(), detail.getMessage(), null );
                 }
             }
 
-            return this.modlets;
-        }
-        catch ( final IOException e )
-        {
-            this.modlets = null;
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final JAXBException e )
-        {
-            this.modlets = null;
-            String message = getMessage( e );
-            if ( message == null && e.getLinkedException() != null )
+            if ( !report.isModelValid() )
             {
-                message = getMessage( e.getLinkedException() );
+                this.modlets = null;
+                throw new ModelException( getMessage( "invalidModlets" ) );
             }
-
-            throw new ModelException( message, e );
         }
-        catch ( final SAXException e )
-        {
-            this.modlets = null;
-            String message = getMessage( e );
-            if ( message == null && e.getException() != null )
-            {
-                message = getMessage( e.getException() );
-            }
 
-            throw new ModelException( message, e );
-        }
+        return this.modlets;
     }
 
     /**
@@ -852,6 +831,22 @@ public abstract class ModelContext
     public abstract Modlets processModlets( Modlets modlets ) throws ModelException;
 
     /**
+     * Validates a list of {@code Modlet}s.
+     *
+     * @param modlets The {@code Modlets} to validate.
+     *
+     * @return Validation report.
+     *
+     * @throws NullPointerException if {@code modlets} is {@code null}.
+     * @throws ModelException if validating {@code modlets} fails.
+     *
+     * @see ModletValidator META-INF/services/org.jomc.modlet.ModletValidator
+     * @see #getModlets()
+     * @since 1.9
+     */
+    public abstract ModelValidationReport validateModlets( Modlets modlets ) throws ModelException;
+
+    /**
      * Creates a new {@code Model} instance.
      *
      * @param model The identifier of the {@code Model} to create.
@@ -861,7 +856,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new {@code Model} instance fails.
      *
-     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelProvider.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class )
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Model findModel( String model ) throws ModelException;
@@ -876,11 +871,108 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if populating {@code model} fails.
      *
-     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelProvider.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class )
      *
      * @since 1.2
      */
     public abstract Model findModel( Model model ) throws ModelException;
+
+    /**
+     * Processes a {@code Model}.
+     *
+     * @param model The {@code Model} to process.
+     *
+     * @return The processed {@code Model}.
+     *
+     * @throws NullPointerException if {@code model} is {@code null}.
+     * @throws ModelException if processing {@code model} fails.
+     *
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProcessor.class )
+     */
+    public abstract Model processModel( Model model ) throws ModelException;
+
+    /**
+     * Validates a given {@code Model}.
+     *
+     * @param model The {@code Model} to validate.
+     *
+     * @return Validation report.
+     *
+     * @throws NullPointerException if {@code model} is {@code null}.
+     * @throws ModelException if validating {@code model} fails.
+     *
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelValidator.class )
+     * @see ModelValidationReport#isModelValid()
+     */
+    public abstract ModelValidationReport validateModel( Model model ) throws ModelException;
+
+    /**
+     * Validates a given model.
+     *
+     * @param model The identifier of the {@code Model} to use for validating {@code source}.
+     * @param source A source providing the model to validate.
+     *
+     * @return Validation report.
+     *
+     * @throws NullPointerException if {@code model} or {@code source} is {@code null}.
+     * @throws ModelException if validating the model fails.
+     *
+     * @see #createSchema(java.lang.String)
+     * @see ModelValidationReport#isModelValid()
+     * @see ModletObject#MODEL_PUBLIC_ID
+     */
+    public abstract ModelValidationReport validateModel( String model, Source source ) throws ModelException;
+
+    /**
+     * Creates service objects of a model.
+     * <p>
+     * Calling this method is the same as calling method<blockquote>
+     * {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, type.getName(), type )}
+     * </blockquote>
+     * </p>
+     *
+     * @param <T> The type of the service.
+     * @param model The identifier of the {@code Model} to create service objects of.
+     * @param type The class of the type of the service.
+     *
+     * @return An ordered, unmodifiable collection of new service objects identified by {@code type} of the model
+     * identified by {@code model}.
+     *
+     * @throws NullPointerException if {@code model} or {@code type} is {@code null}.
+     * @throws ModelException if creating service objects fails.
+     *
+     * @see ModelProvider
+     * @see ModelProcessor
+     * @see ModelValidator
+     *
+     * @since 1.9
+     */
+    public abstract <T> Collection<? extends T> createServiceObjects( final String model, final Class<T> type )
+        throws ModelException;
+
+    /**
+     * Creates service objects of a model.
+     *
+     * @param <T> The type of the service.
+     * @param model The identifier of the {@code Model} to create service objects of.
+     * @param service The identifier of the service to create objects of.
+     * @param type The class of the type of the service.
+     *
+     * @return An ordered, unmodifiable collection of new service objects identified by {@code service} of the model
+     * identified by {@code model}.
+     *
+     * @throws NullPointerException if {@code model}, {@code service} or {@code type} is {@code null}.
+     * @throws ModelException if creating service objects fails.
+     *
+     * @see ModelProvider
+     * @see ModelProcessor
+     * @see ModelValidator
+     *
+     * @since 1.9
+     */
+    public abstract <T> Collection<? extends T> createServiceObjects( final String model, final String service,
+                                                                      final Class<T> type )
+        throws ModelException;
 
     /**
      * Creates a new service object.
@@ -894,9 +986,10 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code service} or {@code type} is {@code null}.
      * @throws ModelException if creating the service object fails.
      *
-     * @see ModelProvider
-     * @see ModelProcessor
-     * @see ModelValidator
+     * @see ModletProvider
+     * @see ModletProcessor
+     * @see ModletValidator
+     * @see ServiceFactory
      *
      * @since 1.2
      */
@@ -985,52 +1078,6 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Unmarshaller createUnmarshaller( String model ) throws ModelException;
-
-    /**
-     * Processes a {@code Model}.
-     *
-     * @param model The {@code Model} to process.
-     *
-     * @return The processed {@code Model}.
-     *
-     * @throws NullPointerException if {@code model} is {@code null}.
-     * @throws ModelException if processing {@code model} fails.
-     *
-     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelProcessor.class )
-     */
-    public abstract Model processModel( Model model ) throws ModelException;
-
-    /**
-     * Validates a given {@code Model}.
-     *
-     * @param model The {@code Model} to validate.
-     *
-     * @return Validation report.
-     *
-     * @throws NullPointerException if {@code model} is {@code null}.
-     * @throws ModelException if validating the modules fails.
-     *
-     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class) createServiceObject( <i>service</i>, ModelValidator.class )
-     * @see ModelValidationReport#isModelValid()
-     */
-    public abstract ModelValidationReport validateModel( Model model ) throws ModelException;
-
-    /**
-     * Validates a given model.
-     *
-     * @param model The identifier of the {@code Model} to use for validating {@code source}.
-     * @param source A source providing the model to validate.
-     *
-     * @return Validation report.
-     *
-     * @throws NullPointerException if {@code model} or {@code source} is {@code null}.
-     * @throws ModelException if validating the model fails.
-     *
-     * @see #createSchema(java.lang.String)
-     * @see ModelValidationReport#isModelValid()
-     * @see ModletObject#MODEL_PUBLIC_ID
-     */
-    public abstract ModelValidationReport validateModel( String model, Source source ) throws ModelException;
 
     private static String getMessage( final String key, final Object... args )
     {

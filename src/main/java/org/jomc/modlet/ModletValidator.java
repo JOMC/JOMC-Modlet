@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) Christian Schulte, 2005-206
+ *   Copyright (C) Christian Schulte, 2015-006
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -28,13 +28,40 @@
  *   $JOMC$
  *
  */
-@XmlSchema( namespace = "http://jomc.org/modlet", elementFormDefault = XmlNsForm.QUALIFIED,
-            location = "http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd", xmlns =
-            {
-                @XmlNs( prefix = "modlet", namespaceURI = "http://jomc.org/modlet" )
-    } )
 package org.jomc.modlet;
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.XmlSchema;
+/**
+ * {@code Modlet} validator interface.
+ *
+ * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
+ * @version $JOMC$
+ * @see ModelContext#validateModlets(org.jomc.modlet.Modlets)
+ * @since 1.9
+ */
+public interface ModletValidator
+{
+
+    /**
+     * Gets the ordinal number of the validator.
+     *
+     * @return The ordinal number of the validator.
+     */
+    int getOrdinal();
+
+    /**
+     * Validates a given list of {@code Modlet}s with a context.
+     *
+     * @param context The context to validate {@code Modlets} with.
+     * @param modlets The {@code Modlets} to validate.
+     *
+     * @return Validation report.
+     *
+     * @throws NullPointerException if {@code context} or {@code modlets} is {@code null}.
+     * @throws ModelException if validating {@code modlets} fails.
+     *
+     * @see ModelValidationReport#isModelValid()
+     */
+    ModelValidationReport validateModlets( ModelContext context, Modlets modlets )
+        throws NullPointerException, ModelException;
+
+}

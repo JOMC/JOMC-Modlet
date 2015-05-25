@@ -234,4 +234,33 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
         this.getModletProcessor().setTransformerLocation( null );
     }
 
+    @Test
+    public final void testDefaultOrdinal() throws Exception
+    {
+        System.clearProperty( "org.jomc.modlet.DefaultModletProcessor.defaultOrdinal" );
+        DefaultModletProcessor.setDefaultOrdinal( null );
+        assertEquals( DefaultModletProcessor.getDefaultOrdinal(), 0 );
+        DefaultModletProcessor.setDefaultOrdinal( null );
+        System.setProperty( "org.jomc.modlet.DefaultModletProcessor.defaultOrdinal", Integer.toString( 3 ) );
+        assertEquals( DefaultModletProcessor.getDefaultOrdinal(), 3 );
+        System.clearProperty( "org.jomc.modlet.DefaultModletProcessor.defaultOrdinal" );
+        DefaultModletProcessor.setDefaultOrdinal( null );
+        assertEquals( DefaultModletProcessor.getDefaultOrdinal(), 0 );
+    }
+
+    @Test
+    public final void testOrdinal() throws Exception
+    {
+        DefaultModletProcessor.setDefaultOrdinal( null );
+        this.getModletProcessor().setOrdinal( null );
+        assertEquals( this.getModletProcessor().getOrdinal(), 0 );
+
+        DefaultModletProcessor.setDefaultOrdinal( 3 );
+        this.getModletProcessor().setOrdinal( null );
+        assertEquals( this.getModletProcessor().getOrdinal(), 3 );
+
+        DefaultModletProcessor.setDefaultOrdinal( null );
+        this.getModletProcessor().setOrdinal( null );
+    }
+
 }

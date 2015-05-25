@@ -187,4 +187,33 @@ public class DefaultModletProviderTest extends ModletProviderTest
         this.getModletProvider().setValidating( null );
     }
 
+    @Test
+    public final void testDefaultOrdinal() throws Exception
+    {
+        System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultOrdinal" );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        assertEquals( DefaultModletProvider.getDefaultOrdinal(), 0 );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        System.setProperty( "org.jomc.modlet.DefaultModletProvider.defaultOrdinal", Integer.toString( 3 ) );
+        assertEquals( DefaultModletProvider.getDefaultOrdinal(), 3 );
+        System.clearProperty( "org.jomc.modlet.DefaultModletProvider.defaultOrdinal" );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        assertEquals( DefaultModletProvider.getDefaultOrdinal(), 0 );
+    }
+
+    @Test
+    public final void testOrdinal() throws Exception
+    {
+        DefaultModletProvider.setDefaultOrdinal( null );
+        this.getModletProvider().setOrdinal( null );
+        assertEquals( this.getModletProvider().getOrdinal(), 0 );
+
+        DefaultModletProvider.setDefaultOrdinal( 3 );
+        this.getModletProvider().setOrdinal( null );
+        assertEquals( this.getModletProvider().getOrdinal(), 3 );
+
+        DefaultModletProvider.setDefaultOrdinal( null );
+        this.getModletProvider().setOrdinal( null );
+    }
+
 }
