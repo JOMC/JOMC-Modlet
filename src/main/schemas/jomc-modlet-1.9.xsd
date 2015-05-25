@@ -29,7 +29,7 @@
 
   $JOMC$
 
-  Location: http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd
+  Location: http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd
 
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -68,7 +68,7 @@
 
   $JOMC$
 
-  Location: http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd
+  Location: http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd
 
 ]]>
     </xsd:documentation>
@@ -106,20 +106,6 @@ The 'Model' type defines attribute 'identifier' holding an identifier uniquely i
       </xsd:annotation>
       <xsd:selector xpath="modlet:modlet"/>
       <xsd:field xpath="@name"/>
-    </xsd:key>
-    <xsd:key name="schemas-system-id-key">
-      <xsd:annotation>
-        <xsd:documentation xml:lang="en">System id key of a schema from the list of modlets.</xsd:documentation>
-      </xsd:annotation>
-      <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
-      <xsd:field xpath="@system-id"/>
-    </xsd:key>
-    <xsd:key name="schemas-public-id-key">
-      <xsd:annotation>
-        <xsd:documentation xml:lang="en">Public id key of a schema from the list of modlets.</xsd:documentation>
-      </xsd:annotation>
-      <xsd:selector xpath="modlet:modlet/modlet:schemas/modlet:schema"/>
-      <xsd:field xpath="@public-id"/>
     </xsd:key>
   </xsd:element>
   <xsd:complexType name="Modlets">

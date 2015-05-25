@@ -39,9 +39,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -394,8 +391,10 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads {@code ModletProvider} classes setup via the platform provider configuration file and
-     * {@code <provider-location>/org.jomc.modlet.ModletProvider} resources to return a list of {@code Modlets}.</p>
+     * <p>
+     * This method loads {@code ModletProvider} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ModletProvider} resources to return a list of {@code Modlets}.
+     * </p>
      *
      * @see #getProviderLocation()
      * @see #getPlatformProviderLocation()
@@ -512,6 +511,47 @@ public class DefaultModelContext extends ModelContext
     /**
      * {@inheritDoc}
      * <p>
+     * This method loads {@code ModletValidator} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ModletValidator} resources to validate a list of {@code Modlets}.
+     * </p>
+     *
+     * @see #getProviderLocation()
+     * @see #getPlatformProviderLocation()
+     * @see ModletValidator#validateModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
+     * @since 1.9
+     */
+    @Override
+    public ModelValidationReport validateModlets( final Modlets modlets ) throws ModelException
+    {
+        if ( modlets == null )
+        {
+            throw new NullPointerException( "modlets" );
+        }
+
+        final ModelValidationReport report = new ModelValidationReport();
+        final Collection<ModletValidator> modletValidators = this.loadModletServices( ModletValidator.class );
+
+        for ( final ModletValidator modletValidator : modletValidators )
+        {
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                this.log( Level.FINER, getMessage( "validatingModlets", modletValidator.toString() ), null );
+            }
+
+            final ModelValidationReport current = modletValidator.validateModlets( this, modlets );
+
+            if ( current != null )
+            {
+                report.getDetails().addAll( current.getDetails() );
+            }
+        }
+
+        return report;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
      * This method loads all {@code ModelProvider} service classes of the model identified by {@code model} to create
      * a new {@code Model} instance.
      * </p>
@@ -540,7 +580,7 @@ public class DefaultModelContext extends ModelContext
      * instance.
      * </p>
      *
-     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class)
+     * @see #createServiceObjects(java.lang.String, java.lang.Class)
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      *
      * @since 1.2
@@ -555,27 +595,19 @@ public class DefaultModelContext extends ModelContext
 
         Model m = model.clone();
         final long t0 = System.currentTimeMillis();
-        final Services services = this.getModlets().getServices( m.getIdentifier() );
 
-        if ( services != null )
+        for ( final ModelProvider provider : this.createServiceObjects( model.getIdentifier(), ModelProvider.class ) )
         {
-            for ( Service service : services.getServices( ModelProvider.class ) )
+            if ( this.isLoggable( Level.FINER ) )
             {
-                final ModelProvider modelProvider = this.createServiceObject( service, ModelProvider.class );
+                this.log( Level.FINER, getMessage( "creatingModel", m.getIdentifier(), provider.toString() ), null );
+            }
 
-                if ( this.isLoggable( Level.FINER ) )
-                {
-                    this.log( Level.FINER, getMessage( "creatingModel", m.getIdentifier(), modelProvider.toString() ),
-                              null );
+            final Model provided = provider.findModel( this, m );
 
-                }
-
-                final Model provided = modelProvider.findModel( this, m );
-
-                if ( provided != null )
-                {
-                    m = provided;
-                }
+            if ( provided != null )
+            {
+                m = provided;
             }
         }
 
@@ -591,7 +623,233 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
+     * <p>
+     * This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
+     * {@code Model}.
+     * </p>
      *
+     * @see #createServiceObjects(java.lang.String, java.lang.Class)
+     * @see ModelProcessor#processModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
+     */
+    @Override
+    public Model processModel( final Model model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        Model processed = model;
+        final long t0 = System.currentTimeMillis();
+
+        for ( final ModelProcessor processor
+                  : this.createServiceObjects( model.getIdentifier(), ModelProcessor.class ) )
+        {
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                this.log( Level.FINER, getMessage( "processingModel", model.getIdentifier(),
+                                                   processor.toString() ), null );
+
+            }
+
+            final Model current = processor.processModel( this, processed );
+
+            if ( current != null )
+            {
+                processed = current;
+            }
+        }
+
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "processModelReport", model.getIdentifier(),
+                                              System.currentTimeMillis() - t0 ), null );
+
+        }
+
+        return processed;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method loads all {@code ModelValidator} service classes of {@code model} to validate the given
+     * {@code Model}.
+     * </p>
+     *
+     * @see #createServiceObjects(java.lang.String, java.lang.Class)
+     * @see ModelValidator#validateModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
+     */
+    @Override
+    public ModelValidationReport validateModel( final Model model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        final long t0 = System.currentTimeMillis();
+        final ModelValidationReport report = new ModelValidationReport();
+
+        for ( final ModelValidator validator
+                  : this.createServiceObjects( model.getIdentifier(), ModelValidator.class ) )
+        {
+            if ( this.isLoggable( Level.FINER ) )
+            {
+                this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
+                                                   validator.toString() ), null );
+
+            }
+
+            final ModelValidationReport current = validator.validateModel( this, model );
+
+            if ( current != null )
+            {
+                report.getDetails().addAll( current.getDetails() );
+            }
+        }
+
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "validateModelReport", model.getIdentifier(),
+                                              System.currentTimeMillis() - t0 ), null );
+
+        }
+
+        return report;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see #createSchema(java.lang.String)
+     */
+    @Override
+    public ModelValidationReport validateModel( final String model, final Source source ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+        if ( source == null )
+        {
+            throw new NullPointerException( "source" );
+        }
+
+        final long t0 = System.currentTimeMillis();
+        final javax.xml.validation.Schema schema = this.createSchema( model );
+        final Validator validator = schema.newValidator();
+        final ModelErrorHandler modelErrorHandler = new ModelErrorHandler( this );
+        validator.setErrorHandler( modelErrorHandler );
+
+        try
+        {
+            validator.validate( source );
+        }
+        catch ( final SAXException e )
+        {
+            String message = getMessage( e );
+            if ( message == null && e.getException() != null )
+            {
+                message = getMessage( e.getException() );
+            }
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                this.log( Level.FINE, message, e );
+            }
+
+            if ( modelErrorHandler.getReport().isModelValid() )
+            {
+                throw new ModelException( message, e );
+            }
+        }
+        catch ( final IOException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "validateModelReport", model, System.currentTimeMillis() - t0 ), null );
+        }
+
+        return modelErrorHandler.getReport();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @since 1.9
+     */
+    @Override
+    public <T> Collection<? extends T> createServiceObjects( final String model, final Class<T> type )
+        throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+        if ( type == null )
+        {
+            throw new NullPointerException( "type" );
+        }
+
+        return this.createServiceObjects( model, type.getName(), type );
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
+     * {@code Model}.
+     * </p>
+     *
+     * @since 1.9
+     */
+    @Override
+    public <T> Collection<? extends T> createServiceObjects( final String model, final String service,
+                                                             final Class<T> type )
+        throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+        if ( service == null )
+        {
+            throw new NullPointerException( "service" );
+        }
+        if ( type == null )
+        {
+            throw new NullPointerException( "type" );
+        }
+
+        final Services modelServices = this.getModlets().getServices( model );
+        final Collection<T> serviceObjects =
+            new ArrayList<T>( modelServices != null ? modelServices.getService().size() : 0 );
+
+        if ( modelServices != null )
+        {
+            for ( final Service s : modelServices.getServices( service ) )
+            {
+                serviceObjects.add( this.createServiceObject( s, type ) );
+            }
+        }
+
+        return Collections.unmodifiableCollection( serviceObjects );
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method loads {@code ServiceFactory} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create a new service object.
+     * </p>
+     *
+     * @see #getProviderLocation()
+     * @see #getPlatformProviderLocation()
+     * @see ServiceFactory#createServiceObject(org.jomc.modlet.ModelContext, org.jomc.modlet.Service, java.lang.Class)
      * @since 1.2
      */
     @Override
@@ -606,42 +864,35 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "type" );
         }
 
-        try
+        T serviceObject = null;
+        final Collection<ServiceFactory> factories = this.loadModletServices( ServiceFactory.class );
+
+        for ( final ServiceFactory factory : factories )
         {
-            final Class<?> clazz = this.findClass( service.getClazz() );
+            final T current = factory.createServiceObject( this, service, type );
 
-            if ( clazz == null )
+            if ( current != null )
             {
-                throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(), service.getIdentifier(),
-                                                      service.getClazz() ) );
+                if ( this.isLoggable( Level.FINER ) )
+                {
+                    this.log( Level.FINER, getMessage( "creatingService", service.getOrdinal(), service.getIdentifier(),
+                                                       service.getClazz(), factory.toString() ), null );
 
+                }
+
+                serviceObject = current;
+                break;
             }
-
-            if ( !type.isAssignableFrom( clazz ) )
-            {
-                throw new ModelException( getMessage( "illegalService", service.getOrdinal(), service.getIdentifier(),
-                                                      service.getClazz(), type.getName() ) );
-
-            }
-
-            final T serviceObject = clazz.asSubclass( type ).newInstance();
-
-            for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
-            {
-                final Property p = service.getProperty().get( i );
-                this.setProperty( serviceObject, p.getName(), p.getValue() );
-            }
-
-            return serviceObject;
         }
-        catch ( final InstantiationException e )
+
+        if ( serviceObject == null )
         {
-            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
+            throw new ModelException( getMessage( "serviceNotCreated", service.getOrdinal(), service.getIdentifier(),
+                                                  service.getClazz() ), null );
+
         }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
-        }
+
+        return serviceObject;
     }
 
     @Override
@@ -790,172 +1041,6 @@ public class DefaultModelContext extends ModelContext
         return this.createUnmarshaller( this.getModlets().getSchemas( publicId ), null, null, publicId );
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
-     * {@code Model}.
-     * </p>
-     *
-     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class)
-     * @see ModelProcessor#processModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
-     */
-    @Override
-    public Model processModel( final Model model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        Model processed = model;
-        final long t0 = System.currentTimeMillis();
-        final Services services = this.getModlets().getServices( model.getIdentifier() );
-
-        if ( services != null )
-        {
-            for ( Service service : services.getServices( ModelProcessor.class ) )
-            {
-                final ModelProcessor modelProcessor = this.createServiceObject( service, ModelProcessor.class );
-
-                if ( this.isLoggable( Level.FINER ) )
-                {
-                    this.log( Level.FINER, getMessage( "processingModel", model.getIdentifier(),
-                                                       modelProcessor.toString() ), null );
-
-                }
-
-                final Model current = modelProcessor.processModel( this, processed );
-
-                if ( current != null )
-                {
-                    processed = current;
-                }
-            }
-        }
-
-        if ( this.isLoggable( Level.FINE ) )
-        {
-            this.log( Level.FINE, getMessage( "processModelReport", model.getIdentifier(),
-                                              System.currentTimeMillis() - t0 ), null );
-
-        }
-
-        return processed;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This method loads all {@code ModelValidator} service classes of {@code model} to validate the given
-     * {@code Model}.
-     * </p>
-     *
-     * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class)
-     * @see ModelValidator#validateModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
-     */
-    @Override
-    public ModelValidationReport validateModel( final Model model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        final long t0 = System.currentTimeMillis();
-        final Services services = this.getModlets().getServices( model.getIdentifier() );
-        final ModelValidationReport report = new ModelValidationReport();
-
-        if ( services != null )
-        {
-            for ( Service service : services.getServices( ModelValidator.class ) )
-            {
-                final ModelValidator modelValidator = this.createServiceObject( service, ModelValidator.class );
-
-                if ( this.isLoggable( Level.FINER ) )
-                {
-                    this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
-                                                       modelValidator.toString() ), null );
-
-                }
-
-                final ModelValidationReport current = modelValidator.validateModel( this, model );
-
-                if ( current != null )
-                {
-                    report.getDetails().addAll( current.getDetails() );
-                }
-            }
-        }
-
-        if ( this.isLoggable( Level.FINE ) )
-        {
-            this.log( Level.FINE, getMessage( "validateModelReport", model.getIdentifier(),
-                                              System.currentTimeMillis() - t0 ), null );
-
-        }
-
-        return report;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see #createSchema(java.lang.String)
-     */
-    @Override
-    public ModelValidationReport validateModel( final String model, final Source source ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-        if ( source == null )
-        {
-            throw new NullPointerException( "source" );
-        }
-
-        final long t0 = System.currentTimeMillis();
-        final javax.xml.validation.Schema schema = this.createSchema( model );
-        final Validator validator = schema.newValidator();
-        final ModelErrorHandler modelErrorHandler = new ModelErrorHandler( this );
-        validator.setErrorHandler( modelErrorHandler );
-
-        try
-        {
-            validator.validate( source );
-        }
-        catch ( final SAXException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getException() != null )
-            {
-                message = getMessage( e.getException() );
-            }
-
-            if ( this.isLoggable( Level.FINE ) )
-            {
-                this.log( Level.FINE, message, e );
-            }
-
-            if ( modelErrorHandler.getReport().isModelValid() )
-            {
-                throw new ModelException( message, e );
-            }
-        }
-        catch ( final IOException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-
-        if ( this.isLoggable( Level.FINE ) )
-        {
-            this.log( Level.FINE, getMessage( "validateModelReport", model, System.currentTimeMillis() - t0 ), null );
-        }
-
-        return modelErrorHandler.getReport();
-    }
-
     private <T> Collection<T> loadModletServices( final Class<T> serviceClass ) throws ModelException
     {
         try
@@ -1026,8 +1111,7 @@ public class DefaultModelContext extends ModelContext
                         }
 
                         sortedPlatformServices.put( e.getKey().toString(),
-                                                    this.createServiceObject( serviceClass, configuration,
-                                                                              platformServices.toURI().toURL() ) );
+                                                    this.createServiceObject( serviceClass, configuration ) );
 
                     }
                 }
@@ -1072,7 +1156,7 @@ public class DefaultModelContext extends ModelContext
 
                         }
 
-                        final T serviceObject = this.createServiceObject( serviceClass, line, url );
+                        final T serviceObject = this.createServiceObject( serviceClass, line );
                         sortedClasspathServices.add( serviceObject );
                     }
 
@@ -1082,27 +1166,7 @@ public class DefaultModelContext extends ModelContext
 
                                           public int compare( final Object o1, final Object o2 )
                                           {
-                                              int ordinal1 = 0;
-                                              int ordinal2 = 0;
-
-                                              if ( o1 instanceof ModletProvider )
-                                              {
-                                                  ordinal1 = ( (ModletProvider) o1 ).getOrdinal();
-                                              }
-                                              if ( o1 instanceof ModletProcessor )
-                                              {
-                                                  ordinal1 = ( (ModletProcessor) o1 ).getOrdinal();
-                                              }
-                                              if ( o2 instanceof ModletProvider )
-                                              {
-                                                  ordinal2 = ( (ModletProvider) o2 ).getOrdinal();
-                                              }
-                                              if ( o2 instanceof ModletProcessor )
-                                              {
-                                                  ordinal2 = ( (ModletProcessor) o2 ).getOrdinal();
-                                              }
-
-                                              return ordinal1 - ordinal2;
+                                              return ordinalOf( o1 ) - ordinalOf( o2 );
                                           }
 
                                       } );
@@ -1154,331 +1218,53 @@ public class DefaultModelContext extends ModelContext
         }
     }
 
-    private <T> T createServiceObject( final Class<T> serviceClass, final String configuration, final URL location )
+    private <T> T createServiceObject( final Class<T> serviceClass, final String configuration )
         throws ModelException
     {
         String className = configuration;
+        final Map<String, String> properties = new HashMap<String, String>();
+        final int i0 = configuration.indexOf( '[' );
+        final int i1 = configuration.lastIndexOf( ']' );
 
-        try
+        if ( i0 != -1 && i1 != -1 )
         {
-            final Map<String, String> properties = new HashMap<String, String>();
-            final int i0 = configuration.indexOf( '[' );
-            final int i1 = configuration.lastIndexOf( ']' );
+            className = configuration.substring( 0, i0 );
+            final StringTokenizer propertyTokens =
+                new StringTokenizer( configuration.substring( i0 + 1, i1 ), "," );
 
-            if ( i0 != -1 && i1 != -1 )
+            while ( propertyTokens.hasMoreTokens() )
             {
-                className = configuration.substring( 0, i0 );
-                final StringTokenizer propertyTokens =
-                    new StringTokenizer( configuration.substring( i0 + 1, i1 ), "," );
+                final String property = propertyTokens.nextToken();
+                final int d0 = property.indexOf( '=' );
 
-                while ( propertyTokens.hasMoreTokens() )
+                String propertyName = property;
+                String propertyValue = null;
+
+                if ( d0 != -1 )
                 {
-                    final String property = propertyTokens.nextToken();
-                    final int d0 = property.indexOf( '=' );
-
-                    String propertyName = property;
-                    String propertyValue = null;
-
-                    if ( d0 != -1 )
-                    {
-                        propertyName = property.substring( 0, d0 );
-                        propertyValue = property.substring( d0 + 1, property.length() );
-                    }
-
-                    properties.put( propertyName, propertyValue );
+                    propertyName = property.substring( 0, d0 );
+                    propertyValue = property.substring( d0 + 1, property.length() );
                 }
+
+                properties.put( propertyName, propertyValue );
             }
-
-            final Class<?> service = this.findClass( className );
-
-            if ( service == null )
-            {
-                throw new ModelException( getMessage( "implementationNotFound", serviceClass.getName(), className,
-                                                      location.toExternalForm() ) );
-
-            }
-
-            if ( !serviceClass.isAssignableFrom( service ) )
-            {
-                throw new ModelException( getMessage( "illegalImplementation", serviceClass.getName(), className,
-                                                      location.toExternalForm() ) );
-
-            }
-
-            final T o = service.asSubclass( serviceClass ).newInstance();
-
-            for ( final Map.Entry<String, String> property : properties.entrySet() )
-            {
-                this.setProperty( o, property.getKey(), property.getValue() );
-            }
-
-            return o;
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( "failedCreatingObject", className ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( "failedCreatingObject", className ), e );
-        }
-    }
-
-    private <T> void setProperty( final T object, final String propertyName, final String propertyValue )
-        throws ModelException
-    {
-        if ( object == null )
-        {
-            throw new NullPointerException( "object" );
-        }
-        if ( propertyName == null )
-        {
-            throw new NullPointerException( "propertyName" );
         }
 
-        try
+        final Service service = new Service();
+        service.setIdentifier( serviceClass.getName() );
+        service.setClazz( className );
+
+        for ( final Map.Entry<String, String> property : properties.entrySet() )
         {
-            final char[] chars = propertyName.toCharArray();
+            final Property p = new Property();
+            service.getProperty().add( p );
 
-            if ( Character.isLowerCase( chars[0] ) )
-            {
-                chars[0] = Character.toUpperCase( chars[0] );
-            }
-
-            final String methodNameSuffix = String.valueOf( chars );
-            Method getterMethod = null;
-
-            try
-            {
-                getterMethod = object.getClass().getMethod( "get" + methodNameSuffix );
-            }
-            catch ( final NoSuchMethodException e )
-            {
-                if ( this.isLoggable( Level.FINEST ) )
-                {
-                    this.log( Level.FINEST, null, e );
-                }
-
-                getterMethod = null;
-            }
-
-            if ( getterMethod == null )
-            {
-                try
-                {
-                    getterMethod = object.getClass().getMethod( "is" + methodNameSuffix );
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-
-                    getterMethod = null;
-                }
-            }
-
-            if ( getterMethod == null )
-            {
-                throw new ModelException( getMessage( "getterMethodNotFound", object.getClass().getName(),
-                                                      propertyName ) );
-
-            }
-
-            final Class<?> propertyType = getterMethod.getReturnType();
-            Class<?> boxedPropertyType = propertyType;
-            Class<?> unboxedPropertyType = propertyType;
-
-            if ( Boolean.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Boolean.class;
-            }
-            else if ( Character.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Character.class;
-            }
-            else if ( Byte.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Byte.class;
-            }
-            else if ( Short.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Short.class;
-            }
-            else if ( Integer.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Integer.class;
-            }
-            else if ( Long.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Long.class;
-            }
-            else if ( Float.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Float.class;
-            }
-            else if ( Double.TYPE.equals( propertyType ) )
-            {
-                boxedPropertyType = Double.class;
-            }
-
-            if ( Boolean.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Boolean.TYPE;
-            }
-            else if ( Character.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Character.TYPE;
-            }
-            else if ( Byte.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Byte.TYPE;
-            }
-            else if ( Short.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Short.TYPE;
-            }
-            else if ( Integer.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Integer.TYPE;
-            }
-            else if ( Long.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Long.TYPE;
-            }
-            else if ( Float.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Float.TYPE;
-            }
-            else if ( Double.class.equals( propertyType ) )
-            {
-                unboxedPropertyType = Double.TYPE;
-            }
-
-            Method setterMethod = null;
-
-            try
-            {
-                setterMethod = object.getClass().getMethod( "set" + methodNameSuffix, boxedPropertyType );
-            }
-            catch ( final NoSuchMethodException e )
-            {
-                if ( this.isLoggable( Level.FINEST ) )
-                {
-                    this.log( Level.FINEST, null, e );
-                }
-
-                setterMethod = null;
-            }
-
-            if ( setterMethod == null && !boxedPropertyType.equals( unboxedPropertyType ) )
-            {
-                try
-                {
-                    setterMethod = object.getClass().getMethod( "set" + methodNameSuffix, unboxedPropertyType );
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-
-                    setterMethod = null;
-                }
-            }
-
-            if ( setterMethod == null )
-            {
-                throw new ModelException( getMessage( "setterMethodNotFound", object.getClass().getName(),
-                                                      propertyName ) );
-
-            }
-
-            if ( boxedPropertyType.equals( Character.class ) )
-            {
-                if ( propertyValue == null || propertyValue.length() != 1 )
-                {
-                    throw new ModelException( getMessage( "unsupportedCharacterValue", object.getClass().getName(),
-                                                          propertyName ) );
-
-                }
-
-                setterMethod.invoke( object, Character.valueOf( propertyValue.charAt( 0 ) ) );
-                return;
-            }
-
-            if ( propertyValue != null )
-            {
-                if ( boxedPropertyType.equals( String.class ) )
-                {
-                    setterMethod.invoke( object, propertyValue );
-                    return;
-                }
-
-                try
-                {
-                    setterMethod.invoke(
-                        object, boxedPropertyType.getConstructor( String.class ).newInstance( propertyValue ) );
-
-                    return;
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-                }
-
-                try
-                {
-                    final Method valueOf = boxedPropertyType.getMethod( "valueOf", String.class );
-
-                    if ( Modifier.isStatic( valueOf.getModifiers() )
-                             && ( valueOf.getReturnType().equals( boxedPropertyType )
-                                  || valueOf.getReturnType().equals( unboxedPropertyType ) ) )
-                    {
-                        setterMethod.invoke( object, valueOf.invoke( null, propertyValue ) );
-                        return;
-                    }
-                }
-                catch ( final NoSuchMethodException e )
-                {
-                    if ( this.isLoggable( Level.FINEST ) )
-                    {
-                        this.log( Level.FINEST, null, e );
-                    }
-                }
-
-                throw new ModelException( getMessage( "unsupportedPropertyType", object.getClass().getName(),
-                                                      propertyName, propertyType.getName() ) );
-
-            }
-            else
-            {
-                setterMethod.invoke( object, (Object) null );
-            }
+            p.setName( property.getKey() );
+            p.setValue( property.getValue() );
         }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
-                                                  object.getClass().getName() ), e );
 
-        }
-        catch ( final InvocationTargetException e )
-        {
-            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
-                                                  object.getClass().getName() ), e );
-
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
-                                                  object.getClass().getName() ), e );
-
-        }
+        // Need a way to exchange the service factory creating service factories?
+        return new DefaultServiceFactory().createServiceObject( this, service, serviceClass );
     }
 
     /**
@@ -2323,6 +2109,30 @@ public class DefaultModelContext extends ModelContext
 
             throw new ModelException( message, e );
         }
+    }
+
+    private static int ordinalOf( final Object serviceObject )
+    {
+        int ordinal = 0;
+
+        if ( serviceObject instanceof ModletProvider )
+        {
+            ordinal = ( (ModletProvider) serviceObject ).getOrdinal();
+        }
+        if ( serviceObject instanceof ModletProcessor )
+        {
+            ordinal = ( (ModletProcessor) serviceObject ).getOrdinal();
+        }
+        if ( serviceObject instanceof ModletValidator )
+        {
+            ordinal = ( (ModletValidator) serviceObject ).getOrdinal();
+        }
+        if ( serviceObject instanceof ServiceFactory )
+        {
+            ordinal = ( (ServiceFactory) serviceObject ).getOrdinal();
+        }
+
+        return ordinal;
     }
 
     private static String getMessage( final String key, final Object... arguments )

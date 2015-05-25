@@ -31,6 +31,7 @@
 package org.jomc.modlet.test.support;
 
 import java.net.URI;
+import java.util.Collection;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -79,6 +80,12 @@ public final class IllegalAccessExceptionModelContext extends ModelContext
 
     @Override
     public Modlets processModlets( final Modlets modlets ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ModelValidationReport validateModlets( final Modlets modlets ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }
@@ -193,6 +200,19 @@ public final class IllegalAccessExceptionModelContext extends ModelContext
     @Override
     @SuppressWarnings( "deprecation" )
     public Unmarshaller createUnmarshaller( final URI publicId ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> Collection<? extends T> createServiceObjects( String model, Class<T> type ) throws ModelException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> Collection<? extends T> createServiceObjects( String model, String service, Class<T> type ) throws
+        ModelException
     {
         throw new UnsupportedOperationException();
     }

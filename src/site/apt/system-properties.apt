@@ -43,6 +43,8 @@ System Properties Reference
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModelContext.defaultProviderLocation>>> | <<<java.lang.String>>> | <<<META-INF/services>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
+| <<<org.jomc.modlet.DefaultServiceFactory.defaultOrdinal>>> | <<<java.lang.Integer>>> | <<<0>>> |
+*---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProcessor.defaultEnabled>>> | <<<java.lang.Boolean>>> | <<<true>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProcessor.defaultOrdinal>>> | <<<java.lang.Integer>>> | <<<0>>> |
@@ -57,9 +59,13 @@ System Properties Reference
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.DefaultModletProvider.defaultOrdinal>>> | <<<java.lang.Integer>>> | <<<0>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
+| <<<org.jomc.modlet.DefaultModletValidator.defaultEnabled>>> | <<<java.lang.Boolean>>> | <<<true>>> |
+*---------------------------------------------*-------------------------------*----------------------------------------*
+| <<<org.jomc.modlet.DefaultModletValidator.defaultOrdinal>>> | <<<java.lang.Integer>>> | <<<0>>> |
+*---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.ModelContext.defaultLogLevel>>> | <<<java.util.logging.Level>>> | <<<WARNING>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
-| <<<org.jomc.modlet.ModelContext.defaultModletSchemaSystemId>>> | <<<java.lang.String>>> | <<<http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd>>> |
+| <<<org.jomc.modlet.ModelContext.defaultModletSchemaSystemId>>> | <<<java.lang.String>>> | <<<http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
 | <<<org.jomc.modlet.ModelContextFactory>>> | <<<java.lang.String>>> | <<<org.jomc.modlet.DefaultModelContextFactory>>> |
 *---------------------------------------------*-------------------------------*----------------------------------------*
