@@ -46,7 +46,9 @@ import static org.junit.Assert.fail;
 public class ServicesTest
 {
 
-    /** Creates a new {@code ServicesTest} instance. */
+    /**
+     * Creates a new {@code ServicesTest} instance.
+     */
     public ServicesTest()
     {
         super();

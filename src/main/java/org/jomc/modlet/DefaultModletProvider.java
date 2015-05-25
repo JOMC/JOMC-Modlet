@@ -53,6 +53,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Constant for the name of the model context attribute backing property {@code enabled}.
+     *
      * @see #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
      * @see ModelContext#getAttribute(java.lang.String)
      * @since 1.2
@@ -61,6 +62,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Constant for the name of the system property controlling property {@code defaultEnabled}.
+     *
      * @see #isDefaultEnabled()
      * @since 1.2
      */
@@ -69,19 +71,25 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Default value of the flag indicating the provider is enabled by default.
+     *
      * @see #isDefaultEnabled()
      * @since 1.2
      */
     private static final Boolean DEFAULT_ENABLED = Boolean.TRUE;
 
-    /** Flag indicating the provider is enabled by default. */
+    /**
+     * Flag indicating the provider is enabled by default.
+     */
     private static volatile Boolean defaultEnabled;
 
-    /** Flag indicating the provider is enabled. */
+    /**
+     * Flag indicating the provider is enabled.
+     */
     private Boolean enabled;
 
     /**
      * Constant for the name of the model context attribute backing property {@code modletLocation}.
+     *
      * @see #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
      * @see ModelContext#getAttribute(java.lang.String)
      * @since 1.2
@@ -91,6 +99,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Constant for the name of the system property controlling property {@code defaultModletLocation}.
+     *
      * @see #getDefaultModletLocation()
      * @since 1.2
      */
@@ -99,18 +108,24 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Class path location searched for {@code Modlets} by default.
+     *
      * @see #getDefaultModletLocation()
      */
     private static final String DEFAULT_MODLET_LOCATION = "META-INF/jomc-modlet.xml";
 
-    /** Default {@code Modlet} location. */
+    /**
+     * Default {@code Modlet} location.
+     */
     private static volatile String defaultModletLocation;
 
-    /** Modlet location of the instance. */
+    /**
+     * Modlet location of the instance.
+     */
     private String modletLocation;
 
     /**
      * Constant for the name of the model context attribute backing property {@code validating}.
+     *
      * @see #findModlets(org.jomc.modlet.ModelContext, java.lang.String)
      * @see ModelContext#getAttribute(java.lang.String)
      * @since 1.2
@@ -120,6 +135,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Constant for the name of the system property controlling property {@code defaultValidating}.
+     *
      * @see #isDefaultValidating()
      * @since 1.2
      */
@@ -128,6 +144,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Default value of the flag indicating the provider is validating resources by default.
+     *
      * @see #isDefaultValidating()
      * @since 1.2
      */
@@ -135,18 +152,21 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Flag indicating the provider is validating resources by default.
+     *
      * @since 1.2
      */
     private static volatile Boolean defaultValidating;
 
     /**
      * Flag indicating the provider is validating resources.
+     *
      * @since 1.2
      */
     private Boolean validating;
 
     /**
      * Constant for the name of the system property controlling property {@code defaultOrdinal}.
+     *
      * @see #getDefaultOrdinal()
      * @since 1.6
      */
@@ -155,6 +175,7 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Default value of the ordinal number of the provider.
+     *
      * @see #getDefaultOrdinal()
      * @since 1.6
      */
@@ -162,17 +183,21 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Default ordinal number of the provider.
+     *
      * @since 1.6
      */
     private static volatile Integer defaultOrdinal;
 
     /**
      * Ordinal number of the provider.
+     *
      * @since 1.6
      */
     private Integer ordinal;
 
-    /** Creates a new {@code DefaultModletProvider} instance. */
+    /**
+     * Creates a new {@code DefaultModletProvider} instance.
+     */
     public DefaultModletProvider()
     {
         super();
@@ -180,9 +205,11 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Gets a flag indicating the provider is enabled by default.
-     * <p>The default enabled flag is controlled by system property
+     * <p>
+     * The default enabled flag is controlled by system property
      * {@code org.jomc.modlet.DefaultModletProvider.defaultEnabled} holding a value indicating the provider is
-     * enabled by default. If that property is not set, the {@code true} default is returned.</p>
+     * enabled by default. If that property is not set, the {@code true} default is returned.
+     * </p>
      *
      * @return {@code true}, if the provider is enabled by default; {@code false}, if the provider is disabled by
      * default.
@@ -246,10 +273,12 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Gets the default location searched for {@code Modlet} resources.
-     * <p>The default {@code Modlet} location is controlled by system property
+     * <p>
+     * The default {@code Modlet} location is controlled by system property
      * {@code org.jomc.modlet.DefaultModletProvider.defaultModletLocation} holding the location to search for
      * {@code Modlet} resources by default. If that property is not set, the {@code META-INF/jomc-modlet.xml} default is
-     * returned.</p>
+     * returned.
+     * </p>
      *
      * @return The location searched for {@code Modlet} resources by default.
      *
@@ -311,9 +340,11 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Gets a flag indicating the provider is validating resources by default.
-     * <p>The default validating flag is controlled by system property
+     * <p>
+     * The default validating flag is controlled by system property
      * {@code org.jomc.modlet.DefaultModletProvider.defaultValidating} holding a value indicating the provider is
-     * validating resources by default. If that property is not set, the {@code true} default is returned.</p>
+     * validating resources by default. If that property is not set, the {@code true} default is returned.
+     * </p>
      *
      * @return {@code true}, if the provider is validating resources by default; {@code false}, if the provider is not
      * validating resources by default.
@@ -387,9 +418,11 @@ public class DefaultModletProvider implements ModletProvider
 
     /**
      * Gets the default ordinal number of the provider.
-     * <p>The default ordinal number is controlled by system property
+     * <p>
+     * The default ordinal number is controlled by system property
      * {@code org.jomc.modlet.DefaultModletProvider.defaultOrdinal} holding the default ordinal number of the provider.
-     * If that property is not set, the {@code 0} default is returned.</p>
+     * If that property is not set, the {@code 0} default is returned.
+     * </p>
      *
      * @return The default ordinal number of the provider.
      *
@@ -487,7 +520,7 @@ public class DefaultModletProvider implements ModletProvider
         {
             boolean contextValidating = this.isValidating();
             if ( DEFAULT_VALIDATING == contextValidating
-                 && context.getAttribute( VALIDATING_ATTRIBUTE_NAME ) instanceof Boolean )
+                     && context.getAttribute( VALIDATING_ATTRIBUTE_NAME ) instanceof Boolean )
             {
                 contextValidating = (Boolean) context.getAttribute( VALIDATING_ATTRIBUTE_NAME );
             }
@@ -630,7 +663,7 @@ public class DefaultModletProvider implements ModletProvider
 
         String contextModletLocation = this.getModletLocation();
         if ( DEFAULT_MODLET_LOCATION.equals( contextModletLocation )
-             && context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+                 && context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME ) instanceof String )
         {
             contextModletLocation = (String) context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME );
         }
@@ -663,10 +696,10 @@ public class DefaultModletProvider implements ModletProvider
     private static String getMessage( final Throwable t )
     {
         return t != null
-               ? t.getMessage() != null && t.getMessage().trim().length() > 0
-                 ? t.getMessage()
-                 : getMessage( t.getCause() )
-               : null;
+                   ? t.getMessage() != null && t.getMessage().trim().length() > 0
+                         ? t.getMessage()
+                         : getMessage( t.getCause() )
+                   : null;
 
     }
 

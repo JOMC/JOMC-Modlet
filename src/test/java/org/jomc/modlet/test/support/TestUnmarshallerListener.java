@@ -108,7 +108,9 @@ public final class TestUnmarshallerListener extends Unmarshaller.Listener
 
     private InvocationTargetExceptionPropertyType invocationTargetExceptionProperty;
 
-    /** Creates a new {@code TestUnmarshallerListener} instance. */
+    /**
+     * Creates a new {@code TestUnmarshallerListener} instance.
+     */
     public TestUnmarshallerListener()
     {
         super();

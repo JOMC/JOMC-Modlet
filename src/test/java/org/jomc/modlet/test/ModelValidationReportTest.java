@@ -48,10 +48,14 @@ import static org.junit.Assert.assertNull;
 public class ModelValidationReportTest
 {
 
-    /** Constant to prefix relative resource names with. */
+    /**
+     * Constant to prefix relative resource names with.
+     */
     private static final String ABSOLUTE_RESOURCE_NAME_PREFIX = "/org/jomc/modlet/test/";
 
-    /** Creates a new {@code ModelValidationReportTest} instance. */
+    /**
+     * Creates a new {@code ModelValidationReportTest} instance.
+     */
     public ModelValidationReportTest()
     {
         super();

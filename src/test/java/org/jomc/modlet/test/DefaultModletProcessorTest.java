@@ -52,20 +52,26 @@ import static org.junit.Assert.fail;
 public class DefaultModletProcessorTest extends ModletProcessorTest
 {
 
-    /** Creates a new {@code DefaultModletProcessorTest} instance. */
+    /**
+     * Creates a new {@code DefaultModletProcessorTest} instance.
+     */
     public DefaultModletProcessorTest()
     {
         super();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DefaultModletProcessor getModletProcessor()
     {
         return (DefaultModletProcessor) super.getModletProcessor();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DefaultModletProcessor newModletProcessor()
     {
@@ -102,7 +108,7 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         this.getModletProcessor().setTransformerLocation( null );
         assertEquals( 1, this.getModletProcessor().findTransformers(
-            context, DefaultModletProcessor.getDefaultTransformerLocation() ).size() );
+                      context, DefaultModletProcessor.getDefaultTransformerLocation() ).size() );
 
         DefaultModletProcessor.setDefaultTransformerLocation( "DOES_NOT_EXIST" );
         this.getModletProcessor().setTransformerLocation( "DOES_NOT_EXIST" );
@@ -212,7 +218,7 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
         assertNotNull( this.getModletProcessor().processModlets( context, modlets ) );
 
         this.getModletProcessor().setTransformerLocation( this.getClass().getPackage().getName().replace( '.', '/' )
-                                                          + "/system-property-test.xsl" );
+                                                              + "/system-property-test.xsl" );
 
         final Modlets processedSystemProperty = this.getModletProcessor().processModlets( context, modlets );
         assertNotNull( processedSystemProperty );

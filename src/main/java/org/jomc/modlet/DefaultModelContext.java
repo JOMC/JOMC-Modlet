@@ -92,6 +92,7 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * Constant for the name of the model context attribute backing property {@code providerLocation}.
+     *
      * @see #getProviderLocation()
      * @see ModelContext#getAttribute(java.lang.String)
      * @since 1.2
@@ -101,6 +102,7 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * Constant for the name of the model context attribute backing property {@code platformProviderLocation}.
+     *
      * @see #getPlatformProviderLocation()
      * @see ModelContext#getAttribute(java.lang.String)
      * @since 1.2
@@ -108,7 +110,9 @@ public class DefaultModelContext extends ModelContext
     public static final String PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME =
         "org.jomc.modlet.DefaultModelContext.platformProviderLocationAttribute";
 
-    /** Supported schema name extensions. */
+    /**
+     * Supported schema name extensions.
+     */
     private static final String[] SCHEMA_EXTENSIONS = new String[]
     {
         "xsd"
@@ -116,12 +120,14 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * Class path location searched for providers by default.
+     *
      * @see #getDefaultProviderLocation()
      */
     private static final String DEFAULT_PROVIDER_LOCATION = "META-INF/services";
 
     /**
      * Location searched for platform providers by default.
+     *
      * @see #getDefaultPlatformProviderLocation()
      */
     private static final String DEFAULT_PLATFORM_PROVIDER_LOCATION =
@@ -130,33 +136,46 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * Constant for the service identifier of marshaller listener services.
+     *
      * @since 1.2
      */
     private static final String MARSHALLER_LISTENER_SERVICE = "javax.xml.bind.Marshaller.Listener";
 
     /**
      * Constant for the service identifier of unmarshaller listener services.
+     *
      * @since 1.2
      */
     private static final String UNMARSHALLER_LISTENER_SERVICE = "javax.xml.bind.Unmarshaller.Listener";
 
-    /** Default provider location. */
+    /**
+     * Default provider location.
+     */
     private static volatile String defaultProviderLocation;
 
-    /** Default platform provider location. */
+    /**
+     * Default platform provider location.
+     */
     private static volatile String defaultPlatformProviderLocation;
 
-    /** Cached schema resources. */
+    /**
+     * Cached schema resources.
+     */
     private Reference<Set<URI>> cachedSchemaResources = new SoftReference<Set<URI>>( null );
 
-    /** Provider location of the instance. */
+    /**
+     * Provider location of the instance.
+     */
     private String providerLocation;
 
-    /** Platform provider location of the instance. */
+    /**
+     * Platform provider location of the instance.
+     */
     private String platformProviderLocation;
 
     /**
      * Creates a new {@code DefaultModelContext} instance.
+     *
      * @since 1.2
      */
     public DefaultModelContext()
@@ -176,10 +195,12 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * Gets the default location searched for provider resources.
-     * <p>The default provider location is controlled by system property
+     * <p>
+     * The default provider location is controlled by system property
      * {@code org.jomc.modlet.DefaultModelContext.defaultProviderLocation} holding the location to search
      * for provider resources by default. If that property is not set, the {@code META-INF/services} default is
-     * returned.</p>
+     * returned.
+     * </p>
      *
      * @return The location searched for provider resources by default.
      *
@@ -261,10 +282,12 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * Gets the default location searched for platform provider resources.
-     * <p>The default platform provider location is controlled by system property
+     * <p>
+     * The default platform provider location is controlled by system property
      * {@code org.jomc.modlet.DefaultModelContext.defaultPlatformProviderLocation} holding the location to
      * search for platform provider resources by default. If that property is not set, the
-     * {@code <java-home>/lib/jomc.properties} default is returned.</p>
+     * {@code <java-home>/lib/jomc.properties} default is returned.
+     * </p>
      *
      * @return The location searched for platform provider resources by default.
      *
@@ -351,8 +374,10 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads {@code ModletProvider} classes setup via the platform provider configuration file and
-     * {@code <provider-location>/org.jomc.modlet.ModletProvider} resources to return a list of {@code Modlets}.</p>
+     * <p>
+     * This method loads {@code ModletProvider} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ModletProvider} resources to return a list of {@code Modlets}.
+     * </p>
      *
      * @see #getProviderLocation()
      * @see #getPlatformProviderLocation()
@@ -388,7 +413,7 @@ public class DefaultModelContext extends ModelContext
         Modlets found = modlets.clone();
         final Collection<ModletProvider> providers = this.loadModletServices( ModletProvider.class );
 
-        for ( ModletProvider provider : providers )
+        for ( final ModletProvider provider : providers )
         {
             if ( this.isLoggable( Level.FINER ) )
             {
@@ -405,7 +430,7 @@ public class DefaultModelContext extends ModelContext
 
         if ( this.isLoggable( Level.FINEST ) )
         {
-            for ( Modlet m : found.getModlet() )
+            for ( final Modlet m : found.getModlet() )
             {
                 this.log( Level.FINEST,
                           getMessage( "modletInfo", m.getName(), m.getModel(),
@@ -416,7 +441,7 @@ public class DefaultModelContext extends ModelContext
 
                 if ( m.getSchemas() != null )
                 {
-                    for ( Schema s : m.getSchemas().getSchema() )
+                    for ( final Schema s : m.getSchemas().getSchema() )
                     {
                         this.log( Level.FINEST,
                                   getMessage( "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
@@ -430,7 +455,7 @@ public class DefaultModelContext extends ModelContext
 
                 if ( m.getServices() != null )
                 {
-                    for ( Service s : m.getServices().getService() )
+                    for ( final Service s : m.getServices().getService() )
                     {
                         this.log( Level.FINEST, getMessage( "modletServiceInfo", m.getName(), s.getOrdinal(),
                                                             s.getIdentifier(), s.getClazz() ), null );
@@ -445,8 +470,10 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads {@code ModletProcessor} classes setup via the platform provider configuration file and
-     * {@code <provider-location>/org.jomc.modlet.ModletProcessor} resources to process a list of {@code Modlets}.</p>
+     * <p>
+     * This method loads {@code ModletProcessor} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ModletProcessor} resources to process a list of {@code Modlets}.
+     * </p>
      *
      * @see #getProviderLocation()
      * @see #getPlatformProviderLocation()
@@ -484,8 +511,10 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelProvider} service classes of the model identified by {@code model} to create
-     * a new {@code Model} instance.</p>
+     * <p>
+     * This method loads all {@code ModelProvider} service classes of the model identified by {@code model} to create
+     * a new {@code Model} instance.
+     * </p>
      *
      * @see #findModel(org.jomc.modlet.Model)
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
@@ -506,8 +535,10 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelProvider} service classes of the given model to populate the given model
-     * instance.</p>
+     * <p>
+     * This method loads all {@code ModelProvider} service classes of the given model to populate the given model
+     * instance.
+     * </p>
      *
      * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class)
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
@@ -560,6 +591,7 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
+     *
      * @since 1.2
      */
     @Override
@@ -760,8 +792,10 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
-     * {@code Model}.</p>
+     * <p>
+     * This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
+     * {@code Model}.
+     * </p>
      *
      * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class)
      * @see ModelProcessor#processModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
@@ -812,8 +846,10 @@ public class DefaultModelContext extends ModelContext
 
     /**
      * {@inheritDoc}
-     * <p>This method loads all {@code ModelValidator} service classes of {@code model} to validate the given
-     * {@code Model}.</p>
+     * <p>
+     * This method loads all {@code ModelValidator} service classes of {@code model} to validate the given
+     * {@code Model}.
+     * </p>
      *
      * @see #createServiceObject(org.jomc.modlet.Service, java.lang.Class)
      * @see ModelValidator#validateModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
@@ -1485,7 +1521,7 @@ public class DefaultModelContext extends ModelContext
                         this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
                     }
 
-                    for ( Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
+                    for ( final Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
                     {
                         for ( int i = SCHEMA_EXTENSIONS.length - 1; i >= 0; i-- )
                         {
@@ -1611,7 +1647,7 @@ public class DefaultModelContext extends ModelContext
                                 schemaName = schemaName.substring( lastIndexOfSlash + 1 );
                             }
 
-                            for ( URI uri : getSchemaResources() )
+                            for ( final URI uri : getSchemaResources() )
                             {
                                 if ( uri.getSchemeSpecificPart() != null
                                          && uri.getSchemeSpecificPart().endsWith( schemaName ) )
@@ -1929,7 +1965,7 @@ public class DefaultModelContext extends ModelContext
 
             if ( schemas != null )
             {
-                for ( Schema s : schemas.getSchema() )
+                for ( final Schema s : schemas.getSchema() )
                 {
                     final InputSource inputSource = entityResolver.resolveEntity( s.getPublicId(), s.getSystemId() );
 
@@ -1989,7 +2025,7 @@ public class DefaultModelContext extends ModelContext
             {
                 final StringBuilder schemaInfo = new StringBuilder( sources.size() * 50 );
 
-                for ( Source s : sources )
+                for ( final Source s : sources )
                 {
                     schemaInfo.append( ", " ).append( s.getSystemId() );
                 }
@@ -2034,7 +2070,7 @@ public class DefaultModelContext extends ModelContext
             {
                 packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
 
-                for ( Schema schema : schemas.getSchema() )
+                for ( final Schema schema : schemas.getSchema() )
                 {
                     if ( schema.getContextId() != null )
                     {
@@ -2096,7 +2132,7 @@ public class DefaultModelContext extends ModelContext
                 packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
                 schemaLocation = new StringBuilder( schemas.getSchema().size() * 50 );
 
-                for ( Schema schema : schemas.getSchema() )
+                for ( final Schema schema : schemas.getSchema() )
                 {
                     if ( schema.getContextId() != null )
                     {
@@ -2135,7 +2171,7 @@ public class DefaultModelContext extends ModelContext
 
             if ( services != null )
             {
-                for ( Service service : services.getServices( MARSHALLER_LISTENER_SERVICE ) )
+                for ( final Service service : services.getServices( MARSHALLER_LISTENER_SERVICE ) )
                 {
                     if ( listenerList == null )
                     {
@@ -2207,7 +2243,7 @@ public class DefaultModelContext extends ModelContext
             {
                 packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
 
-                for ( Schema schema : schemas.getSchema() )
+                for ( final Schema schema : schemas.getSchema() )
                 {
                     if ( schema.getContextId() != null )
                     {
@@ -2235,7 +2271,7 @@ public class DefaultModelContext extends ModelContext
 
             if ( services != null )
             {
-                for ( Service service : services.getServices( UNMARSHALLER_LISTENER_SERVICE ) )
+                for ( final Service service : services.getServices( UNMARSHALLER_LISTENER_SERVICE ) )
                 {
                     if ( listenerList == null )
                     {
@@ -2317,10 +2353,14 @@ public class DefaultModelContext extends ModelContext
 class ModelErrorHandler extends DefaultHandler
 {
 
-    /** The context of the instance. */
+    /**
+     * The context of the instance.
+     */
     private ModelContext context;
 
-    /** The report of the instance. */
+    /**
+     * The report of the instance.
+     */
     private ModelValidationReport report;
 
     /**
@@ -2440,10 +2480,14 @@ class ModelErrorHandler extends DefaultHandler
 class MarshallerListenerList extends Marshaller.Listener
 {
 
-    /** The {@code Marshaller.Listener}s of the instance. */
+    /**
+     * The {@code Marshaller.Listener}s of the instance.
+     */
     private List<Marshaller.Listener> listeners;
 
-    /** Creates a new {@code MarshallerListenerList} instance. */
+    /**
+     * Creates a new {@code MarshallerListenerList} instance.
+     */
     MarshallerListenerList()
     {
         super();
@@ -2451,9 +2495,11 @@ class MarshallerListenerList extends Marshaller.Listener
 
     /**
      * Gets the listeners of the instance.
-     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * <p>
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
      * to the returned list will be present inside the object. This is why there is no {@code set} method for the
-     * listeners property.</p>
+     * listeners property.
+     * </p>
      *
      * @return The list of listeners of the instance.
      */
@@ -2497,10 +2543,14 @@ class MarshallerListenerList extends Marshaller.Listener
 class UnmarshallerListenerList extends Unmarshaller.Listener
 {
 
-    /** The {@code Unmarshaller.Listener}s of the instance. */
+    /**
+     * The {@code Unmarshaller.Listener}s of the instance.
+     */
     private List<Unmarshaller.Listener> listeners;
 
-    /** Creates a new {@code UnmarshallerListenerList} instance. */
+    /**
+     * Creates a new {@code UnmarshallerListenerList} instance.
+     */
     UnmarshallerListenerList()
     {
         super();
@@ -2508,9 +2558,11 @@ class UnmarshallerListenerList extends Unmarshaller.Listener
 
     /**
      * Gets the listeners of the instance.
-     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * <p>
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
      * to the returned list will be present inside the object. This is why there is no {@code set} method for the
-     * listeners property.</p>
+     * listeners property.
+     * </p>
      *
      * @return The list of listeners of the instance.
      */

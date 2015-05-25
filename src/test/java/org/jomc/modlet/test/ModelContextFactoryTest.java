@@ -49,14 +49,20 @@ import static org.junit.Assert.fail;
 public class ModelContextFactoryTest
 {
 
-    /** Constant for the name of the default {@code ModelContextFactory} implementation. */
+    /**
+     * Constant for the name of the default {@code ModelContextFactory} implementation.
+     */
     private static final String DEFAULT_MODEL_CONTEXT_FACTORY_CLASS_NAME = "org.jomc.modlet.DefaultModelContextFactory";
 
-    /** Constant for the name of the system property controlling {@code ModelContextFactory} implementations. */
+    /**
+     * Constant for the name of the system property controlling {@code ModelContextFactory} implementations.
+     */
     private static final String MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY =
         "org.jomc.modlet.ModelContextFactory";
 
-    /** Creates a new {@code ModelContextFactoryTest} instance. */
+    /**
+     * Creates a new {@code ModelContextFactoryTest} instance.
+     */
     public ModelContextFactoryTest()
     {
         super();

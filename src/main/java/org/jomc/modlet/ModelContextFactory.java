@@ -46,14 +46,20 @@ import java.util.ResourceBundle;
 public abstract class ModelContextFactory
 {
 
-    /** Constant for the name of the default {@code ModelContextFactory} implementation. */
+    /**
+     * Constant for the name of the default {@code ModelContextFactory} implementation.
+     */
     private static final String DEFAULT_MODEL_CONTEXT_FACTORY_CLASS_NAME = "org.jomc.modlet.DefaultModelContextFactory";
 
-    /** Constant for the name of the system property controlling {@code ModelContextFactory} implementations. */
+    /**
+     * Constant for the name of the system property controlling {@code ModelContextFactory} implementations.
+     */
     private static final String MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY =
         "org.jomc.modlet.ModelContextFactory";
 
-    /** Creates a new {@code ModelContextFactory} instance. */
+    /**
+     * Creates a new {@code ModelContextFactory} instance.
+     */
     protected ModelContextFactory()
     {
         super();
@@ -61,9 +67,11 @@ public abstract class ModelContextFactory
 
     /**
      * Creates a new {@code ModelContextFactory} instance.
-     * <p>The name of the class providing the {@code ModelContextFactory} implementation loaded by this method is
+     * <p>
+     * The name of the class providing the {@code ModelContextFactory} implementation loaded by this method is
      * controlled by system property {@code org.jomc.modlet.ModelContextFactory}. If that property is not set, this
-     * methods returns a new default instance.</p>
+     * methods returns a new default instance.
+     * </p>
      *
      * @return A new {@code ModelContextFactory} instance.
      *
@@ -161,10 +169,10 @@ public abstract class ModelContextFactory
     private static String getMessage( final Throwable t )
     {
         return t != null
-               ? t.getMessage() != null && t.getMessage().trim().length() > 0
-                 ? t.getMessage()
-                 : getMessage( t.getCause() )
-               : null;
+                   ? t.getMessage() != null && t.getMessage().trim().length() > 0
+                         ? t.getMessage()
+                         : getMessage( t.getCause() )
+                   : null;
 
     }
 

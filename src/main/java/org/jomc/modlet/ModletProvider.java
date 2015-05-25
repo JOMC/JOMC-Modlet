@@ -44,6 +44,7 @@ public interface ModletProvider
      * Gets the ordinal number of the provider.
      *
      * @return The ordinal number of the provider.
+     *
      * @since 1.6
      */
     int getOrdinal();

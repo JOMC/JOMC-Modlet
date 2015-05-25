@@ -41,10 +41,14 @@ package org.jomc.modlet;
 public class ModelContextFactoryError extends Error
 {
 
-    /** Serial version UID for backwards compatibility with 1.2.x object streams. */
+    /**
+     * Serial version UID for backwards compatibility with 1.2.x object streams.
+     */
     private static final long serialVersionUID = 1404619161262524716L;
 
-    /** Creates a new {@code ModelContextFactoryError} instance. */
+    /**
+     * Creates a new {@code ModelContextFactoryError} instance.
+     */
     public ModelContextFactoryError()
     {
         this( null, null );

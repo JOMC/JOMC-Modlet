@@ -29,8 +29,8 @@
  *
  */
 @XmlSchema( namespace = "http://jomc.org/modlet/test", elementFormDefault = XmlNsForm.QUALIFIED, xmlns =
-{
-    @XmlNs( prefix = "modlet-test", namespaceURI = "http://jomc.org/modlet/test" )
+        {
+            @XmlNs( prefix = "modlet-test", namespaceURI = "http://jomc.org/modlet/test" )
 } )
 package org.jomc.modlet.test;
 

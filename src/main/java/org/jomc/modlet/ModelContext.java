@@ -82,11 +82,15 @@ import org.xml.sax.SAXException;
 public abstract class ModelContext
 {
 
-    /** Listener interface. */
+    /**
+     * Listener interface.
+     */
     public abstract static class Listener
     {
 
-        /** Creates a new {@code Listener} instance. */
+        /**
+         * Creates a new {@code Listener} instance.
+         */
         public Listener()
         {
             super();
@@ -113,6 +117,7 @@ public abstract class ModelContext
 
     /**
      * Default {@code http://jomc.org/modlet} namespace schema system id.
+     *
      * @see #getDefaultModletSchemaSystemId()
      */
     private static final String DEFAULT_MODLET_SCHEMA_SYSTEM_ID =
@@ -120,46 +125,67 @@ public abstract class ModelContext
 
     /**
      * Log level events are logged at by default.
+     *
      * @see #getDefaultLogLevel()
      */
     private static final Level DEFAULT_LOG_LEVEL = Level.WARNING;
 
-    /** Default log level. */
+    /**
+     * Default log level.
+     */
     private static volatile Level defaultLogLevel;
 
-    /** Default {@code http://jomc.org/model/modlet} namespace schema system id. */
+    /**
+     * Default {@code http://jomc.org/model/modlet} namespace schema system id.
+     */
     private static volatile String defaultModletSchemaSystemId;
 
-    /** Class name of the {@code ModelContext} implementation. */
+    /**
+     * Class name of the {@code ModelContext} implementation.
+     */
     @Deprecated
     private static volatile String modelContextClassName;
 
-    /** The attributes of the instance. */
+    /**
+     * The attributes of the instance.
+     */
     private final Map<String, Object> attributes = new HashMap<String, Object>();
 
-    /** The class loader of the instance. */
+    /**
+     * The class loader of the instance.
+     */
     private ClassLoader classLoader;
 
     /**
      * Flag indicating the {@code classLoader} field is initialized.
+     *
      * @since 1.2
      */
     private boolean classLoaderSet;
 
-    /** The listeners of the instance. */
+    /**
+     * The listeners of the instance.
+     */
     private List<Listener> listeners;
 
-    /** Log level of the instance. */
+    /**
+     * Log level of the instance.
+     */
     private Level logLevel;
 
-    /** The {@code Modlets} of the instance. */
+    /**
+     * The {@code Modlets} of the instance.
+     */
     private Modlets modlets;
 
-    /** Modlet namespace schema system id of the instance. */
+    /**
+     * Modlet namespace schema system id of the instance.
+     */
     private String modletSchemaSystemId;
 
     /**
      * Creates a new {@code ModelContext} instance.
+     *
      * @since 1.2
      */
     public ModelContext()
@@ -325,9 +351,11 @@ public abstract class ModelContext
 
     /**
      * Gets the listeners of the context.
-     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * <p>
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
      * to the returned list will be present inside the object. This is why there is no {@code set} method for the
-     * listeners property.</p>
+     * listeners property.
+     * </p>
      *
      * @return The list of listeners of the context.
      *
@@ -345,10 +373,12 @@ public abstract class ModelContext
 
     /**
      * Gets the default {@code http://jomc.org/modlet} namespace schema system id.
-     * <p>The default {@code http://jomc.org/modlet} namespace schema system id is controlled by system property
+     * <p>
+     * The default {@code http://jomc.org/modlet} namespace schema system id is controlled by system property
      * {@code org.jomc.modlet.ModelContext.defaultModletSchemaSystemId} holding a system id URI.
      * If that property is not set, the {@code http://xml.jomc.org/modlet/jomc-modlet-1.8.xsd} default is
-     * returned.</p>
+     * returned.
+     * </p>
      *
      * @return The default system id of the {@code http://jomc.org/modlet} namespace schema.
      *
@@ -436,9 +466,11 @@ public abstract class ModelContext
 
     /**
      * Gets the default log level events are logged at.
-     * <p>The default log level is controlled by system property
+     * <p>
+     * The default log level is controlled by system property
      * {@code org.jomc.modlet.ModelContext.defaultLogLevel} holding the log level to log events at by default.
-     * If that property is not set, the {@code WARNING} default is returned.</p>
+     * If that property is not set, the {@code WARNING} default is returned.
+     * </p>
      *
      * @return The log level events are logged at by default.
      *
@@ -550,7 +582,7 @@ public abstract class ModelContext
 
         if ( this.isLoggable( level ) )
         {
-            for ( Listener l : this.getListeners() )
+            for ( final Listener l : this.getListeners() )
             {
                 l.onLog( level, message, throwable );
             }
@@ -559,11 +591,15 @@ public abstract class ModelContext
 
     /**
      * Gets the {@code Modlets} of the context.
-     * <p>If no {@code Modlets} have been set using the {@code setModlets} method, this method calls the
+     * <p>
+     * If no {@code Modlets} have been set using the {@code setModlets} method, this method calls the
      * {@code findModlets} method and the {@code processModlets} method to initialize the {@code Modlets} of the
-     * context.</p>
-     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
-     * to the returned list will be present inside the object.</p>
+     * context.
+     * </p>
+     * <p>
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make
+     * to the returned list will be present inside the object.
+     * </p>
      *
      * @return The {@code Modlets} of the context.
      *
@@ -872,10 +908,12 @@ public abstract class ModelContext
 
     /**
      * Gets the name of the class providing the default {@code ModelContext} implementation.
-     * <p>The name of the class providing the default {@code ModelContext} implementation returned by method
+     * <p>
+     * The name of the class providing the default {@code ModelContext} implementation returned by method
      * {@link #createModelContext(java.lang.ClassLoader)} is controlled by system property
      * {@code org.jomc.modlet.ModelContext.className}. If that property is not set, the name of the
-     * {@link org.jomc.modlet.DefaultModelContext} class is returned.</p>
+     * {@link org.jomc.modlet.DefaultModelContext} class is returned.
+     * </p>
      *
      * @return The name of the class providing the default {@code ModelContext} implementation.
      *

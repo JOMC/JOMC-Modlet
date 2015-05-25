@@ -48,7 +48,9 @@ import static org.junit.Assert.fail;
 public class ModletObjectTest
 {
 
-    /** Creates a new {@code ModletObjectTest} instance. */
+    /**
+     * Creates a new {@code ModletObjectTest} instance.
+     */
     public ModletObjectTest()
     {
         super();

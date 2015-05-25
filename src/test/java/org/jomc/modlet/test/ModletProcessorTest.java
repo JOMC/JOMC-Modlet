@@ -48,10 +48,14 @@ import static org.junit.Assert.fail;
 public class ModletProcessorTest
 {
 
-    /** The {@code ModletProcessor} instance tests are performed with. */
+    /**
+     * The {@code ModletProcessor} instance tests are performed with.
+     */
     private ModletProcessor modletProcessor;
 
-    /** Creates a new {@code ModletProcessorTest} instance. */
+    /**
+     * Creates a new {@code ModletProcessorTest} instance.
+     */
     public ModletProcessorTest()
     {
         super();
