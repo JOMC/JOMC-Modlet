@@ -37,8 +37,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -153,11 +151,6 @@ public class DefaultModelContext extends ModelContext
      * Default platform provider location.
      */
     private static volatile String defaultPlatformProviderLocation;
-
-    /**
-     * Cached schema resources.
-     */
-    private Reference<Set<URI>> cachedSchemaResources = new SoftReference<Set<URI>>( null );
 
     /**
      * Provider location of the instance.
@@ -1214,86 +1207,79 @@ public class DefaultModelContext extends ModelContext
      */
     private Set<URI> getSchemaResources() throws IOException, URISyntaxException, ModelException
     {
-        Set<URI> resources = this.cachedSchemaResources.get();
+        final Set<URI> resources = new HashSet<URI>();
+        final long t0 = System.currentTimeMillis();
+        int count = 0;
 
-        if ( resources == null )
+        for ( final Enumeration<URL> e = this.findResources( "META-INF/MANIFEST.MF" );
+              e.hasMoreElements(); )
         {
-            resources = new HashSet<URI>();
-            final long t0 = System.currentTimeMillis();
-            int count = 0;
+            InputStream manifestStream = null;
+            boolean suppressExceptionOnClose = true;
 
-            for ( final Enumeration<URL> e = this.findResources( "META-INF/MANIFEST.MF" );
-                  e.hasMoreElements(); )
+            try
             {
-                InputStream manifestStream = null;
-                boolean suppressExceptionOnClose = true;
+                count++;
+                final URL manifestUrl = e.nextElement();
+                final String externalForm = manifestUrl.toExternalForm();
+                final String baseUrl = externalForm.substring( 0, externalForm.indexOf( "META-INF" ) );
+                manifestStream = manifestUrl.openStream();
+                final Manifest mf = new Manifest( manifestStream );
 
-                try
+                if ( this.isLoggable( Level.FINEST ) )
                 {
-                    count++;
-                    final URL manifestUrl = e.nextElement();
-                    final String externalForm = manifestUrl.toExternalForm();
-                    final String baseUrl = externalForm.substring( 0, externalForm.indexOf( "META-INF" ) );
-                    manifestStream = manifestUrl.openStream();
-                    final Manifest mf = new Manifest( manifestStream );
+                    this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
+                }
 
-                    if ( this.isLoggable( Level.FINEST ) )
+                for ( final Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
+                {
+                    for ( int i = SCHEMA_EXTENSIONS.length - 1; i >= 0; i-- )
                     {
-                        this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
-                    }
-
-                    for ( final Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
-                    {
-                        for ( int i = SCHEMA_EXTENSIONS.length - 1; i >= 0; i-- )
+                        if ( entry.getKey().toLowerCase().endsWith( '.' + SCHEMA_EXTENSIONS[i].toLowerCase() ) )
                         {
-                            if ( entry.getKey().toLowerCase().endsWith( '.' + SCHEMA_EXTENSIONS[i].toLowerCase() ) )
+                            final URL schemaUrl = new URL( baseUrl + entry.getKey() );
+                            resources.add( schemaUrl.toURI() );
+
+                            if ( this.isLoggable( Level.FINEST ) )
                             {
-                                final URL schemaUrl = new URL( baseUrl + entry.getKey() );
-                                resources.add( schemaUrl.toURI() );
+                                this.log( Level.FINEST, getMessage( "foundSchemaCandidate",
+                                                                    schemaUrl.toExternalForm() ), null );
 
-                                if ( this.isLoggable( Level.FINEST ) )
-                                {
-                                    this.log( Level.FINEST, getMessage( "foundSchemaCandidate",
-                                                                        schemaUrl.toExternalForm() ), null );
-
-                                }
                             }
                         }
                     }
+                }
 
-                    suppressExceptionOnClose = false;
-                }
-                finally
-                {
-                    try
-                    {
-                        if ( manifestStream != null )
-                        {
-                            manifestStream.close();
-                        }
-                    }
-                    catch ( final IOException ex )
-                    {
-                        if ( suppressExceptionOnClose )
-                        {
-                            this.log( Level.SEVERE, getMessage( ex ), ex );
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                    }
-                }
+                suppressExceptionOnClose = false;
             }
-
-            if ( this.isLoggable( Level.FINE ) )
+            finally
             {
-                this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF",
-                                                  System.currentTimeMillis() - t0 ), null );
-
+                try
+                {
+                    if ( manifestStream != null )
+                    {
+                        manifestStream.close();
+                    }
+                }
+                catch ( final IOException ex )
+                {
+                    if ( suppressExceptionOnClose )
+                    {
+                        this.log( Level.SEVERE, getMessage( ex ), ex );
+                    }
+                    else
+                    {
+                        throw ex;
+                    }
+                }
             }
+        }
 
-            this.cachedSchemaResources = new SoftReference<Set<URI>>( resources );
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF",
+                                              System.currentTimeMillis() - t0 ), null );
+
         }
 
         return resources;
