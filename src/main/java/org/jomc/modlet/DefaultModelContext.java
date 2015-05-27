@@ -48,7 +48,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -532,11 +531,12 @@ public class DefaultModelContext extends ModelContext
     /**
      * {@inheritDoc}
      * <p>
-     * This method loads all {@code ModelProvider} service classes of the model identified by {@code model} to create
+     * This method creates all {@code ModelProvider} service objects of the model identified by {@code model} to create
      * a new {@code Model} instance.
      * </p>
      *
      * @see #findModel(org.jomc.modlet.Model)
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class )
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      */
     @Override
@@ -556,11 +556,11 @@ public class DefaultModelContext extends ModelContext
     /**
      * {@inheritDoc}
      * <p>
-     * This method loads all {@code ModelProvider} service classes of the given model to populate the given model
+     * This method creates all {@code ModelProvider} service objects of the given model to populate the given model
      * instance.
      * </p>
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class)
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model.getIdentifier(), ModelProvider.class )
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      *
      * @since 1.2
@@ -604,11 +604,11 @@ public class DefaultModelContext extends ModelContext
     /**
      * {@inheritDoc}
      * <p>
-     * This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
+     * This method creates all {@code ModelProcessor} service objects of {@code model} to process the given
      * {@code Model}.
      * </p>
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class)
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model.getIdentifier(), ModelProcessor.class )
      * @see ModelProcessor#processModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      */
     @Override
@@ -653,11 +653,11 @@ public class DefaultModelContext extends ModelContext
     /**
      * {@inheritDoc}
      * <p>
-     * This method loads all {@code ModelValidator} service classes of {@code model} to validate the given
+     * This method creates all {@code ModelValidator} service objects of {@code model} to validate the given
      * {@code Model}.
      * </p>
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class)
+     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model.getIdentifier(), ModelValidator.class )
      * @see ModelValidator#validateModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      */
     @Override
@@ -761,6 +761,7 @@ public class DefaultModelContext extends ModelContext
      * {@inheritDoc}
      *
      * @since 1.9
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, type.getName(), type )
      */
     @Override
     public <T> Collection<? extends T> createServiceObjects( final String model, final Class<T> type )
@@ -781,8 +782,8 @@ public class DefaultModelContext extends ModelContext
     /**
      * {@inheritDoc}
      * <p>
-     * This method loads all {@code ModelProcessor} service classes of {@code model} to process the given
-     * {@code Model}.
+     * This method loads {@code ServiceFactory} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create a new service object.
      * </p>
      *
      * @since 1.9
@@ -811,9 +812,11 @@ public class DefaultModelContext extends ModelContext
 
         if ( modelServices != null )
         {
+            final Collection<ServiceFactory> factories = this.loadModletServices( ServiceFactory.class );
+
             for ( final Service s : modelServices.getServices( service ) )
             {
-                serviceObjects.add( this.createServiceObject( s, type ) );
+                serviceObjects.add( this.createServiceObject( s, type, factories ) );
             }
         }
 
@@ -844,8 +847,40 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "type" );
         }
 
+        return this.createServiceObject( service, type, this.loadModletServices( ServiceFactory.class ) );
+    }
+
+    /**
+     * This method creates a new service object for a given service using a given collection of service factories.
+     *
+     * @param <T> The type of the service.
+     * @param service The service to create a new object of.
+     * @param type The class of the type of the service.
+     * @param factories The service factories to use for creating the new service object.
+     *
+     * @return An new service object for {@code service}.
+     *
+     * @throws NullPointerException if {@code service}, {@code type} or {@code factories} is {@code null}.
+     * @throws ModelException if creating the service object fails.
+     * @since 1.9
+     */
+    private <T> T createServiceObject( final Service service, final Class<T> type,
+                                       final Collection<ServiceFactory> factories ) throws ModelException
+    {
+        if ( service == null )
+        {
+            throw new NullPointerException( "service" );
+        }
+        if ( type == null )
+        {
+            throw new NullPointerException( "type" );
+        }
+        if ( factories == null )
+        {
+            throw new NullPointerException( "factories" );
+        }
+
         T serviceObject = null;
-        final Collection<ServiceFactory> factories = this.loadModletServices( ServiceFactory.class );
 
         for ( final ServiceFactory factory : factories )
         {
@@ -1017,7 +1052,7 @@ public class DefaultModelContext extends ModelContext
                         }
 
                         sortedPlatformServices.put( e.getKey().toString(),
-                                                    this.createServiceObject( serviceClass, configuration ) );
+                                                    this.createModletServiceObject( serviceClass, configuration ) );
 
                     }
                 }
@@ -1062,7 +1097,7 @@ public class DefaultModelContext extends ModelContext
 
                         }
 
-                        final T serviceObject = this.createServiceObject( serviceClass, line );
+                        final T serviceObject = this.createModletServiceObject( serviceClass, line );
                         sortedClasspathServices.add( serviceObject );
                     }
 
@@ -1124,13 +1159,14 @@ public class DefaultModelContext extends ModelContext
         }
     }
 
-    private <T> T createServiceObject( final Class<T> serviceClass, final String configuration )
+    private <T> T createModletServiceObject( final Class<T> serviceClass, final String configuration )
         throws ModelException
     {
         String className = configuration;
-        final Map<String, String> properties = new HashMap<String, String>();
         final int i0 = configuration.indexOf( '[' );
         final int i1 = configuration.lastIndexOf( ']' );
+        final Service service = new Service();
+        service.setIdentifier( serviceClass.getName() );
 
         if ( i0 != -1 && i1 != -1 )
         {
@@ -1152,24 +1188,17 @@ public class DefaultModelContext extends ModelContext
                     propertyValue = property.substring( d0 + 1, property.length() );
                 }
 
-                properties.put( propertyName, propertyValue );
+                final Property p = new Property();
+                service.getProperty().add( p );
+
+                p.setName( propertyName );
+                p.setValue( propertyValue );
             }
         }
 
-        final Service service = new Service();
-        service.setIdentifier( serviceClass.getName() );
         service.setClazz( className );
 
-        for ( final Map.Entry<String, String> property : properties.entrySet() )
-        {
-            final Property p = new Property();
-            service.getProperty().add( p );
-
-            p.setName( property.getKey() );
-            p.setValue( property.getValue() );
-        }
-
-        // Need a way to exchange the service factory creating service factories?
+        // Need a way to exchange the service factory creating modlet service objects?
         return new DefaultServiceFactory().createServiceObject( this, service, serviceClass );
     }
 
