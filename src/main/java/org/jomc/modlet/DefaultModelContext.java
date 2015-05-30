@@ -549,7 +549,7 @@ public class DefaultModelContext extends ModelContext
      * </p>
      *
      * @see #findModel(org.jomc.modlet.Model)
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class.getName(), ModelProvider.class )
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      */
     @Override
@@ -573,7 +573,7 @@ public class DefaultModelContext extends ModelContext
      * instance.
      * </p>
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model.getIdentifier(), ModelProvider.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class.getName(), ModelProvider.class )
      * @see ModelProvider#findModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      *
      * @since 1.2
@@ -623,7 +623,7 @@ public class DefaultModelContext extends ModelContext
      * {@code Model}.
      * </p>
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model.getIdentifier(), ModelProcessor.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelProcessor.class.getName(), ModelProcessor.class )
      * @see ModelProcessor#processModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      */
     @Override
@@ -673,7 +673,7 @@ public class DefaultModelContext extends ModelContext
      * {@code Model}.
      * </p>
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model.getIdentifier(), ModelValidator.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelValidator.class.getName(), ModelValidator.class )
      * @see ModelValidator#validateModel(org.jomc.modlet.ModelContext, org.jomc.modlet.Model)
      */
     @Override

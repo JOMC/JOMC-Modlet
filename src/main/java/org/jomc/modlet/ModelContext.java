@@ -880,7 +880,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if creating a new {@code Model} instance fails.
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class.getName(), ModelProvider.class )
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Model findModel( String model ) throws ModelException;
@@ -895,7 +895,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if populating {@code model} fails.
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelProvider.class.getName(), ModelProvider.class )
      *
      * @since 1.2
      */
@@ -1030,7 +1030,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if processing {@code model} fails.
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelProcessor.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelProcessor.class.getName(), ModelProcessor.class )
      */
     public abstract Model processModel( Model model ) throws ModelException;
 
@@ -1044,7 +1044,7 @@ public abstract class ModelContext
      * @throws NullPointerException if {@code model} is {@code null}.
      * @throws ModelException if validating {@code model} fails.
      *
-     * @see #createServiceObjects(java.lang.String, java.lang.Class) createServiceObjects( model, ModelValidator.class )
+     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, ModelValidator.class.getName(), ModelValidator.class )
      * @see ModelValidationReport#isModelValid()
      */
     public abstract ModelValidationReport validateModel( Model model ) throws ModelException;
