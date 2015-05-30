@@ -1068,33 +1068,6 @@ public abstract class ModelContext
 
     /**
      * Creates service objects of a model.
-     * <p>
-     * Calling this method is the same as calling method<blockquote>
-     * {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, type.getName(), type )}
-     * </blockquote>
-     * </p>
-     *
-     * @param <T> The type of the service.
-     * @param model The identifier of the {@code Model} to create service objects of.
-     * @param type The class of the type of the service.
-     *
-     * @return An ordered, unmodifiable collection of new service objects identified by {@code type} of the model
-     * identified by {@code model}.
-     *
-     * @throws NullPointerException if {@code model} or {@code type} is {@code null}.
-     * @throws ModelException if creating service objects fails.
-     *
-     * @see ModelProvider
-     * @see ModelProcessor
-     * @see ModelValidator
-     *
-     * @since 1.9
-     */
-    public abstract <T> Collection<? extends T> createServiceObjects( final String model, final Class<T> type )
-        throws ModelException;
-
-    /**
-     * Creates service objects of a model.
      *
      * @param <T> The type of the service.
      * @param model The identifier of the {@code Model} to create service objects of.
