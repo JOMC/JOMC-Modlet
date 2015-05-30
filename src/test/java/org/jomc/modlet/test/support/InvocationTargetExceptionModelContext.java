@@ -41,7 +41,6 @@ import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModelValidationReport;
 import org.jomc.modlet.Modlets;
-import org.jomc.modlet.Service;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 
@@ -146,13 +145,6 @@ public final class InvocationTargetExceptionModelContext extends ModelContext
 
     @Override
     public ModelValidationReport validateModel( final String model, final Source source ) throws ModelException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @Deprecated
-    public <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
     {
         throw new UnsupportedOperationException();
     }

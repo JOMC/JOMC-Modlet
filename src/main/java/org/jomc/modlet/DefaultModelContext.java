@@ -754,11 +754,723 @@ public class DefaultModelContext extends ModelContext
         return modelErrorHandler.getReport();
     }
 
+    @Override
+    public EntityResolver createEntityResolver( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        final Schemas schemas = getModlets().getSchemas( model );
+        return new DefaultHandler()
+        {
+
+            @Override
+            public InputSource resolveEntity( final String publicId, final String systemId )
+                throws SAXException, IOException
+            {
+                InputSource schemaSource = null;
+
+                try
+                {
+                    Schema s = null;
+
+                    if ( schemas != null )
+                    {
+                        if ( systemId != null && !"".equals( systemId ) )
+                        {
+                            s = schemas.getSchemaBySystemId( systemId );
+                        }
+                        else if ( publicId != null )
+                        {
+                            s = schemas.getSchemaByPublicId( publicId );
+                        }
+                    }
+
+                    if ( s != null )
+                    {
+                        schemaSource = new InputSource();
+                        schemaSource.setPublicId( s.getPublicId() );
+                        schemaSource.setSystemId( s.getSystemId() );
+
+                        if ( s.getClasspathId() != null )
+                        {
+                            final URL resource = findResource( s.getClasspathId() );
+
+                            if ( resource != null )
+                            {
+                                schemaSource.setSystemId( resource.toExternalForm() );
+                            }
+                            else if ( isLoggable( Level.WARNING ) )
+                            {
+                                log( Level.WARNING, getMessage( "resourceNotFound", s.getClasspathId() ), null );
+                            }
+                        }
+
+                        if ( isLoggable( Level.FINEST ) )
+                        {
+                            log( Level.FINEST, getMessage( "resolutionInfo", publicId + ", " + systemId,
+                                                           schemaSource.getPublicId() + ", "
+                                                               + schemaSource.getSystemId() ), null );
+
+                        }
+                    }
+
+                    if ( schemaSource == null && systemId != null && !"".equals( systemId ) )
+                    {
+                        final URI systemUri = new URI( systemId );
+                        String schemaName = systemUri.getPath();
+
+                        if ( schemaName != null )
+                        {
+                            final int lastIndexOfSlash = schemaName.lastIndexOf( '/' );
+                            if ( lastIndexOfSlash != -1 && lastIndexOfSlash < schemaName.length() )
+                            {
+                                schemaName = schemaName.substring( lastIndexOfSlash + 1 );
+                            }
+
+                            for ( final URI uri : getSchemaResources() )
+                            {
+                                if ( uri.getSchemeSpecificPart() != null
+                                         && uri.getSchemeSpecificPart().endsWith( schemaName ) )
+                                {
+                                    schemaSource = new InputSource();
+                                    schemaSource.setPublicId( publicId );
+                                    schemaSource.setSystemId( uri.toASCIIString() );
+
+                                    if ( isLoggable( Level.FINEST ) )
+                                    {
+                                        log( Level.FINEST, getMessage( "resolutionInfo", systemUri.toASCIIString(),
+                                                                       schemaSource.getSystemId() ), null );
+
+                                    }
+
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if ( isLoggable( Level.WARNING ) )
+                            {
+                                log( Level.WARNING, getMessage( "unsupportedIdUri", systemId,
+                                                                systemUri.toASCIIString() ), null );
+
+                            }
+
+                            schemaSource = null;
+                        }
+                    }
+                }
+                catch ( final URISyntaxException e )
+                {
+                    if ( isLoggable( Level.WARNING ) )
+                    {
+                        log( Level.WARNING, getMessage( "unsupportedIdUri", systemId, getMessage( e ) ), null );
+                    }
+
+                    schemaSource = null;
+                }
+                catch ( final ModelException e )
+                {
+                    String message = getMessage( e );
+                    if ( message == null )
+                    {
+                        message = "";
+                    }
+                    else if ( message.length() > 0 )
+                    {
+                        message = " " + message;
+                    }
+
+                    String resource = "";
+                    if ( publicId != null )
+                    {
+                        resource = publicId + ", ";
+                    }
+                    resource += systemId;
+
+                    // JDK: As of JDK 6, "new IOException( message, cause )".
+                    throw (IOException) new IOException( getMessage(
+                        "failedResolving", resource, message ) ).initCause( e );
+
+                }
+
+                return schemaSource;
+            }
+
+        };
+    }
+
+    @Override
+    public LSResourceResolver createResourceResolver( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        final EntityResolver entityResolver = this.createEntityResolver( model );
+        return new LSResourceResolver()
+        {
+
+            public LSInput resolveResource( final String type, final String namespaceURI, final String publicId,
+                                            final String systemId, final String baseURI )
+            {
+                final String resolvePublicId = namespaceURI == null ? publicId : namespaceURI;
+                final String resolveSystemId = systemId == null ? "" : systemId;
+
+                try
+                {
+                    if ( XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( type ) )
+                    {
+                        final InputSource schemaSource =
+                            entityResolver.resolveEntity( resolvePublicId, resolveSystemId );
+
+                        if ( schemaSource != null )
+                        {
+                            return new LSInput()
+                            {
+
+                                public Reader getCharacterStream()
+                                {
+                                    return schemaSource.getCharacterStream();
+                                }
+
+                                public void setCharacterStream( final Reader characterStream )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setCharacterStream",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                                public InputStream getByteStream()
+                                {
+                                    return schemaSource.getByteStream();
+                                }
+
+                                public void setByteStream( final InputStream byteStream )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setByteStream",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                                public String getStringData()
+                                {
+                                    return null;
+                                }
+
+                                public void setStringData( final String stringData )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setStringData",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                                public String getSystemId()
+                                {
+                                    return schemaSource.getSystemId();
+                                }
+
+                                public void setSystemId( final String systemId )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setSystemId",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                                public String getPublicId()
+                                {
+                                    return schemaSource.getPublicId();
+                                }
+
+                                public void setPublicId( final String publicId )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setPublicId",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                                public String getBaseURI()
+                                {
+                                    return baseURI;
+                                }
+
+                                public void setBaseURI( final String baseURI )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setBaseURI",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                                public String getEncoding()
+                                {
+                                    return schemaSource.getEncoding();
+                                }
+
+                                public void setEncoding( final String encoding )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setEncoding",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                                public boolean getCertifiedText()
+                                {
+                                    return false;
+                                }
+
+                                public void setCertifiedText( final boolean certifiedText )
+                                {
+                                    if ( isLoggable( Level.WARNING ) )
+                                    {
+                                        log( Level.WARNING, getMessage(
+                                             "unsupportedOperation", "setCertifiedText",
+                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
+
+                                    }
+                                }
+
+                            };
+                        }
+
+                    }
+                    else if ( isLoggable( Level.WARNING ) )
+                    {
+                        log( Level.WARNING, getMessage( "unsupportedResourceType", type ), null );
+                    }
+                }
+                catch ( final SAXException e )
+                {
+                    String message = getMessage( e );
+                    if ( message == null && e.getException() != null )
+                    {
+                        message = getMessage( e.getException() );
+                    }
+                    if ( message == null )
+                    {
+                        message = "";
+                    }
+                    else if ( message.length() > 0 )
+                    {
+                        message = " " + message;
+                    }
+
+                    String resource = "";
+                    if ( resolvePublicId != null )
+                    {
+                        resource = resolvePublicId + ", ";
+                    }
+                    resource += resolveSystemId;
+
+                    if ( isLoggable( Level.SEVERE ) )
+                    {
+                        log( Level.SEVERE, getMessage( "failedResolving", resource, message ), e );
+                    }
+                }
+                catch ( final IOException e )
+                {
+                    String message = getMessage( e );
+                    if ( message == null )
+                    {
+                        message = "";
+                    }
+                    else if ( message.length() > 0 )
+                    {
+                        message = " " + message;
+                    }
+
+                    String resource = "";
+                    if ( resolvePublicId != null )
+                    {
+                        resource = resolvePublicId + ", ";
+                    }
+                    resource += resolveSystemId;
+
+                    if ( isLoggable( Level.SEVERE ) )
+                    {
+                        log( Level.SEVERE, getMessage( "failedResolving", resource, message ), e );
+                    }
+                }
+
+                return null;
+            }
+
+        };
+    }
+
+    @Override
+    public javax.xml.validation.Schema createSchema( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        try
+        {
+            final long t0 = System.currentTimeMillis();
+            final Schemas schemas = this.getModlets().getSchemas( model );
+            final EntityResolver entityResolver = this.createEntityResolver( model );
+            final SchemaFactory f = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+            final List<Source> sources = new ArrayList<Source>( schemas != null ? schemas.getSchema().size() : 0 );
+
+            if ( schemas != null )
+            {
+                for ( final Schema s : schemas.getSchema() )
+                {
+                    final InputSource inputSource = entityResolver.resolveEntity( s.getPublicId(), s.getSystemId() );
+
+                    if ( inputSource != null )
+                    {
+                        sources.add( new SAXSource( inputSource ) );
+                    }
+                }
+            }
+
+            if ( sources.isEmpty() )
+            {
+                throw new ModelException( getMessage( "missingSchemasForModel", model ) );
+            }
+
+            f.setResourceResolver( this.createResourceResolver( model ) );
+            f.setErrorHandler( new ErrorHandler()
+            {
+                // See http://java.net/jira/browse/JAXP-66
+
+                public void warning( final SAXParseException e ) throws SAXException
+                {
+                    String message = getMessage( e );
+                    if ( message == null && e.getException() != null )
+                    {
+                        message = getMessage( e.getException() );
+                    }
+
+                    if ( isLoggable( Level.WARNING ) )
+                    {
+                        log( Level.WARNING, message, e );
+                    }
+                }
+
+                public void error( final SAXParseException e ) throws SAXException
+                {
+                    throw e;
+                }
+
+                public void fatalError( final SAXParseException e ) throws SAXException
+                {
+                    throw e;
+                }
+
+            } );
+
+            final javax.xml.validation.Schema schema = f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                final StringBuilder schemaInfo = new StringBuilder( sources.size() * 50 );
+
+                for ( final Source s : sources )
+                {
+                    schemaInfo.append( ", " ).append( s.getSystemId() );
+                }
+
+                this.log( Level.FINE, getMessage( "creatingSchema", schemaInfo.substring( 2 ),
+                                                  System.currentTimeMillis() - t0 ), null );
+
+            }
+
+            return schema;
+        }
+        catch ( final IOException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final SAXException e )
+        {
+            String message = getMessage( e );
+            if ( message == null && e.getException() != null )
+            {
+                message = getMessage( e.getException() );
+            }
+
+            throw new ModelException( message, e );
+        }
+    }
+
+    @Override
+    public JAXBContext createContext( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        try
+        {
+            StringBuilder packageNames = null;
+            final long t0 = System.currentTimeMillis();
+            final Schemas schemas = this.getModlets().getSchemas( model );
+
+            if ( schemas != null )
+            {
+                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
+
+                for ( final Schema schema : schemas.getSchema() )
+                {
+                    if ( schema.getContextId() != null )
+                    {
+                        packageNames.append( ':' ).append( schema.getContextId() );
+                    }
+                }
+            }
+
+            if ( packageNames == null || packageNames.length() == 0 )
+            {
+                throw new ModelException( getMessage( "missingSchemasForModel", model ) );
+            }
+
+            final JAXBContext context = JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() );
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                this.log( Level.FINE, getMessage( "creatingContext", packageNames.substring( 1 ),
+                                                  System.currentTimeMillis() - t0 ), null );
+            }
+
+            return context;
+        }
+        catch ( final JAXBException e )
+        {
+            String message = getMessage( e );
+            if ( message == null && e.getLinkedException() != null )
+            {
+                message = getMessage( e.getLinkedException() );
+            }
+
+            throw new ModelException( message, e );
+        }
+    }
+
+    @Override
+    public Marshaller createMarshaller( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        try
+        {
+            StringBuilder packageNames = null;
+            StringBuilder schemaLocation = null;
+            final long t0 = System.currentTimeMillis();
+            final Schemas schemas = this.getModlets().getSchemas( model );
+
+            if ( schemas != null )
+            {
+                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
+                schemaLocation = new StringBuilder( schemas.getSchema().size() * 50 );
+
+                for ( final Schema schema : schemas.getSchema() )
+                {
+                    if ( schema.getContextId() != null )
+                    {
+                        packageNames.append( ':' ).append( schema.getContextId() );
+                    }
+                    if ( schema.getPublicId() != null && schema.getSystemId() != null )
+                    {
+                        schemaLocation.append( ' ' ).append( schema.getPublicId() ).append( ' ' ).
+                            append( schema.getSystemId() );
+
+                    }
+                }
+            }
+
+            if ( packageNames == null || packageNames.length() == 0 )
+            {
+                throw new ModelException( getMessage( "missingSchemasForModel", model ) );
+            }
+
+            final Marshaller m =
+                JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createMarshaller();
+
+            if ( schemaLocation != null && schemaLocation.length() != 0 )
+            {
+                m.setProperty( Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.substring( 1 ) );
+            }
+
+            final Collection<? extends Marshaller.Listener> listeners =
+                this.createServiceObjects( model, MARSHALLER_LISTENER_SERVICE, Marshaller.Listener.class );
+
+            MarshallerListenerList listenerList = null;
+
+            if ( !listeners.isEmpty() )
+            {
+                listenerList = new MarshallerListenerList();
+                listenerList.getListeners().addAll( listeners );
+                m.setListener( listenerList );
+            }
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                if ( listenerList == null )
+                {
+                    this.log( Level.FINE, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
+                                                      schemaLocation.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
+
+                }
+                else
+                {
+                    final StringBuilder b = new StringBuilder( listenerList.getListeners().size() * 100 );
+
+                    for ( int i = 0, s0 = listenerList.getListeners().size(); i < s0; i++ )
+                    {
+                        b.append( ',' ).append( listenerList.getListeners().get( i ) );
+                    }
+
+                    this.log( Level.FINE, getMessage( "creatingMarshallerWithListeners", packageNames.substring( 1 ),
+                                                      schemaLocation.substring( 1 ), b.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
+
+                }
+            }
+
+            return m;
+        }
+        catch ( final JAXBException e )
+        {
+            String message = getMessage( e );
+            if ( message == null && e.getLinkedException() != null )
+            {
+                message = getMessage( e.getLinkedException() );
+            }
+
+            throw new ModelException( message, e );
+        }
+    }
+
+    @Override
+    public Unmarshaller createUnmarshaller( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        try
+        {
+            StringBuilder packageNames = null;
+            final long t0 = System.currentTimeMillis();
+            final Schemas schemas = this.getModlets().getSchemas( model );
+
+            if ( schemas != null )
+            {
+                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
+
+                for ( final Schema schema : schemas.getSchema() )
+                {
+                    if ( schema.getContextId() != null )
+                    {
+                        packageNames.append( ':' ).append( schema.getContextId() );
+                    }
+                }
+            }
+
+            if ( packageNames == null || packageNames.length() == 0 )
+            {
+                throw new ModelException( getMessage( "missingSchemasForModel", model ) );
+            }
+
+            final Unmarshaller u =
+                JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createUnmarshaller();
+
+            UnmarshallerListenerList listenerList = null;
+
+            final Collection<? extends Unmarshaller.Listener> listeners =
+                this.createServiceObjects( model, UNMARSHALLER_LISTENER_SERVICE, Unmarshaller.Listener.class );
+
+            if ( !listeners.isEmpty() )
+            {
+                listenerList = new UnmarshallerListenerList();
+                listenerList.getListeners().addAll( listeners );
+                u.setListener( listenerList );
+            }
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                if ( listenerList == null )
+                {
+                    this.log( Level.FINE, getMessage( "creatingUnmarshaller", packageNames.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
+
+                }
+                else
+                {
+                    final StringBuilder b = new StringBuilder( listenerList.getListeners().size() * 100 );
+
+                    for ( int i = 0, s0 = listenerList.getListeners().size(); i < s0; i++ )
+                    {
+                        b.append( ',' ).append( listenerList.getListeners().get( i ) );
+                    }
+
+                    this.log( Level.FINE, getMessage( "creatingUnmarshallerWithListeners",
+                                                      packageNames.substring( 1 ), b.substring( 1 ),
+                                                      System.currentTimeMillis() - t0 ), null );
+
+                }
+            }
+
+            return u;
+        }
+        catch ( final JAXBException e )
+        {
+            String message = getMessage( e );
+            if ( message == null && e.getLinkedException() != null )
+            {
+                message = getMessage( e.getLinkedException() );
+            }
+
+            throw new ModelException( message, e );
+        }
+    }
+
     /**
      * {@inheritDoc}
      * <p>
      * This method loads {@code ServiceFactory} classes setup via the platform provider configuration file and
-     * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create a new service object.
+     * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create new service objects.
      * </p>
      *
      * @since 1.9
@@ -796,36 +1508,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return Collections.unmodifiableCollection( serviceObjects );
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This method loads {@code ServiceFactory} classes setup via the platform provider configuration file and
-     * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create a new service object.
-     * </p>
-     *
-     * @see #getProviderLocation()
-     * @see #getPlatformProviderLocation()
-     * @see ServiceFactory#createServiceObject(org.jomc.modlet.ModelContext, org.jomc.modlet.Service, java.lang.Class)
-     * @since 1.2
-     * @deprecated As of JOMC 1.9, please use method {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)}.
-     * This method will be removed in JOMC 2.0.
-     */
-    @Override
-    @Deprecated
-    public <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
-    {
-        if ( service == null )
-        {
-            throw new NullPointerException( "service" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
-
-        return this.createServiceObject( service, type, this.loadModletServices( ServiceFactory.class ) );
     }
 
     /**
@@ -886,78 +1568,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return serviceObject;
-    }
-
-    @Override
-    public EntityResolver createEntityResolver( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createEntityResolver( this.getModlets().getSchemas( model ) );
-    }
-
-    @Override
-    public LSResourceResolver createResourceResolver( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createResourceResolver( this.createEntityResolver( model ) );
-    }
-
-    @Override
-    public javax.xml.validation.Schema createSchema( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createSchema( this.getModlets().getSchemas( model ), this.createEntityResolver( model ),
-                                  this.createResourceResolver( model ), model, null );
-
-    }
-
-    @Override
-    public JAXBContext createContext( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createContext( this.getModlets().getSchemas( model ), model, null );
-    }
-
-    @Override
-    public Marshaller createMarshaller( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createMarshaller( this.getModlets().getSchemas( model ), this.getModlets().getServices( model ),
-                                      model, null );
-
-    }
-
-    @Override
-    public Unmarshaller createUnmarshaller( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createUnmarshaller( this.getModlets().getSchemas( model ), this.getModlets().getServices( model ),
-                                        model, null );
-
     }
 
     private <T> Collection<T> loadModletServices( final Class<T> serviceClass ) throws ModelException
@@ -1268,753 +1878,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return resources;
-    }
-
-    private EntityResolver createEntityResolver( final Schemas schemas )
-    {
-        return new DefaultHandler()
-        {
-
-            @Override
-            public InputSource resolveEntity( final String publicId, final String systemId )
-                throws SAXException, IOException
-            {
-                InputSource schemaSource = null;
-
-                try
-                {
-                    Schema s = null;
-
-                    if ( schemas != null )
-                    {
-                        if ( systemId != null && !"".equals( systemId ) )
-                        {
-                            s = schemas.getSchemaBySystemId( systemId );
-                        }
-                        else if ( publicId != null )
-                        {
-                            s = schemas.getSchemaByPublicId( publicId );
-                        }
-                    }
-
-                    if ( s != null )
-                    {
-                        schemaSource = new InputSource();
-                        schemaSource.setPublicId( s.getPublicId() );
-                        schemaSource.setSystemId( s.getSystemId() );
-
-                        if ( s.getClasspathId() != null )
-                        {
-                            final URL resource = findResource( s.getClasspathId() );
-
-                            if ( resource != null )
-                            {
-                                schemaSource.setSystemId( resource.toExternalForm() );
-                            }
-                            else if ( isLoggable( Level.WARNING ) )
-                            {
-                                log( Level.WARNING, getMessage( "resourceNotFound", s.getClasspathId() ), null );
-                            }
-                        }
-
-                        if ( isLoggable( Level.FINEST ) )
-                        {
-                            log( Level.FINEST, getMessage( "resolutionInfo", publicId + ", " + systemId,
-                                                           schemaSource.getPublicId() + ", "
-                                                               + schemaSource.getSystemId() ), null );
-
-                        }
-                    }
-
-                    if ( schemaSource == null && systemId != null && !"".equals( systemId ) )
-                    {
-                        final URI systemUri = new URI( systemId );
-                        String schemaName = systemUri.getPath();
-
-                        if ( schemaName != null )
-                        {
-                            final int lastIndexOfSlash = schemaName.lastIndexOf( '/' );
-                            if ( lastIndexOfSlash != -1 && lastIndexOfSlash < schemaName.length() )
-                            {
-                                schemaName = schemaName.substring( lastIndexOfSlash + 1 );
-                            }
-
-                            for ( final URI uri : getSchemaResources() )
-                            {
-                                if ( uri.getSchemeSpecificPart() != null
-                                         && uri.getSchemeSpecificPart().endsWith( schemaName ) )
-                                {
-                                    schemaSource = new InputSource();
-                                    schemaSource.setPublicId( publicId );
-                                    schemaSource.setSystemId( uri.toASCIIString() );
-
-                                    if ( isLoggable( Level.FINEST ) )
-                                    {
-                                        log( Level.FINEST, getMessage( "resolutionInfo", systemUri.toASCIIString(),
-                                                                       schemaSource.getSystemId() ), null );
-
-                                    }
-
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if ( isLoggable( Level.WARNING ) )
-                            {
-                                log( Level.WARNING, getMessage( "unsupportedIdUri", systemId,
-                                                                systemUri.toASCIIString() ), null );
-
-                            }
-
-                            schemaSource = null;
-                        }
-                    }
-                }
-                catch ( final URISyntaxException e )
-                {
-                    if ( isLoggable( Level.WARNING ) )
-                    {
-                        log( Level.WARNING, getMessage( "unsupportedIdUri", systemId, getMessage( e ) ), null );
-                    }
-
-                    schemaSource = null;
-                }
-                catch ( final ModelException e )
-                {
-                    String message = getMessage( e );
-                    if ( message == null )
-                    {
-                        message = "";
-                    }
-                    else if ( message.length() > 0 )
-                    {
-                        message = " " + message;
-                    }
-
-                    String resource = "";
-                    if ( publicId != null )
-                    {
-                        resource = publicId + ", ";
-                    }
-                    resource += systemId;
-
-                    // JDK: As of JDK 6, "new IOException( message, cause )".
-                    throw (IOException) new IOException( getMessage(
-                        "failedResolving", resource, message ) ).initCause( e );
-
-                }
-
-                return schemaSource;
-            }
-
-        };
-    }
-
-    private LSResourceResolver createResourceResolver( final EntityResolver entityResolver )
-    {
-        if ( entityResolver == null )
-        {
-            throw new NullPointerException( "entityResolver" );
-        }
-
-        return new LSResourceResolver()
-        {
-
-            public LSInput resolveResource( final String type, final String namespaceURI, final String publicId,
-                                            final String systemId, final String baseURI )
-            {
-                final String resolvePublicId = namespaceURI == null ? publicId : namespaceURI;
-                final String resolveSystemId = systemId == null ? "" : systemId;
-
-                try
-                {
-                    if ( XMLConstants.W3C_XML_SCHEMA_NS_URI.equals( type ) )
-                    {
-                        final InputSource schemaSource =
-                            entityResolver.resolveEntity( resolvePublicId, resolveSystemId );
-
-                        if ( schemaSource != null )
-                        {
-                            return new LSInput()
-                            {
-
-                                public Reader getCharacterStream()
-                                {
-                                    return schemaSource.getCharacterStream();
-                                }
-
-                                public void setCharacterStream( final Reader characterStream )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setCharacterStream",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                                public InputStream getByteStream()
-                                {
-                                    return schemaSource.getByteStream();
-                                }
-
-                                public void setByteStream( final InputStream byteStream )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setByteStream",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                                public String getStringData()
-                                {
-                                    return null;
-                                }
-
-                                public void setStringData( final String stringData )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setStringData",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                                public String getSystemId()
-                                {
-                                    return schemaSource.getSystemId();
-                                }
-
-                                public void setSystemId( final String systemId )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setSystemId",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                                public String getPublicId()
-                                {
-                                    return schemaSource.getPublicId();
-                                }
-
-                                public void setPublicId( final String publicId )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setPublicId",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                                public String getBaseURI()
-                                {
-                                    return baseURI;
-                                }
-
-                                public void setBaseURI( final String baseURI )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setBaseURI",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                                public String getEncoding()
-                                {
-                                    return schemaSource.getEncoding();
-                                }
-
-                                public void setEncoding( final String encoding )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setEncoding",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                                public boolean getCertifiedText()
-                                {
-                                    return false;
-                                }
-
-                                public void setCertifiedText( final boolean certifiedText )
-                                {
-                                    if ( isLoggable( Level.WARNING ) )
-                                    {
-                                        log( Level.WARNING, getMessage(
-                                             "unsupportedOperation", "setCertifiedText",
-                                             DefaultModelContext.class.getName() + ".LSResourceResolver" ), null );
-
-                                    }
-                                }
-
-                            };
-                        }
-
-                    }
-                    else if ( isLoggable( Level.WARNING ) )
-                    {
-                        log( Level.WARNING, getMessage( "unsupportedResourceType", type ), null );
-                    }
-                }
-                catch ( final SAXException e )
-                {
-                    String message = getMessage( e );
-                    if ( message == null && e.getException() != null )
-                    {
-                        message = getMessage( e.getException() );
-                    }
-                    if ( message == null )
-                    {
-                        message = "";
-                    }
-                    else if ( message.length() > 0 )
-                    {
-                        message = " " + message;
-                    }
-
-                    String resource = "";
-                    if ( resolvePublicId != null )
-                    {
-                        resource = resolvePublicId + ", ";
-                    }
-                    resource += resolveSystemId;
-
-                    if ( isLoggable( Level.SEVERE ) )
-                    {
-                        log( Level.SEVERE, getMessage( "failedResolving", resource, message ), e );
-                    }
-                }
-                catch ( final IOException e )
-                {
-                    String message = getMessage( e );
-                    if ( message == null )
-                    {
-                        message = "";
-                    }
-                    else if ( message.length() > 0 )
-                    {
-                        message = " " + message;
-                    }
-
-                    String resource = "";
-                    if ( resolvePublicId != null )
-                    {
-                        resource = resolvePublicId + ", ";
-                    }
-                    resource += resolveSystemId;
-
-                    if ( isLoggable( Level.SEVERE ) )
-                    {
-                        log( Level.SEVERE, getMessage( "failedResolving", resource, message ), e );
-                    }
-                }
-
-                return null;
-            }
-
-        };
-    }
-
-    private javax.xml.validation.Schema createSchema( final Schemas schemas, final EntityResolver entityResolver,
-                                                      final LSResourceResolver resourceResolver, final String model,
-                                                      final URI publicId ) throws ModelException
-    {
-        if ( entityResolver == null )
-        {
-            throw new NullPointerException( "entityResolver" );
-        }
-        if ( model != null && publicId != null )
-        {
-            throw new IllegalArgumentException( "model=" + model + ", publicId=" + publicId.toASCIIString() );
-        }
-
-        try
-        {
-            final long t0 = System.currentTimeMillis();
-            final SchemaFactory f = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
-            final List<Source> sources = new ArrayList<Source>( schemas != null ? schemas.getSchema().size() : 0 );
-
-            if ( schemas != null )
-            {
-                for ( final Schema s : schemas.getSchema() )
-                {
-                    final InputSource inputSource = entityResolver.resolveEntity( s.getPublicId(), s.getSystemId() );
-
-                    if ( inputSource != null )
-                    {
-                        sources.add( new SAXSource( inputSource ) );
-                    }
-                }
-            }
-
-            if ( sources.isEmpty() )
-            {
-                if ( model != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForModel", model ) );
-                }
-                if ( publicId != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForPublicId", publicId ) );
-                }
-            }
-
-            f.setResourceResolver( resourceResolver );
-            f.setErrorHandler( new ErrorHandler()
-            {
-                // See http://java.net/jira/browse/JAXP-66
-
-                public void warning( final SAXParseException e ) throws SAXException
-                {
-                    String message = getMessage( e );
-                    if ( message == null && e.getException() != null )
-                    {
-                        message = getMessage( e.getException() );
-                    }
-
-                    if ( isLoggable( Level.WARNING ) )
-                    {
-                        log( Level.WARNING, message, e );
-                    }
-                }
-
-                public void error( final SAXParseException e ) throws SAXException
-                {
-                    throw e;
-                }
-
-                public void fatalError( final SAXParseException e ) throws SAXException
-                {
-                    throw e;
-                }
-
-            } );
-
-            final javax.xml.validation.Schema schema = f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
-
-            if ( this.isLoggable( Level.FINE ) )
-            {
-                final StringBuilder schemaInfo = new StringBuilder( sources.size() * 50 );
-
-                for ( final Source s : sources )
-                {
-                    schemaInfo.append( ", " ).append( s.getSystemId() );
-                }
-
-                this.log( Level.FINE, getMessage( "creatingSchema", schemaInfo.substring( 2 ),
-                                                  System.currentTimeMillis() - t0 ), null );
-
-            }
-
-            return schema;
-        }
-        catch ( final IOException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final SAXException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getException() != null )
-            {
-                message = getMessage( e.getException() );
-            }
-
-            throw new ModelException( message, e );
-        }
-    }
-
-    private JAXBContext createContext( final Schemas schemas, final String model, final URI publicId )
-        throws ModelException
-    {
-        if ( model != null && publicId != null )
-        {
-            throw new IllegalArgumentException( "model=" + model + ", publicId=" + publicId.toASCIIString() );
-        }
-
-        try
-        {
-            StringBuilder packageNames = null;
-            final long t0 = System.currentTimeMillis();
-
-            if ( schemas != null )
-            {
-                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
-
-                for ( final Schema schema : schemas.getSchema() )
-                {
-                    if ( schema.getContextId() != null )
-                    {
-                        packageNames.append( ':' ).append( schema.getContextId() );
-                    }
-                }
-            }
-
-            if ( packageNames == null || packageNames.length() == 0 )
-            {
-                if ( model != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForModel", model ) );
-                }
-                if ( publicId != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForPublicId", publicId ) );
-                }
-            }
-
-            final JAXBContext context = JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() );
-
-            if ( this.isLoggable( Level.FINE ) )
-            {
-                this.log( Level.FINE, getMessage( "creatingContext", packageNames.substring( 1 ),
-                                                  System.currentTimeMillis() - t0 ), null );
-            }
-
-            return context;
-        }
-        catch ( final JAXBException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getLinkedException() != null )
-            {
-                message = getMessage( e.getLinkedException() );
-            }
-
-            throw new ModelException( message, e );
-        }
-    }
-
-    private Marshaller createMarshaller( final Schemas schemas, final Services services, final String model,
-                                         final URI publicId ) throws ModelException
-    {
-        if ( model != null && publicId != null )
-        {
-            throw new IllegalArgumentException( "model=" + model + ", publicId=" + publicId.toASCIIString() );
-        }
-
-        try
-        {
-            StringBuilder packageNames = null;
-            StringBuilder schemaLocation = null;
-            final long t0 = System.currentTimeMillis();
-
-            if ( schemas != null )
-            {
-                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
-                schemaLocation = new StringBuilder( schemas.getSchema().size() * 50 );
-
-                for ( final Schema schema : schemas.getSchema() )
-                {
-                    if ( schema.getContextId() != null )
-                    {
-                        packageNames.append( ':' ).append( schema.getContextId() );
-                    }
-                    if ( schema.getPublicId() != null && schema.getSystemId() != null )
-                    {
-                        schemaLocation.append( ' ' ).append( schema.getPublicId() ).append( ' ' ).
-                            append( schema.getSystemId() );
-
-                    }
-                }
-            }
-
-            if ( packageNames == null || packageNames.length() == 0 )
-            {
-                if ( model != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForModel", model ) );
-                }
-                if ( publicId != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForPublicId", publicId ) );
-                }
-            }
-
-            final Marshaller m =
-                JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createMarshaller();
-
-            if ( schemaLocation != null && schemaLocation.length() != 0 )
-            {
-                m.setProperty( Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.substring( 1 ) );
-            }
-
-            MarshallerListenerList listenerList = null;
-
-            if ( services != null )
-            {
-                for ( final Service service : services.getServices( MARSHALLER_LISTENER_SERVICE ) )
-                {
-                    if ( listenerList == null )
-                    {
-                        listenerList = new MarshallerListenerList();
-                    }
-
-                    listenerList.getListeners().add( this.createServiceObject( service, Marshaller.Listener.class ) );
-                }
-            }
-
-            if ( listenerList != null )
-            {
-                m.setListener( listenerList );
-            }
-
-            if ( this.isLoggable( Level.FINE ) )
-            {
-                if ( listenerList == null )
-                {
-                    this.log( Level.FINE, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
-                                                      schemaLocation.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
-
-                }
-                else
-                {
-                    final StringBuilder b = new StringBuilder( listenerList.getListeners().size() * 100 );
-
-                    for ( int i = 0, s0 = listenerList.getListeners().size(); i < s0; i++ )
-                    {
-                        b.append( ',' ).append( listenerList.getListeners().get( i ) );
-                    }
-
-                    this.log( Level.FINE, getMessage( "creatingMarshallerWithListeners", packageNames.substring( 1 ),
-                                                      schemaLocation.substring( 1 ), b.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
-
-                }
-            }
-
-            return m;
-        }
-        catch ( final JAXBException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getLinkedException() != null )
-            {
-                message = getMessage( e.getLinkedException() );
-            }
-
-            throw new ModelException( message, e );
-        }
-    }
-
-    private Unmarshaller createUnmarshaller( final Schemas schemas, final Services services, final String model,
-                                             final URI publicId ) throws ModelException
-    {
-        if ( model != null && publicId != null )
-        {
-            throw new IllegalArgumentException( "model=" + model + ", publicId=" + publicId.toASCIIString() );
-        }
-
-        try
-        {
-            StringBuilder packageNames = null;
-            final long t0 = System.currentTimeMillis();
-
-            if ( schemas != null )
-            {
-                packageNames = new StringBuilder( schemas.getSchema().size() * 25 );
-
-                for ( final Schema schema : schemas.getSchema() )
-                {
-                    if ( schema.getContextId() != null )
-                    {
-                        packageNames.append( ':' ).append( schema.getContextId() );
-                    }
-                }
-            }
-
-            if ( packageNames == null || packageNames.length() == 0 )
-            {
-                if ( model != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForModel", model ) );
-                }
-                if ( publicId != null )
-                {
-                    throw new ModelException( getMessage( "missingSchemasForPublicId", publicId ) );
-                }
-            }
-
-            final Unmarshaller u =
-                JAXBContext.newInstance( packageNames.substring( 1 ), this.getClassLoader() ).createUnmarshaller();
-
-            UnmarshallerListenerList listenerList = null;
-
-            if ( services != null )
-            {
-                for ( final Service service : services.getServices( UNMARSHALLER_LISTENER_SERVICE ) )
-                {
-                    if ( listenerList == null )
-                    {
-                        listenerList = new UnmarshallerListenerList();
-                    }
-
-                    listenerList.getListeners().add( this.createServiceObject( service, Unmarshaller.Listener.class ) );
-                }
-            }
-
-            if ( listenerList != null )
-            {
-                u.setListener( listenerList );
-            }
-
-            if ( this.isLoggable( Level.FINE ) )
-            {
-                if ( listenerList == null )
-                {
-                    this.log( Level.FINE, getMessage( "creatingUnmarshaller", packageNames.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
-
-                }
-                else
-                {
-                    final StringBuilder b = new StringBuilder( listenerList.getListeners().size() * 100 );
-
-                    for ( int i = 0, s0 = listenerList.getListeners().size(); i < s0; i++ )
-                    {
-                        b.append( ',' ).append( listenerList.getListeners().get( i ) );
-                    }
-
-                    this.log( Level.FINE, getMessage( "creatingUnmarshallerWithListeners",
-                                                      packageNames.substring( 1 ), b.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
-
-                }
-            }
-
-            return u;
-        }
-        catch ( final JAXBException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getLinkedException() != null )
-            {
-                message = getMessage( e.getLinkedException() );
-            }
-
-            throw new ModelException( message, e );
-        }
     }
 
     private static int ordinalOf( final Object serviceObject )

@@ -924,54 +924,6 @@ public abstract class ModelContext
     public abstract ModelValidationReport validateModel( String model, Source source ) throws ModelException;
 
     /**
-     * Creates service objects of a model.
-     *
-     * @param <T> The type of the service.
-     * @param model The identifier of the {@code Model} to create service objects of.
-     * @param service The identifier of the service to create objects of.
-     * @param type The class of the type of the service.
-     *
-     * @return An ordered, unmodifiable collection of new service objects identified by {@code service} of the model
-     * identified by {@code model}.
-     *
-     * @throws NullPointerException if {@code model}, {@code service} or {@code type} is {@code null}.
-     * @throws ModelException if creating service objects fails.
-     *
-     * @see ModelProvider
-     * @see ModelProcessor
-     * @see ModelValidator
-     *
-     * @since 1.9
-     */
-    public abstract <T> Collection<? extends T> createServiceObjects( final String model, final String service,
-                                                                      final Class<T> type )
-        throws ModelException;
-
-    /**
-     * Creates a new service object.
-     *
-     * @param <T> The type of the service.
-     * @param service The service to create a new object of.
-     * @param type The class of the type of the service.
-     *
-     * @return An new service object for {@code service}.
-     *
-     * @throws NullPointerException if {@code service} or {@code type} is {@code null}.
-     * @throws ModelException if creating the service object fails.
-     *
-     * @see ModletProvider
-     * @see ModletProcessor
-     * @see ModletValidator
-     * @see ServiceFactory
-     *
-     * @since 1.2
-     * @deprecated As of JOMC 1.9, please use method {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)}.
-     * This method will be removed in JOMC 2.0.
-     */
-    @Deprecated
-    public abstract <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException;
-
-    /**
      * Creates a new SAX entity resolver instance of a given model.
      *
      * @param model The identifier of the model to create a new SAX entity resolver of.
@@ -1054,6 +1006,30 @@ public abstract class ModelContext
      * @see ModletObject#MODEL_PUBLIC_ID
      */
     public abstract Unmarshaller createUnmarshaller( String model ) throws ModelException;
+
+    /**
+     * Creates service objects of a model.
+     *
+     * @param <T> The type of the service.
+     * @param model The identifier of the {@code Model} to create service objects of.
+     * @param service The identifier of the service to create objects of.
+     * @param type The class of the type of the service.
+     *
+     * @return An ordered, unmodifiable collection of new service objects identified by {@code service} of the model
+     * identified by {@code model}.
+     *
+     * @throws NullPointerException if {@code model}, {@code service} or {@code type} is {@code null}.
+     * @throws ModelException if creating service objects fails.
+     *
+     * @see ModelProvider
+     * @see ModelProcessor
+     * @see ModelValidator
+     *
+     * @since 1.9
+     */
+    public abstract <T> Collection<? extends T> createServiceObjects( final String model, final String service,
+                                                                      final Class<T> type )
+        throws ModelException;
 
     private static String getMessage( final String key, final Object... args )
     {
