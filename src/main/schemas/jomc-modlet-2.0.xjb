@@ -542,7 +542,7 @@
 
             if ( m.getSchemas() != null && !m.getSchemas().getSchema().isEmpty()
                      && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                          || ( modelFound = model.equals( m.getModel() ) ) ) )
+                          || ( modelFound |= model.equals( m.getModel() ) ) ) )
             {
                 for ( int j = 0, s1 = m.getSchemas().getSchema().size(); j < s1; j++ )
                 {
@@ -585,7 +585,7 @@
 
             if ( m.getServices() != null && !m.getServices().getService().isEmpty()
                      && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                          || ( modelFound = model.equals( m.getModel() ) ) ) )
+                          || ( modelFound |= model.equals( m.getModel() ) ) ) )
             {
                 for ( int j = 0, s1 = m.getServices().getService().size(); j < s1; j++ )
                 {
