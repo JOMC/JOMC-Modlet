@@ -42,8 +42,6 @@ import java.util.logging.Level;
  *
  * @author <a href="mailto:cs@schulte.it">Christian Schulte</a>
  * @version $JOMC$
- * @see ModelContext#createServiceObject(org.jomc.modlet.Service, java.lang.Class)
- * @see ModelContext#createServiceObjects(java.lang.String, java.lang.Class)
  * @see ModelContext#createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)
  * @since 1.9
  */
