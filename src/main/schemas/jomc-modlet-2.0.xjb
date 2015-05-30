@@ -541,9 +541,10 @@
             final Modlet m = this.getModlet().get( i );
 
             if ( m.getSchemas() != null && !m.getSchemas().getSchema().isEmpty()
-                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                          || ( modelFound |= model.equals( m.getModel() ) ) ) )
+                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() ) || model.equals( m.getModel() ) ) )
             {
+                modelFound |= model.equals( m.getModel() );
+
                 for ( int j = 0, s1 = m.getSchemas().getSchema().size(); j < s1; j++ )
                 {
                     schemas.getSchema().add( m.getSchemas().getSchema().get( j ) );
@@ -551,10 +552,7 @@
             }
         }
 
-        return ( ModletObject.MODEL_PUBLIC_ID.equals( model ) || modelFound ) && !schemas.getSchema().isEmpty()
-                   ? schemas
-                   : null;
-
+        return modelFound && !schemas.getSchema().isEmpty() ? schemas : null;
     }
 
     /**
@@ -584,9 +582,10 @@
             final Modlet m = this.getModlet().get( i );
 
             if ( m.getServices() != null && !m.getServices().getService().isEmpty()
-                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                          || ( modelFound |= model.equals( m.getModel() ) ) ) )
+                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() ) || model.equals( m.getModel() ) ) )
             {
+                modelFound |= model.equals( m.getModel() );
+
                 for ( int j = 0, s1 = m.getServices().getService().size(); j < s1; j++ )
                 {
                     services.getService().add( m.getServices().getService().get( j ) );
@@ -594,10 +593,7 @@
             }
         }
 
-        return ( ModletObject.MODEL_PUBLIC_ID.equals( model ) || modelFound ) && !services.getService().isEmpty()
-                   ? services
-                   : null;
-
+        return modelFound && !services.getService().isEmpty() ? services : null;
     }]]>
       </ci:code>
     </jaxb:bindings>
