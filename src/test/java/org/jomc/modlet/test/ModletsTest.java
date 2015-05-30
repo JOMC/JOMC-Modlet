@@ -37,8 +37,10 @@ import org.jomc.modlet.Schemas;
 import org.jomc.modlet.Service;
 import org.jomc.modlet.Services;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -114,9 +116,13 @@ public class ModletsTest
         assertNotNull( result );
         assertNotNull( result.getSchemaBySystemId( "Modlet 1 Schema System Id" ) );
         assertNotNull( result.getSchemaByPublicId( "Modlet 1 Schema Public Id" ) );
+        assertNull( result.getSchemaBySystemId( "Modlet 2 Schema System Id" ) );
+        assertNull( result.getSchemaByPublicId( "Modlet 2 Schema Public Id" ) );
 
         result = modlets.getSchemas( "Modlet 2" );
         assertNotNull( result );
+        assertNull( result.getSchemaBySystemId( "Modlet 1 Schema System Id" ) );
+        assertNull( result.getSchemaByPublicId( "Modlet 1 Schema Public Id" ) );
         assertNotNull( result.getSchemaBySystemId( "Modlet 2 Schema System Id" ) );
         assertNotNull( result.getSchemaByPublicId( "Modlet 2 Schema Public Id" ) );
     }
@@ -174,11 +180,19 @@ public class ModletsTest
 
         result = modlets.getServices( "Modlet 1" );
         assertNotNull( result );
-        assertNotNull( result.getServices( "Modlet 1 Service Identifier" ) );
+        assertEquals( 1, result.getServices( "Modlet 1 Service Identifier" ).size() );
+        assertEquals( "Modlet 1 Service Identifier",
+                      result.getServices( "Modlet 1 Service Identifier" ).get( 0 ).getIdentifier() );
+
+        assertTrue( result.getServices( "Modlet 2 Service Identifier" ).isEmpty() );
 
         result = modlets.getServices( "Modlet 2" );
         assertNotNull( result );
-        assertNotNull( result.getServices( "Modlet 2 Service Identifier" ) );
+        assertTrue( result.getServices( "Modlet 1 Service Identifier" ).isEmpty() );
+        assertEquals( 1, result.getServices( "Modlet 2 Service Identifier" ).size() );
+        assertEquals( "Modlet 2 Service Identifier",
+                      result.getServices( "Modlet 2 Service Identifier" ).get( 0 ).getIdentifier() );
+
     }
 
 }
