@@ -569,7 +569,9 @@ public class DefaultModelContext extends ModelContext
         Model m = model.clone();
         final long t0 = System.currentTimeMillis();
 
-        for ( final ModelProvider provider : this.createServiceObjects( model.getIdentifier(), ModelProvider.class ) )
+        for ( final ModelProvider provider
+                  : this.createServiceObjects( model.getIdentifier(), ModelProvider.class.getName(),
+                                               ModelProvider.class ) )
         {
             if ( this.isLoggable( Level.FINER ) )
             {
@@ -616,7 +618,8 @@ public class DefaultModelContext extends ModelContext
         final long t0 = System.currentTimeMillis();
 
         for ( final ModelProcessor processor
-                  : this.createServiceObjects( model.getIdentifier(), ModelProcessor.class ) )
+                  : this.createServiceObjects( model.getIdentifier(), ModelProcessor.class.getName(),
+                                               ModelProcessor.class ) )
         {
             if ( this.isLoggable( Level.FINER ) )
             {
@@ -665,7 +668,8 @@ public class DefaultModelContext extends ModelContext
         final ModelValidationReport report = new ModelValidationReport();
 
         for ( final ModelValidator validator
-                  : this.createServiceObjects( model.getIdentifier(), ModelValidator.class ) )
+                  : this.createServiceObjects( model.getIdentifier(), ModelValidator.class.getName(),
+                                               ModelValidator.class ) )
         {
             if ( this.isLoggable( Level.FINER ) )
             {
@@ -748,28 +752,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return modelErrorHandler.getReport();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @since 1.9
-     * @see #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class) createServiceObjects( model, type.getName(), type )
-     */
-    @Override
-    public <T> Collection<? extends T> createServiceObjects( final String model, final Class<T> type )
-        throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
-
-        return this.createServiceObjects( model, type.getName(), type );
     }
 
     /**

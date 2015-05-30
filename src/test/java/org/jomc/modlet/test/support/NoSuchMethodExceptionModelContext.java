@@ -150,14 +150,8 @@ public final class NoSuchMethodExceptionModelContext extends ModelContext
     }
 
     @Override
-    public <T> Collection<? extends T> createServiceObjects( String model, Class<T> type ) throws ModelException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T> Collection<? extends T> createServiceObjects( String model, String service, Class<T> type ) throws
-        ModelException
+    public <T> Collection<? extends T> createServiceObjects( String model, String service, Class<T> type )
+        throws ModelException
     {
         throw new UnsupportedOperationException();
     }

@@ -713,6 +713,43 @@ public class ModelContextTest
     }
 
     @Test
+    public final void CreateServiceObjectsThrowsNullPointerExceptionWithNonNullMessageOnNullArguments() throws Exception
+    {
+        try
+        {
+            this.getModelContext().createServiceObjects( null, "IDENTIFIER", Object.class );
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createServiceObjects( "IDENTIFIER", null, Object.class );
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        try
+        {
+            this.getModelContext().createServiceObjects( "IDENTIFIER", "IDENTIFIER", null );
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+    }
+
+    @Test
     public final void testDefaultLogLevel() throws Exception
     {
         final String testLogLevel = System.getProperty( "org.jomc.modlet.ModelContext.defaultLogLevel" );
