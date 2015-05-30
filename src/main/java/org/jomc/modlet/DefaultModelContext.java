@@ -829,8 +829,11 @@ public class DefaultModelContext extends ModelContext
      * @see #getPlatformProviderLocation()
      * @see ServiceFactory#createServiceObject(org.jomc.modlet.ModelContext, org.jomc.modlet.Service, java.lang.Class)
      * @since 1.2
+     * @deprecated As of JOMC 1.9, please use method {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)}.
+     * This method will be removed in JOMC 2.0.
      */
     @Override
+    @Deprecated
     public <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
     {
         if ( service == null )
