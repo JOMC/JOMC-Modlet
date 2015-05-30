@@ -534,13 +534,15 @@
         }
 
         final Schemas schemas = new Schemas();
+        boolean modelFound = false;
 
         for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
         {
             final Modlet m = this.getModlet().get( i );
 
-            if ( m.getSchemas() != null && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                                             || model.equals( m.getModel() ) ) )
+            if ( m.getSchemas() != null && !m.getSchemas().getSchema().isEmpty()
+                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
+                          || ( modelFound = model.equals( m.getModel() ) ) ) )
             {
                 for ( int j = 0, s1 = m.getSchemas().getSchema().size(); j < s1; j++ )
                 {
@@ -549,7 +551,10 @@
             }
         }
 
-        return schemas.getSchema().isEmpty() ? null : schemas;
+        return ( ModletObject.MODEL_PUBLIC_ID.equals( model ) || modelFound ) && !schemas.getSchema().isEmpty()
+                   ? schemas
+                   : null;
+
     }
 
     /**
@@ -572,13 +577,15 @@
         }
 
         final Services services = new Services();
+        boolean modelFound = false;
 
         for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
         {
             final Modlet m = this.getModlet().get( i );
 
-            if ( m.getServices() != null && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                                              || model.equals( m.getModel() ) ) )
+            if ( m.getServices() != null && !m.getServices().getService().isEmpty()
+                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
+                          || ( modelFound = model.equals( m.getModel() ) ) ) )
             {
                 for ( int j = 0, s1 = m.getServices().getService().size(); j < s1; j++ )
                 {
@@ -587,7 +594,10 @@
             }
         }
 
-        return services.getService().isEmpty() ? null : services;
+        return ( ModletObject.MODEL_PUBLIC_ID.equals( model ) || modelFound ) && !services.getService().isEmpty()
+                   ? services
+                   : null;
+
     }]]>
       </ci:code>
     </jaxb:bindings>
