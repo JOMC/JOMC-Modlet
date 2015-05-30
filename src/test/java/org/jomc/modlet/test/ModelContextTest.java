@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBElement;
@@ -44,12 +45,14 @@ import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelContextFactory;
 import org.jomc.modlet.ModelException;
+import org.jomc.modlet.Modlet;
 import org.jomc.modlet.ModletObject;
 import org.jomc.modlet.ModletProvider;
 import org.jomc.modlet.Modlets;
 import org.jomc.modlet.Property;
 import org.jomc.modlet.Service;
 import org.jomc.modlet.test.support.ClassCastExceptionModelContext;
+import org.jomc.modlet.Services;
 import org.jomc.modlet.test.support.IllegalAccessExceptionModelContext;
 import org.jomc.modlet.test.support.InstantiationExceptionModelContext;
 import org.jomc.modlet.test.support.InvocationTargetExceptionModelContext;
@@ -314,6 +317,7 @@ public class ModelContextTest
         assertNotNull( modlets );
         assertNotNull( modlets.getModlet( DEFAULT_MODLET_NAME ) );
         DefaultModletProvider.setDefaultEnabled( null );
+        this.getModelContext().setModlets( null );
     }
 
     @Test
@@ -598,6 +602,8 @@ public class ModelContextTest
         assertNull( r.resolveEntity( null, ":" ) );
         assertNull( r.resolveEntity( "", null ) );
         assertNull( r.resolveEntity( null, "" ) );
+
+        this.getModelContext().setModlets( null );
     }
 
     @Test
@@ -691,6 +697,8 @@ public class ModelContextTest
         input.setPublicId( null );
         input.setStringData( null );
         input.setSystemId( null );
+
+        this.getModelContext().setModlets( null );
     }
 
     @Test
@@ -748,6 +756,7 @@ public class ModelContextTest
         this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createContext( ModletObject.MODEL_PUBLIC_ID ) );
         assertNotNull( this.getModelContext().createContext( ModletObject.PUBLIC_ID ) );
+        this.getModelContext().setModlets( null );
     }
 
     @Test
@@ -805,6 +814,7 @@ public class ModelContextTest
         this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createMarshaller( ModletObject.MODEL_PUBLIC_ID ) );
         assertNotNull( this.getModelContext().createMarshaller( ModletObject.PUBLIC_ID ) );
+        this.getModelContext().setModlets( null );
     }
 
     @Test
@@ -862,6 +872,7 @@ public class ModelContextTest
         this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createUnmarshaller( ModletObject.MODEL_PUBLIC_ID ) );
         assertNotNull( this.getModelContext().createUnmarshaller( ModletObject.PUBLIC_ID ) );
+        this.getModelContext().setModlets( null );
     }
 
     @Test
@@ -919,6 +930,7 @@ public class ModelContextTest
         this.getModelContext().setModlets( null );
         assertNotNull( this.getModelContext().createSchema( ModletObject.MODEL_PUBLIC_ID ) );
         assertNotNull( this.getModelContext().createSchema( ModletObject.PUBLIC_ID ) );
+        this.getModelContext().setModlets( null );
     }
 
     @Test
@@ -1071,6 +1083,230 @@ public class ModelContextTest
             assertNotNull( e.getMessage() );
             System.out.println( e.toString() );
         }
+    }
+
+    @Test
+    public final void CreateServiceObjectsThrowsModelExceptionWithNonNullMessageForInacessibleServiceClass()
+        throws Exception
+    {
+        DefaultModletProvider.setDefaultEnabled( null );
+        DefaultModletProvider.setDefaultModletLocation( null );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        DefaultModletProvider.setDefaultValidating( null );
+        this.getModelContext().setModlets( null );
+
+        final Modlet modlet = new Modlet();
+        this.getModelContext().getModlets().getModlet().add( modlet );
+
+        modlet.setModel( "Test" );
+        modlet.setName( "Test" );
+        modlet.setServices( new Services() );
+
+        final Service service = new Service();
+        modlet.getServices().getService().add( service );
+
+        service.setIdentifier( ModelContext.class.getName() );
+        service.setClazz( IllegalAccessExceptionModelContext.class.getName() );
+
+        try
+        {
+            this.getModelContext().createServiceObjects( "Test", ModelContext.class.getName(), ModelContext.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+    }
+
+    @Test
+    public final void CreateServiceObjectsThrowsModelExceptionWithNonNullMessageForNonInstantiableServiceClass()
+        throws Exception
+    {
+        DefaultModletProvider.setDefaultEnabled( null );
+        DefaultModletProvider.setDefaultModletLocation( null );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        DefaultModletProvider.setDefaultValidating( null );
+        this.getModelContext().setModlets( null );
+
+        final Modlet modlet = new Modlet();
+        this.getModelContext().getModlets().getModlet().add( modlet );
+
+        modlet.setModel( "Test" );
+        modlet.setName( "Test" );
+        modlet.setServices( new Services() );
+
+        final Service service = new Service();
+        modlet.getServices().getService().add( service );
+
+        service.setIdentifier( ModelContext.class.getName() );
+        service.setClazz( InstantiationExceptionModelContext.class.getName() );
+
+        try
+        {
+            this.getModelContext().createServiceObjects( "Test", ModelContext.class.getName(), ModelContext.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+    }
+
+    @Test
+    public final void CreateServiceObjectsThrowsModelExceptionWithNonNullMessageForUnsupportedPropertyTypes()
+        throws Exception
+    {
+        DefaultModletProvider.setDefaultEnabled( null );
+        DefaultModletProvider.setDefaultModletLocation( null );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        DefaultModletProvider.setDefaultValidating( null );
+        this.getModelContext().setModlets( null );
+
+        final Modlet modlet = new Modlet();
+        this.getModelContext().getModlets().getModlet().add( modlet );
+
+        modlet.setModel( "Test" );
+        modlet.setName( "Test" );
+        modlet.setServices( new Services() );
+
+        final Service service = new Service();
+        modlet.getServices().getService().add( service );
+
+        service.setIdentifier( ModletProvider.class.getName() );
+        service.setClazz( TestModletProvider.class.getName() );
+
+        final Collection<? extends ModletProvider> serviceObjects =
+            this.getModelContext().createServiceObjects( "Test", ModletProvider.class.getName(),
+                                                         ModletProvider.class );
+
+        assertNotNull( serviceObjects );
+        assertEquals( 1, serviceObjects.size() );
+
+        final Property property = new Property();
+        property.setName( "unsupportedPropertyType" );
+        property.setValue( "UNSUPPORTED TYPE" );
+
+        service.getProperty().add( property );
+
+        try
+        {
+            this.getModelContext().createServiceObjects( "Test", ModletProvider.class.getName(), ModletProvider.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+    }
+
+    @Test
+    public final void CreateServiceObjectsThrowsModelExceptionWithNonNullMessageForNonInstantiablePropertyObject()
+        throws Exception
+    {
+        DefaultModletProvider.setDefaultEnabled( null );
+        DefaultModletProvider.setDefaultModletLocation( null );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        DefaultModletProvider.setDefaultValidating( null );
+        this.getModelContext().setModlets( null );
+
+        final Modlet modlet = new Modlet();
+        this.getModelContext().getModlets().getModlet().add( modlet );
+
+        modlet.setModel( "Test" );
+        modlet.setName( "Test" );
+        modlet.setServices( new Services() );
+
+        final Service service = new Service();
+        modlet.getServices().getService().add( service );
+
+        service.setIdentifier( ModletProvider.class.getName() );
+        service.setClazz( TestModletProvider.class.getName() );
+
+        final Collection<? extends ModletProvider> serviceObjects =
+            this.getModelContext().createServiceObjects( "Test", ModletProvider.class.getName(),
+                                                         ModletProvider.class );
+
+        assertNotNull( serviceObjects );
+        assertEquals( 1, serviceObjects.size() );
+
+        final Property property = new Property();
+        property.setName( "instantiationExceptionProperty" );
+        property.setValue( "UNSUPPORTED TYPE" );
+
+        service.getProperty().add( property );
+
+        try
+        {
+            this.getModelContext().createServiceObjects( "Test", ModletProvider.class.getName(), ModletProvider.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
+    }
+
+    @Test
+    public final void CreateServiceObjectsThrowsModelExceptionWithNonNullMessageForNonOperationalPropertyObject()
+        throws Exception
+    {
+        DefaultModletProvider.setDefaultEnabled( null );
+        DefaultModletProvider.setDefaultModletLocation( null );
+        DefaultModletProvider.setDefaultOrdinal( null );
+        DefaultModletProvider.setDefaultValidating( null );
+        this.getModelContext().setModlets( null );
+
+        final Modlet modlet = new Modlet();
+        this.getModelContext().getModlets().getModlet().add( modlet );
+
+        modlet.setModel( "Test" );
+        modlet.setName( "Test" );
+        modlet.setServices( new Services() );
+
+        final Service service = new Service();
+        modlet.getServices().getService().add( service );
+
+        service.setIdentifier( ModletProvider.class.getName() );
+        service.setClazz( TestModletProvider.class.getName() );
+
+        final Collection<? extends ModletProvider> serviceObjects =
+            this.getModelContext().createServiceObjects( "Test", ModletProvider.class.getName(),
+                                                         ModletProvider.class );
+
+        assertNotNull( serviceObjects );
+        assertEquals( 1, serviceObjects.size() );
+
+        final Property property = new Property();
+        property.setName( "invocationTargetExceptionProperty" );
+        property.setValue( "UNSUPPORTED TYPE" );
+
+        service.getProperty().add( property );
+
+        try
+        {
+            this.getModelContext().createServiceObjects( "Test", ModletProvider.class.getName(), ModletProvider.class );
+            fail( "Expected 'ModelException' not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+
+        this.getModelContext().setModlets( null );
     }
 
     @Test

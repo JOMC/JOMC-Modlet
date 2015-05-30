@@ -774,6 +774,148 @@ public class DefaultModelContext extends ModelContext
         return modelErrorHandler.getReport();
     }
 
+    @Override
+    public EntityResolver createEntityResolver( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        return this.createEntityResolver( this.getModlets().getSchemas( model ) );
+    }
+
+    @Override
+    @Deprecated
+    public EntityResolver createEntityResolver( final URI publicId ) throws ModelException
+    {
+        if ( publicId == null )
+        {
+            throw new NullPointerException( "publicId" );
+        }
+
+        return this.createEntityResolver( this.getModlets().getSchemas( publicId ) );
+    }
+
+    @Override
+    public LSResourceResolver createResourceResolver( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        return this.createResourceResolver( this.createEntityResolver( model ) );
+    }
+
+    @Override
+    @Deprecated
+    public LSResourceResolver createResourceResolver( final URI publicId ) throws ModelException
+    {
+        if ( publicId == null )
+        {
+            throw new NullPointerException( "publicId" );
+        }
+
+        return this.createResourceResolver( this.createEntityResolver( publicId ) );
+    }
+
+    @Override
+    public javax.xml.validation.Schema createSchema( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        return this.createSchema( this.getModlets().getSchemas( model ), this.createEntityResolver( model ),
+                                  this.createResourceResolver( model ), model, null );
+
+    }
+
+    @Override
+    @Deprecated
+    public javax.xml.validation.Schema createSchema( final URI publicId ) throws ModelException
+    {
+        if ( publicId == null )
+        {
+            throw new NullPointerException( "publicId" );
+        }
+
+        return this.createSchema( this.getModlets().getSchemas( publicId ), this.createEntityResolver( publicId ),
+                                  this.createResourceResolver( publicId ), null, publicId );
+
+    }
+
+    @Override
+    public JAXBContext createContext( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        return this.createContext( this.getModlets().getSchemas( model ), model, null );
+    }
+
+    @Override
+    @Deprecated
+    public JAXBContext createContext( final URI publicId ) throws ModelException
+    {
+        if ( publicId == null )
+        {
+            throw new NullPointerException( "publicId" );
+        }
+
+        return this.createContext( this.getModlets().getSchemas( publicId ), null, publicId );
+    }
+
+    @Override
+    public Marshaller createMarshaller( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        return this.createMarshaller( model, null );
+    }
+
+    @Override
+    @Deprecated
+    public Marshaller createMarshaller( final URI publicId ) throws ModelException
+    {
+        if ( publicId == null )
+        {
+            throw new NullPointerException( "publicId" );
+        }
+
+        return this.createMarshaller( null, publicId );
+    }
+
+    @Override
+    public Unmarshaller createUnmarshaller( final String model ) throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+
+        return this.createUnmarshaller( model, null );
+    }
+
+    @Override
+    @Deprecated
+    public Unmarshaller createUnmarshaller( final URI publicId ) throws ModelException
+    {
+        if ( publicId == null )
+        {
+            throw new NullPointerException( "publicId" );
+        }
+
+        return this.createUnmarshaller( null, publicId );
+    }
+
     /**
      * {@inheritDoc}
      * <p>
@@ -906,152 +1048,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return serviceObject;
-    }
-
-    @Override
-    public EntityResolver createEntityResolver( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createEntityResolver( this.getModlets().getSchemas( model ) );
-    }
-
-    @Override
-    @Deprecated
-    public EntityResolver createEntityResolver( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createEntityResolver( this.getModlets().getSchemas( publicId ) );
-    }
-
-    @Override
-    public LSResourceResolver createResourceResolver( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createResourceResolver( this.createEntityResolver( model ) );
-    }
-
-    @Override
-    @Deprecated
-    public LSResourceResolver createResourceResolver( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createResourceResolver( this.createEntityResolver( publicId ) );
-    }
-
-    @Override
-    public javax.xml.validation.Schema createSchema( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createSchema( this.getModlets().getSchemas( model ), this.createEntityResolver( model ),
-                                  this.createResourceResolver( model ), model, null );
-
-    }
-
-    @Override
-    @Deprecated
-    public javax.xml.validation.Schema createSchema( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createSchema( this.getModlets().getSchemas( publicId ), this.createEntityResolver( publicId ),
-                                  this.createResourceResolver( publicId ), null, publicId );
-
-    }
-
-    @Override
-    public JAXBContext createContext( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createContext( this.getModlets().getSchemas( model ), model, null );
-    }
-
-    @Override
-    @Deprecated
-    public JAXBContext createContext( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createContext( this.getModlets().getSchemas( publicId ), null, publicId );
-    }
-
-    @Override
-    public Marshaller createMarshaller( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createMarshaller( this.getModlets().getSchemas( model ), this.getModlets().getServices( model ),
-                                      model, null );
-
-    }
-
-    @Override
-    @Deprecated
-    public Marshaller createMarshaller( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createMarshaller( this.getModlets().getSchemas( publicId ), null, null, publicId );
-    }
-
-    @Override
-    public Unmarshaller createUnmarshaller( final String model ) throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
-        return this.createUnmarshaller( this.getModlets().getSchemas( model ), this.getModlets().getServices( model ),
-                                        model, null );
-
-    }
-
-    @Override
-    @Deprecated
-    public Unmarshaller createUnmarshaller( final URI publicId ) throws ModelException
-    {
-        if ( publicId == null )
-        {
-            throw new NullPointerException( "publicId" );
-        }
-
-        return this.createUnmarshaller( this.getModlets().getSchemas( publicId ), null, null, publicId );
     }
 
     private <T> Collection<T> loadModletServices( final Class<T> serviceClass ) throws ModelException
@@ -1899,12 +1895,24 @@ public class DefaultModelContext extends ModelContext
         }
     }
 
-    private Marshaller createMarshaller( final Schemas schemas, final Services services, final String model,
-                                         final URI publicId ) throws ModelException
+    private Marshaller createMarshaller( final String model, final URI publicId )
+        throws ModelException
     {
         if ( model != null && publicId != null )
         {
             throw new IllegalArgumentException( "model=" + model + ", publicId=" + publicId.toASCIIString() );
+        }
+
+        Schemas schemas = null;
+
+        if ( model != null )
+        {
+            schemas = this.getModlets().getSchemas( model );
+        }
+
+        if ( publicId != null )
+        {
+            schemas = this.getModlets().getSchemas( publicId );
         }
 
         try
@@ -1955,22 +1963,17 @@ public class DefaultModelContext extends ModelContext
 
             MarshallerListenerList listenerList = null;
 
-            if ( services != null )
+            if ( model != null )
             {
-                for ( final Service service : services.getServices( MARSHALLER_LISTENER_SERVICE ) )
+                final Collection<? extends Marshaller.Listener> listeners =
+                    this.createServiceObjects( model, MARSHALLER_LISTENER_SERVICE, Marshaller.Listener.class );
+
+                if ( !listeners.isEmpty() )
                 {
-                    if ( listenerList == null )
-                    {
-                        listenerList = new MarshallerListenerList();
-                    }
-
-                    listenerList.getListeners().add( this.createServiceObject( service, Marshaller.Listener.class ) );
+                    listenerList = new MarshallerListenerList();
+                    listenerList.getListeners().addAll( listeners );
+                    m.setListener( listenerList );
                 }
-            }
-
-            if ( listenerList != null )
-            {
-                m.setListener( listenerList );
             }
 
             if ( this.isLoggable( Level.FINE ) )
@@ -2012,12 +2015,24 @@ public class DefaultModelContext extends ModelContext
         }
     }
 
-    private Unmarshaller createUnmarshaller( final Schemas schemas, final Services services, final String model,
-                                             final URI publicId ) throws ModelException
+    private Unmarshaller createUnmarshaller( final String model, final URI publicId )
+        throws ModelException
     {
         if ( model != null && publicId != null )
         {
             throw new IllegalArgumentException( "model=" + model + ", publicId=" + publicId.toASCIIString() );
+        }
+
+        Schemas schemas = null;
+
+        if ( model != null )
+        {
+            schemas = this.getModlets().getSchemas( model );
+        }
+
+        if ( publicId != null )
+        {
+            schemas = this.getModlets().getSchemas( publicId );
         }
 
         try
@@ -2055,22 +2070,17 @@ public class DefaultModelContext extends ModelContext
 
             UnmarshallerListenerList listenerList = null;
 
-            if ( services != null )
+            if ( model != null )
             {
-                for ( final Service service : services.getServices( UNMARSHALLER_LISTENER_SERVICE ) )
+                final Collection<? extends Unmarshaller.Listener> listeners =
+                    this.createServiceObjects( model, UNMARSHALLER_LISTENER_SERVICE, Unmarshaller.Listener.class );
+
+                if ( !listeners.isEmpty() )
                 {
-                    if ( listenerList == null )
-                    {
-                        listenerList = new UnmarshallerListenerList();
-                    }
-
-                    listenerList.getListeners().add( this.createServiceObject( service, Unmarshaller.Listener.class ) );
+                    listenerList = new UnmarshallerListenerList();
+                    listenerList.getListeners().addAll( listeners );
+                    u.setListener( listenerList );
                 }
-            }
-
-            if ( listenerList != null )
-            {
-                u.setListener( listenerList );
             }
 
             if ( this.isLoggable( Level.FINE ) )
