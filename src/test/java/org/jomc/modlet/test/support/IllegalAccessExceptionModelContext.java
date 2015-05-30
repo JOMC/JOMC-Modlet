@@ -149,6 +149,7 @@ public final class IllegalAccessExceptionModelContext extends ModelContext
     }
 
     @Override
+    @Deprecated
     public <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException
     {
         throw new UnsupportedOperationException();

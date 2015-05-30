@@ -599,6 +599,7 @@ public class ModelContextTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public final void testCreateServiceObject() throws Exception
     {
         try
