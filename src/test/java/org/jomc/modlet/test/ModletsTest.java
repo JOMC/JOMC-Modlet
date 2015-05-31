@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.net.URI;
 import org.jomc.modlet.Modlet;
 import org.jomc.modlet.Modlets;
 import org.jomc.modlet.Schema;
@@ -61,11 +62,27 @@ public class ModletsTest
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
+    public final void GetSchemasForUriThrowsNullPointerExceptionWithNonNullMessageOnNullUri() throws Exception
+    {
+        try
+        {
+            new Modlets().getSchemas( (URI) null );
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+    }
+
+    @Test
     public final void GetSchemasForModelThrowsNullPointerExceptionWithNonNullMessageOnNullModel() throws Exception
     {
         try
         {
-            new Modlets().getSchemas( null );
+            new Modlets().getSchemas( (String) null );
             fail( "Expected 'NullPointerException' not thrown." );
         }
         catch ( final NullPointerException e )
