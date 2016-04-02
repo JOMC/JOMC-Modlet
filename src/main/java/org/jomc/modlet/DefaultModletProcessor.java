@@ -388,7 +388,7 @@ public class DefaultModletProcessor implements ModletProcessor
 
         try
         {
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final List<Transformer> transformers = new LinkedList<Transformer>();
             final TransformerFactory transformerFactory = TransformerFactory.newInstance();
             final Enumeration<URL> resources = context.findResources( location );
@@ -453,9 +453,7 @@ public class DefaultModletProcessor implements ModletProcessor
 
             if ( context.isLoggable( Level.FINE ) )
             {
-                context.log( Level.FINE, getMessage( "contextReport", count, location,
-                                                     Long.valueOf( System.currentTimeMillis() - t0 ) ), null );
-
+                context.log( Level.FINE, getMessage( "contextReport", count, location, System.nanoTime() - t0 ), null );
             }
 
             return transformers.isEmpty() ? null : transformers;

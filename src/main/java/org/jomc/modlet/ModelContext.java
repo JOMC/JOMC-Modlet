@@ -630,14 +630,14 @@ public abstract class ModelContext
             this.modlets = new Modlets();
             this.modlets.getModlet().add( modlet );
 
-            long t0 = System.currentTimeMillis();
+            long t0 = System.nanoTime();
             final Modlets provided = this.findModlets( this.modlets );
 
             if ( this.isLoggable( Level.FINE ) )
             {
                 this.log( Level.FINE, getMessage( "findModletsReport",
                                                   provided != null ? provided.getModlet().size() : 0,
-                                                  System.currentTimeMillis() - t0 ), null );
+                                                  System.nanoTime() - t0 ), null );
 
             }
 
@@ -646,14 +646,14 @@ public abstract class ModelContext
                 this.modlets = provided;
             }
 
-            t0 = System.currentTimeMillis();
+            t0 = System.nanoTime();
             final Modlets processed = this.processModlets( this.modlets );
 
             if ( this.isLoggable( Level.FINE ) )
             {
                 this.log( Level.FINE, getMessage( "processModletsReport",
                                                   processed != null ? processed.getModlet().size() : 0,
-                                                  System.currentTimeMillis() - t0 ), null );
+                                                  System.nanoTime() - t0 ), null );
             }
 
             if ( processed != null )
@@ -661,14 +661,14 @@ public abstract class ModelContext
                 this.modlets = processed;
             }
 
-            t0 = System.currentTimeMillis();
+            t0 = System.nanoTime();
             final ModelValidationReport report = this.validateModlets( this.modlets );
 
             if ( this.isLoggable( Level.FINE ) )
             {
                 this.log( Level.FINE, getMessage( "validateModletsReport",
                                                   this.modlets.getModlet().size(),
-                                                  System.currentTimeMillis() - t0 ), null );
+                                                  System.nanoTime() - t0 ), null );
             }
 
             for ( final ModelValidationReport.Detail detail : report.getDetails() )
@@ -754,14 +754,14 @@ public abstract class ModelContext
             throw new NullPointerException( "name" );
         }
 
-        final long t0 = System.currentTimeMillis();
+        final long t0 = System.nanoTime();
         final URL resource = this.getClassLoader() == null
                                  ? ClassLoader.getSystemResource( name )
                                  : this.getClassLoader().getResource( name );
 
         if ( this.isLoggable( Level.FINE ) )
         {
-            this.log( Level.FINE, getMessage( "resourcesReport", name, System.currentTimeMillis() - t0 ), null );
+            this.log( Level.FINE, getMessage( "resourcesReport", name, System.nanoTime() - t0 ), null );
         }
 
         return resource;
@@ -789,14 +789,14 @@ public abstract class ModelContext
 
         try
         {
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final Enumeration<URL> resources = this.getClassLoader() == null
                                                    ? ClassLoader.getSystemResources( name )
                                                    : this.getClassLoader().getResources( name );
 
             if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINE, getMessage( "resourcesReport", name, System.currentTimeMillis() - t0 ), null );
+                this.log( Level.FINE, getMessage( "resourcesReport", name, System.nanoTime() - t0 ), null );
             }
 
             return resources;
