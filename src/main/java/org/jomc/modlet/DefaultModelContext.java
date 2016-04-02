@@ -567,7 +567,7 @@ public class DefaultModelContext extends ModelContext
         }
 
         Model m = model.clone();
-        final long t0 = System.currentTimeMillis();
+        final long t0 = System.nanoTime();
 
         for ( final ModelProvider provider
                   : this.createServiceObjects( model.getIdentifier(), ModelProvider.class.getName(),
@@ -588,9 +588,7 @@ public class DefaultModelContext extends ModelContext
 
         if ( this.isLoggable( Level.FINE ) )
         {
-            this.log( Level.FINE, getMessage( "findModelReport", m.getIdentifier(), System.currentTimeMillis() - t0 ),
-                      null );
-
+            this.log( Level.FINE, getMessage( "findModelReport", m.getIdentifier(), System.nanoTime() - t0 ), null );
         }
 
         return m;
@@ -615,7 +613,7 @@ public class DefaultModelContext extends ModelContext
         }
 
         Model processed = model;
-        final long t0 = System.currentTimeMillis();
+        final long t0 = System.nanoTime();
 
         for ( final ModelProcessor processor
                   : this.createServiceObjects( model.getIdentifier(), ModelProcessor.class.getName(),
@@ -638,8 +636,8 @@ public class DefaultModelContext extends ModelContext
 
         if ( this.isLoggable( Level.FINE ) )
         {
-            this.log( Level.FINE, getMessage( "processModelReport", model.getIdentifier(),
-                                              System.currentTimeMillis() - t0 ), null );
+            this.log( Level.FINE, getMessage( "processModelReport", model.getIdentifier(), System.nanoTime() - t0 ),
+                      null );
 
         }
 
@@ -664,7 +662,7 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
-        final long t0 = System.currentTimeMillis();
+        final long t0 = System.nanoTime();
         final ModelValidationReport report = new ModelValidationReport();
 
         for ( final ModelValidator validator
@@ -689,7 +687,7 @@ public class DefaultModelContext extends ModelContext
         if ( this.isLoggable( Level.FINE ) )
         {
             this.log( Level.FINE, getMessage( "validateModelReport", model.getIdentifier(),
-                                              System.currentTimeMillis() - t0 ), null );
+                                              System.nanoTime() - t0 ), null );
 
         }
 
@@ -713,7 +711,7 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "source" );
         }
 
-        final long t0 = System.currentTimeMillis();
+        final long t0 = System.nanoTime();
         final javax.xml.validation.Schema schema = this.createSchema( model );
         final Validator validator = schema.newValidator();
         final ModelErrorHandler modelErrorHandler = new ModelErrorHandler( this );
@@ -748,7 +746,7 @@ public class DefaultModelContext extends ModelContext
 
         if ( this.isLoggable( Level.FINE ) )
         {
-            this.log( Level.FINE, getMessage( "validateModelReport", model, System.currentTimeMillis() - t0 ), null );
+            this.log( Level.FINE, getMessage( "validateModelReport", model, System.nanoTime() - t0 ), null );
         }
 
         return modelErrorHandler.getReport();
@@ -1139,7 +1137,7 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final Schemas schemas = this.getModlets().getSchemas( model );
             final EntityResolver entityResolver = this.createEntityResolver( model );
             final SchemaFactory f = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
@@ -1205,8 +1203,8 @@ public class DefaultModelContext extends ModelContext
                     schemaInfo.append( ", " ).append( s.getSystemId() );
                 }
 
-                this.log( Level.FINE, getMessage( "creatingSchema", schemaInfo.substring( 2 ),
-                                                  System.currentTimeMillis() - t0 ), null );
+                this.log( Level.FINE, getMessage( "creatingSchema", schemaInfo.substring( 2 ), System.nanoTime() - t0 ),
+                          null );
 
             }
 
@@ -1239,7 +1237,7 @@ public class DefaultModelContext extends ModelContext
         try
         {
             StringBuilder packageNames = null;
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final Schemas schemas = this.getModlets().getSchemas( model );
 
             if ( schemas != null )
@@ -1265,7 +1263,8 @@ public class DefaultModelContext extends ModelContext
             if ( this.isLoggable( Level.FINE ) )
             {
                 this.log( Level.FINE, getMessage( "creatingContext", packageNames.substring( 1 ),
-                                                  System.currentTimeMillis() - t0 ), null );
+                                                  System.nanoTime() - t0 ), null );
+
             }
 
             return context;
@@ -1294,7 +1293,7 @@ public class DefaultModelContext extends ModelContext
         {
             StringBuilder packageNames = null;
             StringBuilder schemaLocation = null;
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final Schemas schemas = this.getModlets().getSchemas( model );
 
             if ( schemas != null )
@@ -1348,7 +1347,7 @@ public class DefaultModelContext extends ModelContext
                 {
                     this.log( Level.FINE, getMessage( "creatingMarshaller", packageNames.substring( 1 ),
                                                       schemaLocation.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
+                                                      System.nanoTime() - t0 ), null );
 
                 }
                 else
@@ -1362,7 +1361,7 @@ public class DefaultModelContext extends ModelContext
 
                     this.log( Level.FINE, getMessage( "creatingMarshallerWithListeners", packageNames.substring( 1 ),
                                                       schemaLocation.substring( 1 ), b.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
+                                                      System.nanoTime() - t0 ), null );
 
                 }
             }
@@ -1392,7 +1391,7 @@ public class DefaultModelContext extends ModelContext
         try
         {
             StringBuilder packageNames = null;
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final Schemas schemas = this.getModlets().getSchemas( model );
 
             if ( schemas != null )
@@ -1433,7 +1432,7 @@ public class DefaultModelContext extends ModelContext
                 if ( listenerList == null )
                 {
                     this.log( Level.FINE, getMessage( "creatingUnmarshaller", packageNames.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
+                                                      System.nanoTime() - t0 ), null );
 
                 }
                 else
@@ -1447,7 +1446,7 @@ public class DefaultModelContext extends ModelContext
 
                     this.log( Level.FINE, getMessage( "creatingUnmarshallerWithListeners",
                                                       packageNames.substring( 1 ), b.substring( 1 ),
-                                                      System.currentTimeMillis() - t0 ), null );
+                                                      System.nanoTime() - t0 ), null );
 
                 }
             }
@@ -1650,7 +1649,7 @@ public class DefaultModelContext extends ModelContext
                 this.findResources( this.getProviderLocation() + '/' + serviceClass.getName() );
 
             int count = 0;
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final List<T> sortedClasspathServices = new ArrayList<T>();
 
             while ( classpathServices.hasMoreElements() )
@@ -1729,7 +1728,7 @@ public class DefaultModelContext extends ModelContext
             {
                 this.log( Level.FINE, getMessage( "contextReport", count,
                                                   this.getProviderLocation() + '/' + serviceClass.getName(),
-                                                  System.currentTimeMillis() - t0 ), null );
+                                                  System.nanoTime() - t0 ), null );
 
             }
 
@@ -1803,7 +1802,7 @@ public class DefaultModelContext extends ModelContext
     private Set<URI> getSchemaResources() throws IOException, URISyntaxException, ModelException
     {
         final Set<URI> resources = new HashSet<URI>();
-        final long t0 = System.currentTimeMillis();
+        final long t0 = System.nanoTime();
         int count = 0;
 
         for ( final Enumeration<URL> e = this.findResources( "META-INF/MANIFEST.MF" );
@@ -1872,8 +1871,8 @@ public class DefaultModelContext extends ModelContext
 
         if ( this.isLoggable( Level.FINE ) )
         {
-            this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF",
-                                              System.currentTimeMillis() - t0 ), null );
+            this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF", System.nanoTime() - t0 ),
+                      null );
 
         }
 

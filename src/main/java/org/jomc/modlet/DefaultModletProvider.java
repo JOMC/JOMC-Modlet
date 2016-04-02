@@ -526,7 +526,7 @@ public class DefaultModletProvider implements ModletProvider
             }
 
             Modlets modlets = null;
-            final long t0 = System.currentTimeMillis();
+            final long t0 = System.nanoTime();
             final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
             final Unmarshaller u = ctx.createUnmarshaller();
             final Enumeration<URL> e = context.findResources( location );
@@ -569,7 +569,7 @@ public class DefaultModletProvider implements ModletProvider
             {
                 context.log( Level.FINE, getMessage( "contextReport",
                                                      modlets != null ? modlets.getModlet().size() : 0,
-                                                     location, System.currentTimeMillis() - t0 ), null );
+                                                     location, System.nanoTime() - t0 ), null );
 
             }
 
