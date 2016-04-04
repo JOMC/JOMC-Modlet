@@ -34,7 +34,7 @@
   <parent>
     <groupId>org.jomc</groupId>
     <artifactId>jomc-pom</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jomc-modlet</artifactId>
@@ -43,9 +43,9 @@
   <description>JOMC Modlet is a model context application programming interface based on JAXB and JAXP.</description>
   <url>${jomc.base.url}/${jomc.site.location}</url>
   <scm>
-    <connection>${jomc.scm.connection}</connection>
-    <developerConnection>${jomc.scm.developerConnection}</developerConnection>
-    <url>${jomc.scm.url}</url>
+    <connection>${jomc.scm.connection}/trunk</connection>
+    <developerConnection>${jomc.scm.developerConnection}/trunk</developerConnection>
+    <url>${jomc.scm.url}/trunk</url>
   </scm>
   <build>
     <resources>
@@ -305,8 +305,4 @@
       </dependencies>
     </profile>
   </profiles>
-  <properties>
-    <jomc.scm.location>jomc-modlet/trunk</jomc.scm.location>
-    <jomc.site.location>${project.artifactId}/${project.version}</jomc.site.location>
-  </properties>
 </project>
