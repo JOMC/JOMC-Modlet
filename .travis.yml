@@ -1,4 +1,8 @@
 language: java
+branches:
+  only:
+  - master
+  - jomc-modlet-1.x
 jdk:
   - openjdk7
 os:
