@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-  Copyright (C) Christian Schulte <cs@schulte.it>, 2014-005
+  Copyright (C) 2014 Christian Schulte <cs@schulte.it>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
