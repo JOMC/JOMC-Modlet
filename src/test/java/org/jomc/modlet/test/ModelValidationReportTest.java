@@ -94,14 +94,14 @@ public class ModelValidationReportTest
     private <T> T readObject( final String location, final Class<T> type ) throws IOException, ClassNotFoundException
     {
         ObjectInputStream in = null;
-        boolean suppressExceptionOnClose = true;
 
         try
         {
             in = new ObjectInputStream( this.getClass().getResourceAsStream( location ) );
             assertNotNull( in );
             final T object = (T) in.readObject();
-            suppressExceptionOnClose = false;
+            in.close();
+            in = null;
             return object;
         }
         finally
@@ -115,10 +115,7 @@ public class ModelValidationReportTest
             }
             catch ( final IOException e )
             {
-                if ( !suppressExceptionOnClose )
-                {
-                    throw e;
-                }
+                e.printStackTrace();
             }
         }
     }

@@ -1571,6 +1571,9 @@ public class DefaultModelContext extends ModelContext
 
     private <T> Collection<T> loadModletServices( final Class<T> serviceClass ) throws ModelException
     {
+        InputStream in = null;
+        BufferedReader reader = null;
+
         try
         {
             final String serviceNamePrefix = serviceClass.getName() + ".";
@@ -1593,37 +1596,14 @@ public class DefaultModelContext extends ModelContext
                     this.log( Level.FINEST, getMessage( "processing", platformServices.getAbsolutePath() ), null );
                 }
 
-                InputStream in = null;
-                boolean suppressExceptionOnClose = true;
                 final java.util.Properties p = new java.util.Properties();
 
-                try
-                {
-                    in = new FileInputStream( platformServices );
-                    p.load( in );
-                    suppressExceptionOnClose = false;
-                }
-                finally
-                {
-                    try
-                    {
-                        if ( in != null )
-                        {
-                            in.close();
-                        }
-                    }
-                    catch ( final IOException e )
-                    {
-                        if ( suppressExceptionOnClose )
-                        {
-                            this.log( Level.SEVERE, getMessage( e ), e );
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                }
+                in = new FileInputStream( platformServices );
+
+                p.load( in );
+
+                in.close();
+                in = null;
 
                 for ( final Map.Entry<Object, Object> e : p.entrySet() )
                 {
@@ -1662,66 +1642,39 @@ public class DefaultModelContext extends ModelContext
                     this.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
                 }
 
-                BufferedReader reader = null;
-                boolean suppressExceptionOnClose = true;
+                reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
 
-                try
+                for ( String line = reader.readLine(); line != null; line = reader.readLine() )
                 {
-                    reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
-
-                    String line;
-                    while ( ( line = reader.readLine() ) != null )
+                    if ( line.contains( "#" ) )
                     {
-                        if ( line.contains( "#" ) )
-                        {
-                            continue;
-                        }
-
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
-                                                                serviceClass.getName(), line ), null );
-
-                        }
-
-                        final T serviceObject = this.createModletServiceObject( serviceClass, line );
-                        sortedClasspathServices.add( serviceObject );
+                        continue;
                     }
 
-                    Collections.sort( sortedClasspathServices,
-                                      new Comparator<Object>()
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
+                                                            serviceClass.getName(), line ), null );
+
+                    }
+
+                    final T serviceObject = this.createModletServiceObject( serviceClass, line );
+                    sortedClasspathServices.add( serviceObject );
+                }
+
+                Collections.sort( sortedClasspathServices,
+                                  new Comparator<Object>()
+                                  {
+
+                                      public int compare( final Object o1, final Object o2 )
                                       {
+                                          return ordinalOf( o1 ) - ordinalOf( o2 );
+                                      }
 
-                                          public int compare( final Object o1, final Object o2 )
-                                          {
-                                              return ordinalOf( o1 ) - ordinalOf( o2 );
-                                          }
+                                  } );
 
-                                      } );
-
-                    suppressExceptionOnClose = false;
-                }
-                finally
-                {
-                    try
-                    {
-                        if ( reader != null )
-                        {
-                            reader.close();
-                        }
-                    }
-                    catch ( final IOException e )
-                    {
-                        if ( suppressExceptionOnClose )
-                        {
-                            this.log( Level.SEVERE, getMessage( e ), e );
-                        }
-                        else
-                        {
-                            throw new ModelException( getMessage( e ), e );
-                        }
-                    }
-                }
+                reader.close();
+                reader = null;
             }
 
             if ( this.isLoggable( Level.FINE ) )
@@ -1743,6 +1696,34 @@ public class DefaultModelContext extends ModelContext
         catch ( final IOException e )
         {
             throw new ModelException( getMessage( e ), e );
+        }
+        finally
+        {
+            try
+            {
+                if ( in != null )
+                {
+                    in.close();
+                }
+            }
+            catch ( final IOException e )
+            {
+                this.log( Level.SEVERE, getMessage( e ), e );
+            }
+            finally
+            {
+                try
+                {
+                    if ( reader != null )
+                    {
+                        reader.close();
+                    }
+                }
+                catch ( final IOException e )
+                {
+                    this.log( Level.SEVERE, getMessage( e ), e );
+                }
+            }
         }
     }
 
@@ -1805,11 +1786,9 @@ public class DefaultModelContext extends ModelContext
         final long t0 = System.nanoTime();
         int count = 0;
 
-        for ( final Enumeration<URL> e = this.findResources( "META-INF/MANIFEST.MF" );
-              e.hasMoreElements(); )
+        for ( final Enumeration<URL> e = this.findResources( "META-INF/MANIFEST.MF" ); e.hasMoreElements(); )
         {
             InputStream manifestStream = null;
-            boolean suppressExceptionOnClose = true;
 
             try
             {
@@ -1844,7 +1823,8 @@ public class DefaultModelContext extends ModelContext
                     }
                 }
 
-                suppressExceptionOnClose = false;
+                manifestStream.close();
+                manifestStream = null;
             }
             finally
             {
@@ -1857,14 +1837,7 @@ public class DefaultModelContext extends ModelContext
                 }
                 catch ( final IOException ex )
                 {
-                    if ( suppressExceptionOnClose )
-                    {
-                        this.log( Level.SEVERE, getMessage( ex ), ex );
-                    }
-                    else
-                    {
-                        throw ex;
-                    }
+                    this.log( Level.SEVERE, getMessage( ex ), ex );
                 }
             }
         }

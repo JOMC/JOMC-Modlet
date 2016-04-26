@@ -63,7 +63,6 @@ public class ModelExceptionTest
     public final void testModelException() throws Exception
     {
         ObjectInputStream in = null;
-        boolean suppressExceptionOnClose = true;
 
         try
         {
@@ -71,9 +70,12 @@ public class ModelExceptionTest
                 ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelException.ser" ) );
 
             final ModelException e = (ModelException) in.readObject();
+
+            in.close();
+            in = null;
+
             assertNotNull( e );
             assertEquals( "ModelException", e.getMessage() );
-            suppressExceptionOnClose = false;
         }
         finally
         {
@@ -86,10 +88,7 @@ public class ModelExceptionTest
             }
             catch ( final IOException e )
             {
-                if ( !suppressExceptionOnClose )
-                {
-                    throw e;
-                }
+                e.printStackTrace();
             }
         }
     }
