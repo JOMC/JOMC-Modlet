@@ -63,7 +63,6 @@ public class ModelContextFactoryErrorTest
     public final void testModelContextFactoryError() throws Exception
     {
         ObjectInputStream in = null;
-        boolean suppressExceptionOnClose = true;
 
         try
         {
@@ -71,9 +70,12 @@ public class ModelContextFactoryErrorTest
                 ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelContextFactoryError.ser" ) );
 
             final ModelContextFactoryError e = (ModelContextFactoryError) in.readObject();
+
+            in.close();
+            in = null;
+
             assertNotNull( e );
             assertEquals( "ModelContextFactoryError", e.getMessage() );
-            suppressExceptionOnClose = false;
         }
         finally
         {
@@ -86,10 +88,7 @@ public class ModelContextFactoryErrorTest
             }
             catch ( final IOException e )
             {
-                if ( !suppressExceptionOnClose )
-                {
-                    throw e;
-                }
+                e.printStackTrace();
             }
         }
     }

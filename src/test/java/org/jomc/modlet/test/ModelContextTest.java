@@ -93,7 +93,6 @@ public class ModelContextTest
     static
     {
         InputStream in = null;
-        boolean suppressExceptionOnClose = true;
 
         try
         {
@@ -102,11 +101,12 @@ public class ModelContextTest
             assertNotNull( "Expected '" + TEST_RESOURCE_LOCATION + "' not found.", in );
             p.load( in );
 
+            in.close();
+            in = null;
+
             final String defaultModletName = p.getProperty( "defaultModletName" );
             assertNotNull( "Expected 'defaultModletName' property not found.", defaultModletName );
             DEFAULT_MODLET_NAME = defaultModletName;
-
-            suppressExceptionOnClose = false;
         }
         catch ( final IOException e )
         {
@@ -123,10 +123,7 @@ public class ModelContextTest
             }
             catch ( final IOException e )
             {
-                if ( !suppressExceptionOnClose )
-                {
-                    throw new AssertionError( e );
-                }
+                e.printStackTrace();
             }
         }
     }

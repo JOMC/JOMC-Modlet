@@ -1250,13 +1250,13 @@ public class DefaultModelContextTest extends ModelContextTest
     private void writePropertiesFile( final Properties properties, final File file ) throws IOException
     {
         OutputStream out = null;
-        boolean suppressExceptionOnClose = true;
 
         try
         {
             out = new FileOutputStream( file );
             properties.store( out, this.getClass().getName() );
-            suppressExceptionOnClose = false;
+            out.close();
+            out = null;
         }
         finally
         {
@@ -1269,10 +1269,7 @@ public class DefaultModelContextTest extends ModelContextTest
             }
             catch ( final IOException e )
             {
-                if ( !suppressExceptionOnClose )
-                {
-                    throw e;
-                }
+                e.printStackTrace();
             }
         }
     }

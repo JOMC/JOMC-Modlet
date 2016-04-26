@@ -918,50 +918,6 @@ public class DefaultModelContext extends ModelContext
      * {@inheritDoc}
      * <p>
      * This method loads {@code ServiceFactory} classes setup via the platform provider configuration file and
-     * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create new service objects.
-     * </p>
-     *
-     * @since 1.9
-     */
-    @Override
-    public <T> Collection<? extends T> createServiceObjects( final String model, final String service,
-                                                             final Class<T> type )
-        throws ModelException
-    {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-        if ( service == null )
-        {
-            throw new NullPointerException( "service" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
-
-        final Services modelServices = this.getModlets().getServices( model );
-        final Collection<T> serviceObjects =
-            new ArrayList<T>( modelServices != null ? modelServices.getService().size() : 0 );
-
-        if ( modelServices != null )
-        {
-            final Collection<ServiceFactory> factories = this.loadModletServices( ServiceFactory.class );
-
-            for ( final Service s : modelServices.getServices( service ) )
-            {
-                serviceObjects.add( this.createServiceObject( s, type, factories ) );
-            }
-        }
-
-        return Collections.unmodifiableCollection( serviceObjects );
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This method loads {@code ServiceFactory} classes setup via the platform provider configuration file and
      * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create a new service object.
      * </p>
      *
@@ -986,376 +942,6 @@ public class DefaultModelContext extends ModelContext
         }
 
         return this.createServiceObject( service, type, this.loadModletServices( ServiceFactory.class ) );
-    }
-
-    /**
-     * This method creates a new service object for a given service using a given collection of service factories.
-     *
-     * @param <T> The type of the service.
-     * @param service The service to create a new object of.
-     * @param type The class of the type of the service.
-     * @param factories The service factories to use for creating the new service object.
-     *
-     * @return An new service object for {@code service}.
-     *
-     * @throws NullPointerException if {@code service}, {@code type} or {@code factories} is {@code null}.
-     * @throws ModelException if creating the service object fails.
-     * @since 1.9
-     */
-    private <T> T createServiceObject( final Service service, final Class<T> type,
-                                       final Collection<ServiceFactory> factories ) throws ModelException
-    {
-        if ( service == null )
-        {
-            throw new NullPointerException( "service" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
-        if ( factories == null )
-        {
-            throw new NullPointerException( "factories" );
-        }
-
-        T serviceObject = null;
-
-        for ( final ServiceFactory factory : factories )
-        {
-            final T current = factory.createServiceObject( this, service, type );
-
-            if ( current != null )
-            {
-                if ( this.isLoggable( Level.FINER ) )
-                {
-                    this.log( Level.FINER, getMessage( "creatingService", service.getOrdinal(), service.getIdentifier(),
-                                                       service.getClazz(), factory.toString() ), null );
-
-                }
-
-                serviceObject = current;
-                break;
-            }
-        }
-
-        if ( serviceObject == null )
-        {
-            throw new ModelException( getMessage( "serviceNotCreated", service.getOrdinal(), service.getIdentifier(),
-                                                  service.getClazz() ), null );
-
-        }
-
-        return serviceObject;
-    }
-
-    private <T> Collection<T> loadModletServices( final Class<T> serviceClass ) throws ModelException
-    {
-        try
-        {
-            final String serviceNamePrefix = serviceClass.getName() + ".";
-            final Map<String, T> sortedPlatformServices = new TreeMap<String, T>( new Comparator<String>()
-            {
-
-                public int compare( final String key1, final String key2 )
-                {
-                    return key1.compareTo( key2 );
-                }
-
-            } );
-
-            final File platformServices = new File( this.getPlatformProviderLocation() );
-
-            if ( platformServices.exists() )
-            {
-                if ( this.isLoggable( Level.FINEST ) )
-                {
-                    this.log( Level.FINEST, getMessage( "processing", platformServices.getAbsolutePath() ), null );
-                }
-
-                InputStream in = null;
-                boolean suppressExceptionOnClose = true;
-                final java.util.Properties p = new java.util.Properties();
-
-                try
-                {
-                    in = new FileInputStream( platformServices );
-                    p.load( in );
-                    suppressExceptionOnClose = false;
-                }
-                finally
-                {
-                    try
-                    {
-                        if ( in != null )
-                        {
-                            in.close();
-                        }
-                    }
-                    catch ( final IOException e )
-                    {
-                        if ( suppressExceptionOnClose )
-                        {
-                            this.log( Level.SEVERE, getMessage( e ), e );
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                }
-
-                for ( final Map.Entry<Object, Object> e : p.entrySet() )
-                {
-                    if ( e.getKey().toString().startsWith( serviceNamePrefix ) )
-                    {
-                        final String configuration = e.getValue().toString();
-
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, getMessage( "serviceInfo", platformServices.getAbsolutePath(),
-                                                                serviceClass.getName(), configuration ), null );
-
-                        }
-
-                        sortedPlatformServices.put( e.getKey().toString(),
-                                                    this.createModletServiceObject( serviceClass, configuration ) );
-
-                    }
-                }
-            }
-
-            final Enumeration<URL> classpathServices =
-                this.findResources( this.getProviderLocation() + '/' + serviceClass.getName() );
-
-            int count = 0;
-            final long t0 = System.nanoTime();
-            final List<T> sortedClasspathServices = new ArrayList<T>();
-
-            while ( classpathServices.hasMoreElements() )
-            {
-                count++;
-                final URL url = classpathServices.nextElement();
-
-                if ( this.isLoggable( Level.FINEST ) )
-                {
-                    this.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
-                }
-
-                BufferedReader reader = null;
-                boolean suppressExceptionOnClose = true;
-
-                try
-                {
-                    reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
-
-                    String line;
-                    while ( ( line = reader.readLine() ) != null )
-                    {
-                        if ( line.contains( "#" ) )
-                        {
-                            continue;
-                        }
-
-                        if ( this.isLoggable( Level.FINEST ) )
-                        {
-                            this.log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
-                                                                serviceClass.getName(), line ), null );
-
-                        }
-
-                        final T serviceObject = this.createModletServiceObject( serviceClass, line );
-                        sortedClasspathServices.add( serviceObject );
-                    }
-
-                    Collections.sort( sortedClasspathServices,
-                                      new Comparator<Object>()
-                                      {
-
-                                          public int compare( final Object o1, final Object o2 )
-                                          {
-                                              return ordinalOf( o1 ) - ordinalOf( o2 );
-                                          }
-
-                                      } );
-
-                    suppressExceptionOnClose = false;
-                }
-                finally
-                {
-                    try
-                    {
-                        if ( reader != null )
-                        {
-                            reader.close();
-                        }
-                    }
-                    catch ( final IOException e )
-                    {
-                        if ( suppressExceptionOnClose )
-                        {
-                            this.log( Level.SEVERE, getMessage( e ), e );
-                        }
-                        else
-                        {
-                            throw new ModelException( getMessage( e ), e );
-                        }
-                    }
-                }
-            }
-
-            if ( this.isLoggable( Level.FINE ) )
-            {
-                this.log( Level.FINE, getMessage( "contextReport", count,
-                                                  this.getProviderLocation() + '/' + serviceClass.getName(),
-                                                  System.nanoTime() - t0 ), null );
-
-            }
-
-            final List<T> services =
-                new ArrayList<T>( sortedPlatformServices.size() + sortedClasspathServices.size() );
-
-            services.addAll( sortedPlatformServices.values() );
-            services.addAll( sortedClasspathServices );
-
-            return services;
-        }
-        catch ( final IOException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-    }
-
-    private <T> T createModletServiceObject( final Class<T> serviceClass, final String configuration )
-        throws ModelException
-    {
-        String className = configuration;
-        final int i0 = configuration.indexOf( '[' );
-        final int i1 = configuration.lastIndexOf( ']' );
-        final Service service = new Service();
-        service.setIdentifier( serviceClass.getName() );
-
-        if ( i0 != -1 && i1 != -1 )
-        {
-            className = configuration.substring( 0, i0 );
-            final StringTokenizer propertyTokens =
-                new StringTokenizer( configuration.substring( i0 + 1, i1 ), "," );
-
-            while ( propertyTokens.hasMoreTokens() )
-            {
-                final String property = propertyTokens.nextToken();
-                final int d0 = property.indexOf( '=' );
-
-                String propertyName = property;
-                String propertyValue = null;
-
-                if ( d0 != -1 )
-                {
-                    propertyName = property.substring( 0, d0 );
-                    propertyValue = property.substring( d0 + 1, property.length() );
-                }
-
-                final Property p = new Property();
-                service.getProperty().add( p );
-
-                p.setName( propertyName );
-                p.setValue( propertyValue );
-            }
-        }
-
-        service.setClazz( className );
-
-        // Need a way to exchange the service factory creating modlet service objects?
-        return new DefaultServiceFactory().createServiceObject( this, service, serviceClass );
-    }
-
-    /**
-     * Searches the context for {@code META-INF/MANIFEST.MF} resources and returns a set of URIs of entries whose names
-     * end with a known schema extension.
-     *
-     * @return Set of URIs of any matching entries.
-     *
-     * @throws IOException if reading fails.
-     * @throws URISyntaxException if parsing fails.
-     * @throws ModelException if searching the context fails.
-     */
-    private Set<URI> getSchemaResources() throws IOException, URISyntaxException, ModelException
-    {
-        final Set<URI> resources = new HashSet<URI>();
-        final long t0 = System.nanoTime();
-        int count = 0;
-
-        for ( final Enumeration<URL> e = this.findResources( "META-INF/MANIFEST.MF" );
-              e.hasMoreElements(); )
-        {
-            InputStream manifestStream = null;
-            boolean suppressExceptionOnClose = true;
-
-            try
-            {
-                count++;
-                final URL manifestUrl = e.nextElement();
-                final String externalForm = manifestUrl.toExternalForm();
-                final String baseUrl = externalForm.substring( 0, externalForm.indexOf( "META-INF" ) );
-                manifestStream = manifestUrl.openStream();
-                final Manifest mf = new Manifest( manifestStream );
-
-                if ( this.isLoggable( Level.FINEST ) )
-                {
-                    this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
-                }
-
-                for ( final Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
-                {
-                    for ( int i = SCHEMA_EXTENSIONS.length - 1; i >= 0; i-- )
-                    {
-                        if ( entry.getKey().toLowerCase().endsWith( '.' + SCHEMA_EXTENSIONS[i].toLowerCase() ) )
-                        {
-                            final URL schemaUrl = new URL( baseUrl + entry.getKey() );
-                            resources.add( schemaUrl.toURI() );
-
-                            if ( this.isLoggable( Level.FINEST ) )
-                            {
-                                this.log( Level.FINEST, getMessage( "foundSchemaCandidate",
-                                                                    schemaUrl.toExternalForm() ), null );
-
-                            }
-                        }
-                    }
-                }
-
-                suppressExceptionOnClose = false;
-            }
-            finally
-            {
-                try
-                {
-                    if ( manifestStream != null )
-                    {
-                        manifestStream.close();
-                    }
-                }
-                catch ( final IOException ex )
-                {
-                    if ( suppressExceptionOnClose )
-                    {
-                        this.log( Level.SEVERE, getMessage( ex ), ex );
-                    }
-                    else
-                    {
-                        throw ex;
-                    }
-                }
-            }
-        }
-
-        if ( this.isLoggable( Level.FINE ) )
-        {
-            this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF", System.nanoTime() - t0 ),
-                      null );
-
-        }
-
-        return resources;
     }
 
     private EntityResolver createEntityResolver( final Schemas schemas )
@@ -2118,6 +1704,393 @@ public class DefaultModelContext extends ModelContext
 
             throw new ModelException( message, e );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method loads {@code ServiceFactory} classes setup via the platform provider configuration file and
+     * {@code <provider-location>/org.jomc.modlet.ServiceFactory} resources to create new service objects.
+     * </p>
+     *
+     * @since 1.9
+     */
+    @Override
+    public <T> Collection<? extends T> createServiceObjects( final String model, final String service,
+                                                             final Class<T> type )
+        throws ModelException
+    {
+        if ( model == null )
+        {
+            throw new NullPointerException( "model" );
+        }
+        if ( service == null )
+        {
+            throw new NullPointerException( "service" );
+        }
+        if ( type == null )
+        {
+            throw new NullPointerException( "type" );
+        }
+
+        final Services modelServices = this.getModlets().getServices( model );
+        final Collection<T> serviceObjects =
+            new ArrayList<T>( modelServices != null ? modelServices.getService().size() : 0 );
+
+        if ( modelServices != null )
+        {
+            final Collection<ServiceFactory> factories = this.loadModletServices( ServiceFactory.class );
+
+            for ( final Service s : modelServices.getServices( service ) )
+            {
+                serviceObjects.add( this.createServiceObject( s, type, factories ) );
+            }
+        }
+
+        return Collections.unmodifiableCollection( serviceObjects );
+    }
+
+    /**
+     * This method creates a new service object for a given service using a given collection of service factories.
+     *
+     * @param <T> The type of the service.
+     * @param service The service to create a new object of.
+     * @param type The class of the type of the service.
+     * @param factories The service factories to use for creating the new service object.
+     *
+     * @return An new service object for {@code service}.
+     *
+     * @throws NullPointerException if {@code service}, {@code type} or {@code factories} is {@code null}.
+     * @throws ModelException if creating the service object fails.
+     * @since 1.9
+     */
+    private <T> T createServiceObject( final Service service, final Class<T> type,
+                                       final Collection<ServiceFactory> factories ) throws ModelException
+    {
+        if ( service == null )
+        {
+            throw new NullPointerException( "service" );
+        }
+        if ( type == null )
+        {
+            throw new NullPointerException( "type" );
+        }
+        if ( factories == null )
+        {
+            throw new NullPointerException( "factories" );
+        }
+
+        T serviceObject = null;
+
+        for ( final ServiceFactory factory : factories )
+        {
+            final T current = factory.createServiceObject( this, service, type );
+
+            if ( current != null )
+            {
+                if ( this.isLoggable( Level.FINER ) )
+                {
+                    this.log( Level.FINER, getMessage( "creatingService", service.getOrdinal(), service.getIdentifier(),
+                                                       service.getClazz(), factory.toString() ), null );
+
+                }
+
+                serviceObject = current;
+                break;
+            }
+        }
+
+        if ( serviceObject == null )
+        {
+            throw new ModelException( getMessage( "serviceNotCreated", service.getOrdinal(), service.getIdentifier(),
+                                                  service.getClazz() ), null );
+
+        }
+
+        return serviceObject;
+    }
+
+    private <T> Collection<T> loadModletServices( final Class<T> serviceClass ) throws ModelException
+    {
+        InputStream in = null;
+        BufferedReader reader = null;
+
+        try
+        {
+            final String serviceNamePrefix = serviceClass.getName() + ".";
+            final Map<String, T> sortedPlatformServices = new TreeMap<String, T>( new Comparator<String>()
+            {
+
+                public int compare( final String key1, final String key2 )
+                {
+                    return key1.compareTo( key2 );
+                }
+
+            } );
+
+            final File platformServices = new File( this.getPlatformProviderLocation() );
+
+            if ( platformServices.exists() )
+            {
+                if ( this.isLoggable( Level.FINEST ) )
+                {
+                    this.log( Level.FINEST, getMessage( "processing", platformServices.getAbsolutePath() ), null );
+                }
+
+                final java.util.Properties p = new java.util.Properties();
+
+                in = new FileInputStream( platformServices );
+
+                p.load( in );
+
+                in.close();
+                in = null;
+
+                for ( final Map.Entry<Object, Object> e : p.entrySet() )
+                {
+                    if ( e.getKey().toString().startsWith( serviceNamePrefix ) )
+                    {
+                        final String configuration = e.getValue().toString();
+
+                        if ( this.isLoggable( Level.FINEST ) )
+                        {
+                            this.log( Level.FINEST, getMessage( "serviceInfo", platformServices.getAbsolutePath(),
+                                                                serviceClass.getName(), configuration ), null );
+
+                        }
+
+                        sortedPlatformServices.put( e.getKey().toString(),
+                                                    this.createModletServiceObject( serviceClass, configuration ) );
+
+                    }
+                }
+            }
+
+            final Enumeration<URL> classpathServices =
+                this.findResources( this.getProviderLocation() + '/' + serviceClass.getName() );
+
+            int count = 0;
+            final long t0 = System.nanoTime();
+            final List<T> sortedClasspathServices = new ArrayList<T>();
+
+            while ( classpathServices.hasMoreElements() )
+            {
+                count++;
+                final URL url = classpathServices.nextElement();
+
+                if ( this.isLoggable( Level.FINEST ) )
+                {
+                    this.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
+                }
+
+                reader = new BufferedReader( new InputStreamReader( url.openStream(), "UTF-8" ) );
+
+                for ( String line = reader.readLine(); line != null; line = reader.readLine() )
+                {
+                    if ( line.contains( "#" ) )
+                    {
+                        continue;
+                    }
+
+                    if ( this.isLoggable( Level.FINEST ) )
+                    {
+                        this.log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
+                                                            serviceClass.getName(), line ), null );
+
+                    }
+
+                    final T serviceObject = this.createModletServiceObject( serviceClass, line );
+                    sortedClasspathServices.add( serviceObject );
+                }
+
+                Collections.sort( sortedClasspathServices,
+                                  new Comparator<Object>()
+                                  {
+
+                                      public int compare( final Object o1, final Object o2 )
+                                      {
+                                          return ordinalOf( o1 ) - ordinalOf( o2 );
+                                      }
+
+                                  } );
+
+                reader.close();
+                reader = null;
+            }
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                this.log( Level.FINE, getMessage( "contextReport", count,
+                                                  this.getProviderLocation() + '/' + serviceClass.getName(),
+                                                  System.nanoTime() - t0 ), null );
+
+            }
+
+            final List<T> services =
+                new ArrayList<T>( sortedPlatformServices.size() + sortedClasspathServices.size() );
+
+            services.addAll( sortedPlatformServices.values() );
+            services.addAll( sortedClasspathServices );
+
+            return services;
+        }
+        catch ( final IOException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        finally
+        {
+            try
+            {
+                if ( in != null )
+                {
+                    in.close();
+                }
+            }
+            catch ( final IOException e )
+            {
+                this.log( Level.SEVERE, getMessage( e ), e );
+            }
+            finally
+            {
+                try
+                {
+                    if ( reader != null )
+                    {
+                        reader.close();
+                    }
+                }
+                catch ( final IOException e )
+                {
+                    this.log( Level.SEVERE, getMessage( e ), e );
+                }
+            }
+        }
+    }
+
+    private <T> T createModletServiceObject( final Class<T> serviceClass, final String configuration )
+        throws ModelException
+    {
+        String className = configuration;
+        final int i0 = configuration.indexOf( '[' );
+        final int i1 = configuration.lastIndexOf( ']' );
+        final Service service = new Service();
+        service.setIdentifier( serviceClass.getName() );
+
+        if ( i0 != -1 && i1 != -1 )
+        {
+            className = configuration.substring( 0, i0 );
+            final StringTokenizer propertyTokens =
+                new StringTokenizer( configuration.substring( i0 + 1, i1 ), "," );
+
+            while ( propertyTokens.hasMoreTokens() )
+            {
+                final String property = propertyTokens.nextToken();
+                final int d0 = property.indexOf( '=' );
+
+                String propertyName = property;
+                String propertyValue = null;
+
+                if ( d0 != -1 )
+                {
+                    propertyName = property.substring( 0, d0 );
+                    propertyValue = property.substring( d0 + 1, property.length() );
+                }
+
+                final Property p = new Property();
+                service.getProperty().add( p );
+
+                p.setName( propertyName );
+                p.setValue( propertyValue );
+            }
+        }
+
+        service.setClazz( className );
+
+        // Need a way to exchange the service factory creating modlet service objects?
+        return new DefaultServiceFactory().createServiceObject( this, service, serviceClass );
+    }
+
+    /**
+     * Searches the context for {@code META-INF/MANIFEST.MF} resources and returns a set of URIs of entries whose names
+     * end with a known schema extension.
+     *
+     * @return Set of URIs of any matching entries.
+     *
+     * @throws IOException if reading fails.
+     * @throws URISyntaxException if parsing fails.
+     * @throws ModelException if searching the context fails.
+     */
+    private Set<URI> getSchemaResources() throws IOException, URISyntaxException, ModelException
+    {
+        final Set<URI> resources = new HashSet<URI>();
+        final long t0 = System.nanoTime();
+        int count = 0;
+
+        for ( final Enumeration<URL> e = this.findResources( "META-INF/MANIFEST.MF" ); e.hasMoreElements(); )
+        {
+            InputStream manifestStream = null;
+
+            try
+            {
+                count++;
+                final URL manifestUrl = e.nextElement();
+                final String externalForm = manifestUrl.toExternalForm();
+                final String baseUrl = externalForm.substring( 0, externalForm.indexOf( "META-INF" ) );
+                manifestStream = manifestUrl.openStream();
+                final Manifest mf = new Manifest( manifestStream );
+
+                if ( this.isLoggable( Level.FINEST ) )
+                {
+                    this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
+                }
+
+                for ( final Map.Entry<String, Attributes> entry : mf.getEntries().entrySet() )
+                {
+                    for ( int i = SCHEMA_EXTENSIONS.length - 1; i >= 0; i-- )
+                    {
+                        if ( entry.getKey().toLowerCase().endsWith( '.' + SCHEMA_EXTENSIONS[i].toLowerCase() ) )
+                        {
+                            final URL schemaUrl = new URL( baseUrl + entry.getKey() );
+                            resources.add( schemaUrl.toURI() );
+
+                            if ( this.isLoggable( Level.FINEST ) )
+                            {
+                                this.log( Level.FINEST, getMessage( "foundSchemaCandidate",
+                                                                    schemaUrl.toExternalForm() ), null );
+
+                            }
+                        }
+                    }
+                }
+
+                manifestStream.close();
+                manifestStream = null;
+            }
+            finally
+            {
+                try
+                {
+                    if ( manifestStream != null )
+                    {
+                        manifestStream.close();
+                    }
+                }
+                catch ( final IOException ex )
+                {
+                    this.log( Level.SEVERE, getMessage( ex ), ex );
+                }
+            }
+        }
+
+        if ( this.isLoggable( Level.FINE ) )
+        {
+            this.log( Level.FINE, getMessage( "contextReport", count, "META-INF/MANIFEST.MF", System.nanoTime() - t0 ),
+                      null );
+
+        }
+
+        return resources;
     }
 
     private static int ordinalOf( final Object serviceObject )
