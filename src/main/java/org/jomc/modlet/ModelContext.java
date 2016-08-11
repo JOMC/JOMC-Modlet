@@ -36,13 +36,13 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -137,39 +137,39 @@ public abstract class ModelContext
     /**
      * The attributes of the instance.
      */
-    private final Map<String, Object> attributes = new HashMap<String, Object>();
+    private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>( 32, .75f, 1 );
 
     /**
      * The class loader of the instance.
      */
-    private ClassLoader classLoader;
+    private volatile ClassLoader classLoader;
 
     /**
      * Flag indicating the {@code classLoader} field is initialized.
      *
      * @since 1.2
      */
-    private boolean classLoaderSet;
+    private volatile boolean classLoaderSet;
 
     /**
      * The listeners of the instance.
      */
-    private List<Listener> listeners;
+    private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
 
     /**
      * Log level of the instance.
      */
-    private Level logLevel;
+    private volatile Level logLevel;
 
     /**
      * The {@code Modlets} of the instance.
      */
-    private Modlets modlets;
+    private volatile Modlets modlets;
 
     /**
      * Modlet namespace schema system id of the instance.
      */
-    private String modletSchemaSystemId;
+    private volatile String modletSchemaSystemId;
 
     /**
      * Creates a new {@code ModelContext} instance.
@@ -351,11 +351,6 @@ public abstract class ModelContext
      */
     public List<Listener> getListeners()
     {
-        if ( this.listeners == null )
-        {
-            this.listeners = new LinkedList<Listener>();
-        }
-
         return this.listeners;
     }
 

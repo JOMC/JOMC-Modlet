@@ -85,7 +85,7 @@ public class DefaultModletProvider implements ModletProvider
     /**
      * Flag indicating the provider is enabled.
      */
-    private Boolean enabled;
+    private volatile Boolean enabled;
 
     /**
      * Constant for the name of the model context attribute backing property {@code modletLocation}.
@@ -121,7 +121,7 @@ public class DefaultModletProvider implements ModletProvider
     /**
      * Modlet location of the instance.
      */
-    private String modletLocation;
+    private volatile String modletLocation;
 
     /**
      * Constant for the name of the model context attribute backing property {@code validating}.
@@ -162,7 +162,7 @@ public class DefaultModletProvider implements ModletProvider
      *
      * @since 1.2
      */
-    private Boolean validating;
+    private volatile Boolean validating;
 
     /**
      * Constant for the name of the system property controlling property {@code defaultOrdinal}.
@@ -193,7 +193,7 @@ public class DefaultModletProvider implements ModletProvider
      *
      * @since 1.6
      */
-    private Integer ordinal;
+    private volatile Integer ordinal;
 
     /**
      * Creates a new {@code DefaultModletProvider} instance.

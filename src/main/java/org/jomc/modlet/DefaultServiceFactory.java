@@ -71,7 +71,7 @@ public class DefaultServiceFactory implements ServiceFactory
     /**
      * Ordinal number of the factory.
      */
-    private Integer ordinal;
+    private volatile Integer ordinal;
 
     /**
      * Creates a new {@code DefaultServiceFactory} instance.

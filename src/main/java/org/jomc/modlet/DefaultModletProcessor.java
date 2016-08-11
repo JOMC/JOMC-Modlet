@@ -94,7 +94,7 @@ public class DefaultModletProcessor implements ModletProcessor
     /**
      * Flag indicating the processor is enabled.
      */
-    private Boolean enabled;
+    private volatile Boolean enabled;
 
     /**
      * Constant for the name of the system property controlling property {@code defaultOrdinal}.
@@ -119,7 +119,7 @@ public class DefaultModletProcessor implements ModletProcessor
     /**
      * Ordinal number of the processor.
      */
-    private Integer ordinal;
+    private volatile Integer ordinal;
 
     /**
      * Constant for the name of the model context attribute backing property {@code transformerLocation}.
@@ -154,7 +154,7 @@ public class DefaultModletProcessor implements ModletProcessor
     /**
      * Transformer location of the instance.
      */
-    private String transformerLocation;
+    private volatile String transformerLocation;
 
     /**
      * Creates a new {@code DefaultModletProcessor} instance.

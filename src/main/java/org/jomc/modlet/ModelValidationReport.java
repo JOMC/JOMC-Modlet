@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBElement;
 
@@ -62,28 +63,28 @@ public class ModelValidationReport implements Serializable
          *
          * @serial
          */
-        private String identifier;
+        private final String identifier;
 
         /**
          * The detail level.
          *
          * @serial
          */
-        private Level level;
+        private final Level level;
 
         /**
          * The detail message.
          *
          * @serial
          */
-        private String message;
+        private final String message;
 
         /**
          * The JAXB element this detail is associated with.
          *
          * @serial
          */
-        private JAXBElement<?> element;
+        private final JAXBElement<?> element;
 
         /**
          * Creates a new {@code Detail} taking an identifier, a level, a message and an element.
@@ -179,7 +180,7 @@ public class ModelValidationReport implements Serializable
      *
      * @serial
      */
-    private List<Detail> details;
+    private final List<Detail> details = new CopyOnWriteArrayList<Detail>();
 
     /**
      * Creates a new {@code ModelValidationReport} instance.
@@ -201,11 +202,6 @@ public class ModelValidationReport implements Serializable
      */
     public List<Detail> getDetails()
     {
-        if ( this.details == null )
-        {
-            this.details = new ArrayList<Detail>();
-        }
-
         return this.details;
     }
 
@@ -220,16 +216,15 @@ public class ModelValidationReport implements Serializable
     {
         final List<Detail> list = new ArrayList<Detail>( this.getDetails().size() );
 
-        for ( int i = this.getDetails().size() - 1; i >= 0; i-- )
+        for ( final Detail detail : this.getDetails() )
         {
-            final Detail d = this.getDetails().get( i );
-            if ( identifier == null && d.getIdentifier() == null )
+            if ( identifier == null && detail.getIdentifier() == null )
             {
-                list.add( d );
+                list.add( detail );
             }
-            if ( identifier != null && identifier.equals( d.getIdentifier() ) )
+            if ( identifier != null && identifier.equals( detail.getIdentifier() ) )
             {
-                list.add( d );
+                list.add( detail );
             }
         }
 
@@ -246,10 +241,9 @@ public class ModelValidationReport implements Serializable
      */
     public boolean isModelValid()
     {
-        for ( int i = this.getDetails().size() - 1; i >= 0; i-- )
+        for ( final Detail detail : this.getDetails() )
         {
-            final Detail d = this.getDetails().get( i );
-            if ( d.getLevel() != null && d.getLevel().intValue() > Level.WARNING.intValue() )
+            if ( detail.getLevel() != null && detail.getLevel().intValue() > Level.WARNING.intValue() )
             {
                 return false;
             }
