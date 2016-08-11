@@ -53,6 +53,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
@@ -1907,12 +1908,12 @@ class ModelErrorHandler extends DefaultHandler
     /**
      * The context of the instance.
      */
-    private ModelContext context;
+    private final ModelContext context;
 
     /**
      * The report of the instance.
      */
-    private ModelValidationReport report;
+    private final ModelValidationReport report;
 
     /**
      * Creates a new {@code ModelErrorHandler} instance taking a context.
@@ -1921,7 +1922,7 @@ class ModelErrorHandler extends DefaultHandler
      */
     ModelErrorHandler( final ModelContext context )
     {
-        this( context, null );
+        this( context, new ModelValidationReport() );
     }
 
     /**
@@ -1944,11 +1945,6 @@ class ModelErrorHandler extends DefaultHandler
      */
     public ModelValidationReport getReport()
     {
-        if ( this.report == null )
-        {
-            this.report = new ModelValidationReport();
-        }
-
         return this.report;
     }
 
@@ -2034,7 +2030,7 @@ class MarshallerListenerList extends Marshaller.Listener
     /**
      * The {@code Marshaller.Listener}s of the instance.
      */
-    private List<Marshaller.Listener> listeners;
+    private final List<Marshaller.Listener> listeners = new CopyOnWriteArrayList<Marshaller.Listener>();
 
     /**
      * Creates a new {@code MarshallerListenerList} instance.
@@ -2056,29 +2052,24 @@ class MarshallerListenerList extends Marshaller.Listener
      */
     List<Marshaller.Listener> getListeners()
     {
-        if ( this.listeners == null )
-        {
-            this.listeners = new ArrayList<Marshaller.Listener>();
-        }
-
         return this.listeners;
     }
 
     @Override
     public void beforeMarshal( final Object source )
     {
-        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        for ( final Marshaller.Listener listener : this.getListeners() )
         {
-            this.getListeners().get( i ).beforeMarshal( source );
+            listener.beforeMarshal( source );
         }
     }
 
     @Override
     public void afterMarshal( final Object source )
     {
-        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        for ( final Marshaller.Listener listener : this.getListeners() )
         {
-            this.getListeners().get( i ).afterMarshal( source );
+            listener.afterMarshal( source );
         }
     }
 
@@ -2097,7 +2088,7 @@ class UnmarshallerListenerList extends Unmarshaller.Listener
     /**
      * The {@code Unmarshaller.Listener}s of the instance.
      */
-    private List<Unmarshaller.Listener> listeners;
+    private final List<Unmarshaller.Listener> listeners = new CopyOnWriteArrayList<Unmarshaller.Listener>();
 
     /**
      * Creates a new {@code UnmarshallerListenerList} instance.
@@ -2119,29 +2110,24 @@ class UnmarshallerListenerList extends Unmarshaller.Listener
      */
     List<Unmarshaller.Listener> getListeners()
     {
-        if ( this.listeners == null )
-        {
-            this.listeners = new ArrayList<Unmarshaller.Listener>();
-        }
-
         return this.listeners;
     }
 
     @Override
     public void beforeUnmarshal( final Object target, final Object parent )
     {
-        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        for ( final Unmarshaller.Listener listener : this.getListeners() )
         {
-            this.getListeners().get( i ).beforeUnmarshal( target, parent );
+            listener.beforeUnmarshal( target, parent );
         }
     }
 
     @Override
     public void afterUnmarshal( final Object target, final Object parent )
     {
-        for ( int i = 0, s0 = this.getListeners().size(); i < s0; i++ )
+        for ( final Unmarshaller.Listener listener : this.getListeners() )
         {
-            this.getListeners().get( i ).afterUnmarshal( target, parent );
+            listener.afterUnmarshal( target, parent );
         }
     }
 
