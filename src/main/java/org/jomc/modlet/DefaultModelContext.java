@@ -155,12 +155,12 @@ public class DefaultModelContext extends ModelContext
     /**
      * Provider location of the instance.
      */
-    private String providerLocation;
+    private volatile String providerLocation;
 
     /**
      * Platform provider location of the instance.
      */
-    private String platformProviderLocation;
+    private volatile String platformProviderLocation;
 
     /**
      * Creates a new {@code DefaultModelContext} instance.

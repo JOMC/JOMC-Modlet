@@ -83,7 +83,7 @@ public class DefaultModletValidator implements ModletValidator
     /**
      * Flag indicating the validator is enabled.
      */
-    private Boolean enabled;
+    private volatile Boolean enabled;
 
     /**
      * Constant for the name of the system property controlling property {@code defaultOrdinal}.
@@ -108,7 +108,7 @@ public class DefaultModletValidator implements ModletValidator
     /**
      * Ordinal number of the validator.
      */
-    private Integer ordinal;
+    private volatile Integer ordinal;
 
     /**
      * Creates a new {@code DefaultModletValidator} instance.
