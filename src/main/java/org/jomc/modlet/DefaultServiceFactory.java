@@ -34,7 +34,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 /**
@@ -183,13 +189,54 @@ public class DefaultServiceFactory implements ServiceFactory
 
             final T serviceObject = clazz.asSubclass( type ).newInstance();
 
-            for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+            if ( !service.getProperty().isEmpty() )
             {
-                final Property p = service.getProperty().get( i );
-                this.initProperty( context, serviceObject, p.getName(), p.getValue() );
+                if ( context.getExecutorService() != null && service.getProperty().size() > 1 )
+                {
+                    final List<Callable<Void>> propertyInitializationTasks =
+                        new ArrayList<Callable<Void>>( service.getProperty().size() );
+
+                    for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+                    {
+                        final Property p = service.getProperty().get( i );
+
+                        propertyInitializationTasks.add( new Callable<Void>()
+                        {
+
+                            public Void call() throws ModelException
+                            {
+                                initProperty( context, serviceObject, p.getName(), p.getValue() );
+                                return null;
+                            }
+
+                        } );
+                    }
+
+                    for ( final Future<Void> propertyInitializationTask
+                              : context.getExecutorService().invokeAll( propertyInitializationTasks ) )
+                    {
+                        propertyInitializationTask.get();
+                    }
+                }
+                else
+                {
+                    for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+                    {
+                        final Property p = service.getProperty().get( i );
+                        this.initProperty( context, serviceObject, p.getName(), p.getValue() );
+                    }
+                }
             }
 
             return serviceObject;
+        }
+        catch ( final CancellationException e )
+        {
+            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
+        }
+        catch ( final InterruptedException e )
+        {
+            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
         }
         catch ( final InstantiationException e )
         {
@@ -198,6 +245,25 @@ public class DefaultServiceFactory implements ServiceFactory
         catch ( final IllegalAccessException e )
         {
             throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
+        }
+        catch ( final ExecutionException e )
+        {
+            if ( e.getCause() instanceof ModelException )
+            {
+                throw (ModelException) e.getCause();
+            }
+            else if ( e.getCause() instanceof RuntimeException )
+            {
+                throw (RuntimeException) e.getCause();
+            }
+            else if ( e.getCause() instanceof Error )
+            {
+                throw (Error) e.getCause();
+            }
+            else
+            {
+                throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e.getCause() );
+            }
         }
     }
 

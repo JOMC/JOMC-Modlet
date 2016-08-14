@@ -53,7 +53,11 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
@@ -521,25 +525,92 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "modlets" );
         }
 
-        final ModelValidationReport report = new ModelValidationReport();
-        final Collection<ModletValidator> modletValidators = this.loadModletServices( ModletValidator.class );
-
-        for ( final ModletValidator modletValidator : modletValidators )
+        try
         {
-            if ( this.isLoggable( Level.FINER ) )
+            final ModelValidationReport report = new ModelValidationReport();
+            final Collection<ModletValidator> modletValidators = this.loadModletServices( ModletValidator.class );
+
+            if ( this.getExecutorService() != null && modletValidators.size() > 1 )
             {
-                this.log( Level.FINER, getMessage( "validatingModlets", modletValidator.toString() ), null );
+                final List<Callable<ModelValidationReport>> modletValidationTasks =
+                    new ArrayList<Callable<ModelValidationReport>>( modletValidators.size() );
+
+                for ( final ModletValidator modletValidator : modletValidators )
+                {
+                    modletValidationTasks.add( new Callable<ModelValidationReport>()
+                    {
+
+                        public ModelValidationReport call() throws ModelException
+                        {
+                            if ( isLoggable( Level.FINER ) )
+                            {
+                                log( Level.FINER, getMessage( "validatingModlets", modletValidator.toString() ), null );
+                            }
+
+                            return modletValidator.validateModlets( DefaultModelContext.this, modlets );
+                        }
+
+                    } );
+                }
+
+                for ( final Future<ModelValidationReport> modletValidationTask
+                          : this.getExecutorService().invokeAll( modletValidationTasks ) )
+                {
+                    final ModelValidationReport current = modletValidationTask.get();
+
+                    if ( current != null )
+                    {
+                        report.getDetails().addAll( current.getDetails() );
+                    }
+                }
+            }
+            else
+            {
+                for ( final ModletValidator modletValidator : modletValidators )
+                {
+                    if ( this.isLoggable( Level.FINER ) )
+                    {
+                        this.log( Level.FINER, getMessage( "validatingModlets", modletValidator.toString() ), null );
+                    }
+
+                    final ModelValidationReport current = modletValidator.validateModlets( this, modlets );
+
+                    if ( current != null )
+                    {
+                        report.getDetails().addAll( current.getDetails() );
+                    }
+                }
             }
 
-            final ModelValidationReport current = modletValidator.validateModlets( this, modlets );
-
-            if ( current != null )
+            return report;
+        }
+        catch ( final CancellationException e )
+        {
+            throw new ModelException( getMessage( "failedValidatingModlets" ), e );
+        }
+        catch ( final InterruptedException e )
+        {
+            throw new ModelException( getMessage( "failedValidatingModlets" ), e );
+        }
+        catch ( final ExecutionException e )
+        {
+            if ( e.getCause() instanceof ModelException )
             {
-                report.getDetails().addAll( current.getDetails() );
+                throw (ModelException) e.getCause();
+            }
+            else if ( e.getCause() instanceof RuntimeException )
+            {
+                throw (RuntimeException) e.getCause();
+            }
+            else if ( e.getCause() instanceof Error )
+            {
+                throw (Error) e.getCause();
+            }
+            else
+            {
+                throw new ModelException( getMessage( "failedValidatingModlets" ), e.getCause() );
             }
         }
-
-        return report;
     }
 
     /**
@@ -683,36 +754,101 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
-        final long t0 = System.nanoTime();
-        final ModelValidationReport report = new ModelValidationReport();
-
-        for ( final ModelValidator validator
-                  : this.createServiceObjects( model.getIdentifier(), ModelValidator.class.getName(),
-                                               ModelValidator.class ) )
+        try
         {
-            if ( this.isLoggable( Level.FINER ) )
+            final long t0 = System.nanoTime();
+            final ModelValidationReport resultReport = new ModelValidationReport();
+
+            final Collection<? extends ModelValidator> modelValidators =
+                this.createServiceObjects( model.getIdentifier(), ModelValidator.class.getName(),
+                                           ModelValidator.class );
+
+            if ( this.getExecutorService() != null && modelValidators.size() > 1 )
             {
-                this.log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
-                                                   validator.toString() ), null );
+                final List<Callable<ModelValidationReport>> modelValidationTasks =
+                    new ArrayList<Callable<ModelValidationReport>>( modelValidators.size() );
+
+                for ( final ModelValidator validator : modelValidators )
+                {
+                    modelValidationTasks.add( new Callable<ModelValidationReport>()
+                    {
+
+                        public ModelValidationReport call() throws ModelException
+                        {
+                            if ( isLoggable( Level.FINER ) )
+                            {
+                                log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
+                                                              validator.toString() ), null );
+
+                            }
+
+                            return validator.validateModel( DefaultModelContext.this, model );
+                        }
+
+                    } );
+
+                }
+
+                for ( final Future<ModelValidationReport> modelValidationTask
+                          : this.getExecutorService().invokeAll( modelValidationTasks ) )
+                {
+                    final ModelValidationReport currentReport = modelValidationTask.get();
+
+                    if ( currentReport != null )
+                    {
+                        resultReport.getDetails().addAll( currentReport.getDetails() );
+                    }
+                }
+            }
+            else
+            {
+                for ( final ModelValidator modelValidator : modelValidators )
+                {
+                    final ModelValidationReport currentReport = modelValidator.validateModel( this, model );
+
+                    if ( currentReport != null )
+                    {
+                        resultReport.getDetails().addAll( currentReport.getDetails() );
+                    }
+                }
+            }
+
+            if ( this.isLoggable( Level.FINE ) )
+            {
+                this.log( Level.FINE, getMessage( "validateModelReport", model.getIdentifier(),
+                                                  System.nanoTime() - t0 ), null );
 
             }
 
-            final ModelValidationReport current = validator.validateModel( this, model );
-
-            if ( current != null )
+            return resultReport;
+        }
+        catch ( final CancellationException e )
+        {
+            throw new ModelException( getMessage( "failedValidatingModel", model.getIdentifier() ), e );
+        }
+        catch ( final InterruptedException e )
+        {
+            throw new ModelException( getMessage( "failedValidatingModel", model.getIdentifier() ), e );
+        }
+        catch ( final ExecutionException e )
+        {
+            if ( e.getCause() instanceof ModelException )
             {
-                report.getDetails().addAll( current.getDetails() );
+                throw (ModelException) e.getCause();
+            }
+            else if ( e.getCause() instanceof RuntimeException )
+            {
+                throw (RuntimeException) e.getCause();
+            }
+            else if ( e.getCause() instanceof Error )
+            {
+                throw (Error) e.getCause();
+            }
+            else
+            {
+                throw new ModelException( getMessage( "failedValidatingModel", model.getIdentifier() ), e.getCause() );
             }
         }
-
-        if ( this.isLoggable( Level.FINE ) )
-        {
-            this.log( Level.FINE, getMessage( "validateModelReport", model.getIdentifier(),
-                                              System.nanoTime() - t0 ), null );
-
-        }
-
-        return report;
     }
 
     /**

@@ -30,15 +30,27 @@
  */
 package org.jomc.modlet;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -390,73 +402,112 @@ public class DefaultModletProcessor implements ModletProcessor
         {
             final long t0 = System.nanoTime();
             final List<Transformer> transformers = new LinkedList<Transformer>();
-            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            final Enumeration<URL> resources = context.findResources( location );
-            final ErrorListener errorListener = new ErrorListener()
+            final Enumeration<URL> transformerResourceEnumeration = context.findResources( location );
+            final Set<URI> transformerResources = new HashSet<URI>();
+            while ( transformerResourceEnumeration.hasMoreElements() )
             {
+                transformerResources.add( transformerResourceEnumeration.nextElement().toURI() );
+            }
 
-                public void warning( final TransformerException exception ) throws TransformerException
-                {
-                    if ( context.isLoggable( Level.WARNING ) )
-                    {
-                        context.log( Level.WARNING, getMessage( exception ), exception );
-                    }
-                }
-
-                public void error( final TransformerException exception ) throws TransformerException
-                {
-                    if ( context.isLoggable( Level.SEVERE ) )
-                    {
-                        context.log( Level.SEVERE, getMessage( exception ), exception );
-                    }
-
-                    throw exception;
-                }
-
-                public void fatalError( final TransformerException exception ) throws TransformerException
-                {
-                    if ( context.isLoggable( Level.SEVERE ) )
-                    {
-                        context.log( Level.SEVERE, getMessage( exception ), exception );
-                    }
-
-                    throw exception;
-                }
-
-            };
-
-            transformerFactory.setErrorListener( errorListener );
-
-            int count = 0;
-            while ( resources.hasMoreElements() )
+            if ( !transformerResources.isEmpty() )
             {
-                count++;
-                final URL url = resources.nextElement();
-
-                if ( context.isLoggable( Level.FINEST ) )
+                final ErrorListener errorListener = new ErrorListener()
                 {
-                    context.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
-                }
 
-                final Transformer transformer =
-                    transformerFactory.newTransformer( new StreamSource( url.toURI().toASCIIString() ) );
+                    public void warning( final TransformerException exception ) throws TransformerException
+                    {
+                        if ( context.isLoggable( Level.WARNING ) )
+                        {
+                            context.log( Level.WARNING, getMessage( exception ), exception );
+                        }
+                    }
 
-                transformer.setErrorListener( errorListener );
+                    public void error( final TransformerException exception ) throws TransformerException
+                    {
+                        if ( context.isLoggable( Level.SEVERE ) )
+                        {
+                            context.log( Level.SEVERE, getMessage( exception ), exception );
+                        }
 
-                for ( final Map.Entry<Object, Object> e : System.getProperties().entrySet() )
+                        throw exception;
+                    }
+
+                    public void fatalError( final TransformerException exception ) throws TransformerException
+                    {
+                        if ( context.isLoggable( Level.SEVERE ) )
+                        {
+                            context.log( Level.SEVERE, getMessage( exception ), exception );
+                        }
+
+                        throw exception;
+                    }
+
+                };
+
+                final Properties transformerParameters = this.getTransformerParameters( context );
+
+                if ( context.getExecutorService() != null && transformerResources.size() > 1 )
                 {
-                    transformer.setParameter( e.getKey().toString(), e.getValue() );
-                }
+                    final ThreadLocal<TransformerFactory> threadLocalTransformerFactory =
+                        new ThreadLocal<TransformerFactory>();
 
-                transformers.add( transformer );
+                    final List<Callable<Transformer>> createTransformerTasks =
+                        new ArrayList<Callable<Transformer>>( transformerResources.size() );
+
+                    for ( final URI transformerResource : transformerResources )
+                    {
+                        createTransformerTasks.add( new Callable<Transformer>()
+                        {
+
+                            public Transformer call() throws TransformerConfigurationException, URISyntaxException
+                            {
+                                TransformerFactory transformerFactory = threadLocalTransformerFactory.get();
+                                if ( transformerFactory == null )
+                                {
+                                    transformerFactory = TransformerFactory.newInstance();
+                                    threadLocalTransformerFactory.set( transformerFactory );
+                                }
+
+                                return createTransformer( context, transformerFactory, transformerParameters,
+                                                          transformerResource );
+
+                            }
+
+                        } );
+                    }
+
+                    for ( final Future<Transformer> createTransformerTask
+                              : context.getExecutorService().invokeAll( createTransformerTasks ) )
+                    {
+                        transformers.add( createTransformerTask.get() );
+                    }
+                }
+                else
+                {
+                    final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                    transformerFactory.setErrorListener( errorListener );
+
+                    for ( final URI transformerResource : transformerResources )
+                    {
+                        transformers.add( this.createTransformer( context, transformerFactory, transformerParameters,
+                                                                  transformerResource ) );
+
+                    }
+                }
             }
 
             if ( context.isLoggable( Level.FINE ) )
             {
-                context.log( Level.FINE, getMessage( "contextReport", count, location, System.nanoTime() - t0 ), null );
+                context.log( Level.FINE, getMessage( "contextReport", transformerResources.size(), location,
+                                                     System.nanoTime() - t0 ), null );
+
             }
 
             return transformers.isEmpty() ? null : transformers;
+        }
+        catch ( final IOException e )
+        {
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final URISyntaxException e )
         {
@@ -471,6 +522,43 @@ public class DefaultModletProcessor implements ModletProcessor
             }
 
             throw new ModelException( message, e );
+        }
+        catch ( final CancellationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final InterruptedException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final ExecutionException e )
+        {
+            if ( e.getCause() instanceof ModelException )
+            {
+                throw (ModelException) e.getCause();
+            }
+            else if ( e.getCause() instanceof TransformerConfigurationException )
+            {
+                String message = getMessage( e );
+                if ( message == null && ( (TransformerConfigurationException) e.getCause() ).getException() != null )
+                {
+                    message = getMessage( ( (TransformerConfigurationException) e.getCause() ).getException() );
+                }
+
+                throw new ModelException( message, e );
+            }
+            else if ( e.getCause() instanceof RuntimeException )
+            {
+                throw (RuntimeException) e.getCause();
+            }
+            else if ( e.getCause() instanceof Error )
+            {
+                throw (Error) e.getCause();
+            }
+            else
+            {
+                throw new ModelException( getMessage( e ), e );
+            }
         }
     }
 
@@ -568,6 +656,86 @@ public class DefaultModletProcessor implements ModletProcessor
 
             throw new ModelException( message, e );
         }
+    }
+
+    private Transformer createTransformer( final ModelContext context, final TransformerFactory transformerFactory,
+                                           final Map<Object, Object> parameters, final URI transformerResource )
+        throws TransformerConfigurationException, URISyntaxException
+    {
+        if ( context.isLoggable( Level.FINEST ) )
+        {
+            context.log( Level.FINEST, getMessage( "processing", transformerResource.toString() ), null );
+        }
+
+        final Transformer transformer =
+            transformerFactory.newTransformer( new StreamSource( transformerResource.toASCIIString() ) );
+
+        transformer.setErrorListener( transformerFactory.getErrorListener() );
+
+        for ( final Map.Entry<Object, Object> e : parameters.entrySet() )
+        {
+            transformer.setParameter( e.getKey().toString(), e.getValue() );
+        }
+
+        return transformer;
+    }
+
+    private Properties getTransformerParameters( final ModelContext context ) throws IOException
+    {
+        final Properties properties = new Properties();
+
+        if ( context.getExecutorService() != null )
+        {
+            ByteArrayInputStream in = null;
+            ByteArrayOutputStream out = null;
+            try
+            {
+                out = new ByteArrayOutputStream();
+                System.getProperties().store( out, this.getClass().getName() );
+                out.close();
+                final byte[] bytes = out.toByteArray();
+                out = null;
+
+                in = new ByteArrayInputStream( bytes );
+                properties.load( in );
+                in.close();
+                in = null;
+            }
+            finally
+            {
+                try
+                {
+                    if ( out != null )
+                    {
+                        out.close();
+                    }
+                }
+                catch ( final IOException e )
+                {
+                    // Suppressed.
+                }
+                finally
+                {
+                    try
+                    {
+                        if ( in != null )
+                        {
+                            in.close();
+                        }
+                    }
+                    catch ( final IOException e )
+                    {
+                        // Suppressed.
+                    }
+                }
+            }
+        }
+        else
+        {
+            properties.putAll( System.getProperties() );
+        }
+
+        return properties;
     }
 
     private static String getMessage( final String key, final Object... args )

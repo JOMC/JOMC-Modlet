@@ -31,8 +31,6 @@
 package org.jomc.modlet.test;
 
 import org.jomc.modlet.DefaultModletProcessor;
-import org.jomc.modlet.ModelContext;
-import org.jomc.modlet.ModelContextFactory;
 import org.jomc.modlet.Modlets;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -81,11 +79,9 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
     @Test
     public final void testFindTransformers() throws Exception
     {
-        final ModelContext context = ModelContextFactory.newInstance().newModelContext();
-
         try
         {
-            this.getModletProcessor().findTransformers( context, null );
+            this.getModletProcessor().findTransformers( this.getModelContext(), null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
@@ -108,16 +104,16 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         this.getModletProcessor().setTransformerLocation( null );
         assertEquals( 1, this.getModletProcessor().findTransformers(
-                      context, DefaultModletProcessor.getDefaultTransformerLocation() ).size() );
+                      this.getModelContext(), DefaultModletProcessor.getDefaultTransformerLocation() ).size() );
 
         DefaultModletProcessor.setDefaultTransformerLocation( "DOES_NOT_EXIST" );
         this.getModletProcessor().setTransformerLocation( "DOES_NOT_EXIST" );
 
         assertNull( this.getModletProcessor().findTransformers(
-            context, DefaultModletProcessor.getDefaultTransformerLocation() ) );
+            this.getModelContext(), DefaultModletProcessor.getDefaultTransformerLocation() ) );
 
         assertNull( this.getModletProcessor().findTransformers(
-            context, this.getModletProcessor().getTransformerLocation() ) );
+            this.getModelContext(), this.getModletProcessor().getTransformerLocation() ) );
 
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         this.getModletProcessor().setTransformerLocation( null );
@@ -126,19 +122,17 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
     @Test
     public final void testDefaultEnabled() throws Exception
     {
-        final ModelContext context = ModelContextFactory.newInstance().newModelContext();
-
         System.clearProperty( "org.jomc.modlet.DefaultModletProcessor.defaultEnabled" );
         DefaultModletProcessor.setDefaultEnabled( null );
         assertTrue( DefaultModletProcessor.isDefaultEnabled() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         System.setProperty( "org.jomc.modlet.DefaultModletProcessor.defaultEnabled", Boolean.toString( false ) );
         DefaultModletProcessor.setDefaultEnabled( null );
         assertFalse( DefaultModletProcessor.isDefaultEnabled() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         System.clearProperty( "org.jomc.modlet.DefaultModletProcessor.defaultEnabled" );
         DefaultModletProcessor.setDefaultEnabled( null );
@@ -148,19 +142,17 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
     @Test
     public final void testEnabled() throws Exception
     {
-        final ModelContext context = ModelContextFactory.newInstance().newModelContext();
-
         DefaultModletProcessor.setDefaultEnabled( null );
         this.getModletProcessor().setEnabled( null );
         assertTrue( this.getModletProcessor().isEnabled() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         DefaultModletProcessor.setDefaultEnabled( false );
         this.getModletProcessor().setEnabled( null );
         assertFalse( this.getModletProcessor().isEnabled() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         DefaultModletProcessor.setDefaultEnabled( null );
         this.getModletProcessor().setEnabled( null );
@@ -169,19 +161,17 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
     @Test
     public final void testDefaultTransformerLocation() throws Exception
     {
-        final ModelContext context = ModelContextFactory.newInstance().newModelContext();
-
         System.clearProperty( "org.jomc.modlet.DefaultModletProcessor.defaultTransformerLocation" );
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         assertEquals( "META-INF/jomc-modlet.xsl", DefaultModletProcessor.getDefaultTransformerLocation() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         System.setProperty( "org.jomc.modlet.DefaultModletProcessor.defaultTransformerLocation", "TEST" );
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         assertEquals( "TEST", DefaultModletProcessor.getDefaultTransformerLocation() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         System.clearProperty( "org.jomc.modlet.DefaultModletProcessor.defaultTransformerLocation" );
         DefaultModletProcessor.setDefaultTransformerLocation( null );
@@ -191,19 +181,17 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
     @Test
     public final void testTransformerLocation() throws Exception
     {
-        final ModelContext context = ModelContextFactory.newInstance().newModelContext();
-
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         this.getModletProcessor().setTransformerLocation( null );
         assertNotNull( this.getModletProcessor().getTransformerLocation() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         DefaultModletProcessor.setDefaultTransformerLocation( "TEST" );
         this.getModletProcessor().setTransformerLocation( null );
         assertEquals( "TEST", this.getModletProcessor().getTransformerLocation() );
 
-        this.getModletProcessor().processModlets( context, new Modlets() );
+        this.getModletProcessor().processModlets( this.getModelContext(), new Modlets() );
 
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         this.getModletProcessor().setTransformerLocation( null );
@@ -212,22 +200,25 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
     @Test
     public final void testDefaultProcessModlets() throws Exception
     {
-        final ModelContext context = ModelContextFactory.newInstance().newModelContext();
         final Modlets modlets = new Modlets();
 
-        assertNotNull( this.getModletProcessor().processModlets( context, modlets ) );
+        assertNotNull( this.getModletProcessor().processModlets( this.getModelContext(), modlets ) );
 
         this.getModletProcessor().setTransformerLocation( this.getClass().getPackage().getName().replace( '.', '/' )
                                                               + "/system-property-test.xsl" );
 
-        final Modlets processedSystemProperty = this.getModletProcessor().processModlets( context, modlets );
+        final Modlets processedSystemProperty =
+            this.getModletProcessor().processModlets( this.getModelContext(), modlets );
+
         assertNotNull( processedSystemProperty );
         assertNotNull( processedSystemProperty.getModlet( System.getProperty( "user.home" ) ) );
 
         this.getModletProcessor().setTransformerLocation(
             this.getClass().getPackage().getName().replace( '.', '/' ) + "/relative-uri-test.xsl" );
 
-        final Modlets processedRelativeUri = this.getModletProcessor().processModlets( context, modlets );
+        final Modlets processedRelativeUri =
+            this.getModletProcessor().processModlets( this.getModelContext(), modlets );
+
         assertNotNull( processedRelativeUri );
         assertNotNull( processedRelativeUri.getModlet( System.getProperty( "os.name" ) ) );
 

@@ -30,10 +30,21 @@
  */
 package org.jomc.modlet;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -515,7 +526,6 @@ public class DefaultModletProvider implements ModletProvider
         }
 
         URL url = null;
-
         try
         {
             boolean contextValidating = this.isValidating();
@@ -527,41 +537,129 @@ public class DefaultModletProvider implements ModletProvider
 
             Modlets modlets = null;
             final long t0 = System.nanoTime();
-            final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
-            final Unmarshaller u = ctx.createUnmarshaller();
-            final Enumeration<URL> e = context.findResources( location );
-
-            if ( contextValidating )
+            final Enumeration<URL> modletResourceEnumeration = context.findResources( location );
+            final Set<URI> modletResources = new HashSet<URI>();
+            while ( modletResourceEnumeration.hasMoreElements() )
             {
-                u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+                modletResources.add( modletResourceEnumeration.nextElement().toURI() );
             }
 
-            while ( e.hasMoreElements() )
+            if ( !modletResources.isEmpty() )
             {
-                url = e.nextElement();
-                Object content = u.unmarshal( url );
-                if ( content instanceof JAXBElement<?> )
+                if ( context.getExecutorService() != null && modletResources.size() > 1 )
                 {
-                    content = ( (JAXBElement<?>) content ).getValue();
-                }
+                    final ThreadLocal<Unmarshaller> threadLocalUnmarshaller = new ThreadLocal<Unmarshaller>();
+                    final List<Callable<Object>> unmarshalTasks =
+                        new ArrayList<Callable<Object>>( modletResources.size() );
 
-                if ( content instanceof Modlet )
-                {
-                    if ( modlets == null )
+                    class UnmarshalTask implements Callable<Object>
                     {
-                        modlets = new Modlets();
+
+                        final URI resource;
+
+                        final boolean validating;
+
+                        UnmarshalTask( final URI resource, final boolean validating )
+                        {
+                            super();
+                            this.resource = resource;
+                            this.validating = validating;
+                        }
+
+                        public Object call() throws ModelException, JAXBException, MalformedURLException
+                        {
+                            Unmarshaller u = threadLocalUnmarshaller.get();
+
+                            if ( u == null )
+                            {
+                                final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
+                                u = ctx.createUnmarshaller();
+
+                                if ( this.validating )
+                                {
+                                    u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+                                }
+
+                                threadLocalUnmarshaller.set( u );
+                            }
+
+                            return u.unmarshal( this.resource.toURL() );
+                        }
+
                     }
 
-                    modlets.getModlet().add( (Modlet) content );
-                }
-                else if ( content instanceof Modlets )
-                {
-                    if ( modlets == null )
+                    for ( final URI modletResoure : modletResources )
                     {
-                        modlets = new Modlets();
+                        unmarshalTasks.add( new UnmarshalTask( modletResoure, contextValidating ) );
                     }
 
-                    modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
+                    for ( final Future<Object> unmarshalTask
+                              : context.getExecutorService().invokeAll( unmarshalTasks ) )
+                    {
+                        Object content = unmarshalTask.get();
+                        if ( content instanceof JAXBElement<?> )
+                        {
+                            content = ( (JAXBElement<?>) content ).getValue();
+                        }
+
+                        if ( content instanceof Modlet )
+                        {
+                            if ( modlets == null )
+                            {
+                                modlets = new Modlets();
+                            }
+
+                            modlets.getModlet().add( (Modlet) content );
+                        }
+                        else if ( content instanceof Modlets )
+                        {
+                            if ( modlets == null )
+                            {
+                                modlets = new Modlets();
+                            }
+
+                            modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
+                        }
+                    }
+                }
+                else
+                {
+                    final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
+                    final Unmarshaller u = ctx.createUnmarshaller();
+
+                    if ( contextValidating )
+                    {
+                        u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+                    }
+
+                    for ( final URI modletResource : modletResources )
+                    {
+                        url = modletResource.toURL();
+                        Object content = u.unmarshal( url );
+                        if ( content instanceof JAXBElement<?> )
+                        {
+                            content = ( (JAXBElement<?>) content ).getValue();
+                        }
+
+                        if ( content instanceof Modlet )
+                        {
+                            if ( modlets == null )
+                            {
+                                modlets = new Modlets();
+                            }
+
+                            modlets.getModlet().add( (Modlet) content );
+                        }
+                        else if ( content instanceof Modlets )
+                        {
+                            if ( modlets == null )
+                            {
+                                modlets = new Modlets();
+                            }
+
+                            modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
+                        }
+                    }
                 }
             }
 
@@ -574,6 +672,14 @@ public class DefaultModletProvider implements ModletProvider
             }
 
             return modlets == null || modlets.getModlet().isEmpty() ? null : modlets;
+        }
+        catch ( final URISyntaxException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final MalformedURLException e )
+        {
+            throw new ModelException( getMessage( e ), e );
         }
         catch ( final UnmarshalException e )
         {
@@ -601,6 +707,43 @@ public class DefaultModletProvider implements ModletProvider
             }
 
             throw new ModelException( message, e );
+        }
+        catch ( final CancellationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final InterruptedException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final ExecutionException e )
+        {
+            if ( e.getCause() instanceof ModelException )
+            {
+                throw (ModelException) e.getCause();
+            }
+            else if ( e.getCause() instanceof JAXBException )
+            {
+                String message = getMessage( e );
+                if ( message == null && ( (JAXBException) e.getCause() ).getLinkedException() != null )
+                {
+                    message = getMessage( ( (JAXBException) e.getCause() ).getLinkedException() );
+                }
+
+                throw new ModelException( message, e );
+            }
+            else if ( e.getCause() instanceof RuntimeException )
+            {
+                throw (RuntimeException) e.getCause();
+            }
+            else if ( e.getCause() instanceof Error )
+            {
+                throw (Error) e.getCause();
+            }
+            else
+            {
+                throw new ModelException( getMessage( e ), e );
+            }
         }
     }
 
