@@ -30,11 +30,15 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
 import org.jomc.modlet.DefaultServiceFactory;
+import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelContextFactory;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.Service;
 import org.jomc.modlet.ServiceFactory;
+import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -50,9 +54,23 @@ public class ServiceFactoryTest
 {
 
     /**
+     * The {@code ModelContext} instance tests are performed with.
+     *
+     * @since 1.10
+     */
+    private volatile ModelContext modelContext;
+
+    /**
+     * The {@code ExecutorService} backing the tests.
+     *
+     * @since 1.10
+     */
+    private volatile ExecutorService executorService;
+
+    /**
      * The {@code ServiceFactory} instance tests are performed with.
      */
-    private ServiceFactory serviceFactory;
+    private volatile ServiceFactory serviceFactory;
 
     /**
      * Creates a new {@code ServiceFactoryTest} instance.
@@ -60,6 +78,96 @@ public class ServiceFactoryTest
     public ServiceFactoryTest()
     {
         super();
+    }
+
+    /**
+     * Gets the {@code ModelContext} instance tests are performed with.
+     *
+     * @return The {@code ModelContext} instance tests are performed with.
+     *
+     * @throws ModelException if creating a new instance fails.
+     *
+     * @see #newModelContext()
+     * @since 1.10
+     */
+    public final ModelContext getModelContext() throws ModelException
+    {
+        if ( this.modelContext == null )
+        {
+            this.modelContext = this.newModelContext();
+            this.modelContext.setExecutorService( this.getExecutorService() );
+            this.modelContext.getListeners().add( new ModelContext.Listener()
+            {
+
+                @Override
+                public void onLog( final Level level, final String message, final Throwable t )
+                {
+                    super.onLog( level, message, t );
+                    System.out.println( "[" + level.getLocalizedName() + "] " + message );
+                }
+
+            } );
+
+        }
+
+        return this.modelContext;
+    }
+
+    /**
+     * Creates a new {@code ModelContext} instance to test.
+     *
+     * @return A new {@code ModelContext} instance to test.
+     *
+     * @see #getModelContext()
+     * @since 1.10
+     */
+    protected ModelContext newModelContext()
+    {
+        return ModelContextFactory.newInstance().newModelContext();
+    }
+
+    /**
+     * Gets the {@code ExecutorService} backing the tests.
+     *
+     * @return The {@code ExecutorService} backing the tests.
+     *
+     * @see #newExecutorService()
+     * @since 1.10
+     */
+    public final ExecutorService getExecutorService()
+    {
+        if ( this.executorService == null )
+        {
+            this.executorService = this.newExecutorService();
+        }
+
+        return this.executorService;
+    }
+
+    /**
+     * Creates a new {@code ExecutorService} backing the tests.
+     *
+     * @return A new {@code ExecutorService} backing the tests, or {@code null}.
+     *
+     * @see #getExecutorService()
+     * @since 1.10
+     */
+    protected ExecutorService newExecutorService()
+    {
+        return null;
+    }
+
+    /**
+     * Shuts down the {@code ExecutorService} backing the tests, if not {@code null}.
+     */
+    @After
+    public final void shutdown()
+    {
+        if ( this.executorService != null )
+        {
+            this.executorService.shutdown();
+            this.executorService = null;
+        }
     }
 
     /**
@@ -108,9 +216,7 @@ public class ServiceFactoryTest
 
         try
         {
-            this.getServiceFactory().createServiceObject( ModelContextFactory.newInstance().newModelContext(), null,
-                                                          Object.class );
-
+            this.getServiceFactory().createServiceObject( this.getModelContext(), null, Object.class );
             fail( "Expected 'NullPointerException' not thrown." );
         }
         catch ( final NullPointerException e )
@@ -121,9 +227,7 @@ public class ServiceFactoryTest
 
         try
         {
-            this.getServiceFactory().createServiceObject( ModelContextFactory.newInstance().newModelContext(),
-                                                          new Service(), null );
-
+            this.getServiceFactory().createServiceObject( this.getModelContext(), new Service(), null );
             fail( "Expected 'NullPointerException' not thrown." );
         }
         catch ( final NullPointerException e )

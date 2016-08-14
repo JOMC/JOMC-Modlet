@@ -35,10 +35,12 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
+import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import org.jomc.modlet.DefaultModletProvider;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
@@ -54,11 +56,11 @@ import org.jomc.modlet.Services;
 import org.jomc.modlet.test.support.IllegalAccessExceptionModelContext;
 import org.jomc.modlet.test.support.InstantiationExceptionModelContext;
 import org.jomc.modlet.test.support.TestModletProvider;
+import org.junit.After;
 import org.junit.Test;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -127,7 +129,12 @@ public class ModelContextTest
     /**
      * The {@code ModelContext} instance tests are performed with.
      */
-    private ModelContext modelContext;
+    private volatile ModelContext modelContext;
+
+    /**
+     * The {@code ExecutorService} backing the tests.
+     */
+    private volatile ExecutorService executorService;
 
     /**
      * Creates a new {@code ModelContextTest} instance.
@@ -151,6 +158,7 @@ public class ModelContextTest
         if ( this.modelContext == null )
         {
             this.modelContext = this.newModelContext();
+            this.modelContext.setExecutorService( this.getExecutorService() );
             this.modelContext.getListeners().add( new ModelContext.Listener()
             {
 
@@ -178,6 +186,50 @@ public class ModelContextTest
     protected ModelContext newModelContext()
     {
         return ModelContextFactory.newInstance().newModelContext();
+    }
+
+    /**
+     * Gets the {@code ExecutorService} backing the tests.
+     *
+     * @return The {@code ExecutorService} backing the tests.
+     *
+     * @see #newExecutorService()
+     * @since 1.10
+     */
+    public final ExecutorService getExecutorService()
+    {
+        if ( this.executorService == null )
+        {
+            this.executorService = this.newExecutorService();
+        }
+
+        return this.executorService;
+    }
+
+    /**
+     * Creates a new {@code ExecutorService} backing the tests.
+     *
+     * @return A new {@code ExecutorService} backing the tests, or {@code null}.
+     *
+     * @see #getExecutorService()
+     * @since 1.10
+     */
+    protected ExecutorService newExecutorService()
+    {
+        return null;
+    }
+
+    /**
+     * Shuts down the {@code ExecutorService} backing the tests, if not {@code null}.
+     */
+    @After
+    public final void shutdown()
+    {
+        if ( this.executorService != null )
+        {
+            this.executorService.shutdown();
+            this.executorService = null;
+        }
     }
 
     @Test

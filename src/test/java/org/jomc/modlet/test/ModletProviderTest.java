@@ -30,10 +30,15 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
 import org.jomc.modlet.DefaultModletProvider;
+import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelContextFactory;
+import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModletProvider;
 import org.jomc.modlet.Modlets;
+import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -48,9 +53,23 @@ public class ModletProviderTest
 {
 
     /**
+     * The {@code ModelContext} instance tests are performed with.
+     *
+     * @since 1.10
+     */
+    private volatile ModelContext modelContext;
+
+    /**
+     * The {@code ExecutorService} backing the tests.
+     *
+     * @since 1.10
+     */
+    private volatile ExecutorService executorService;
+
+    /**
      * The {@code ModletProvider} instance tests are performed with.
      */
-    private ModletProvider modletProvider;
+    private volatile ModletProvider modletProvider;
 
     /**
      * Creates a new {@code ModletProviderTest} instance.
@@ -58,6 +77,96 @@ public class ModletProviderTest
     public ModletProviderTest()
     {
         super();
+    }
+
+    /**
+     * Gets the {@code ModelContext} instance tests are performed with.
+     *
+     * @return The {@code ModelContext} instance tests are performed with.
+     *
+     * @throws ModelException if creating a new instance fails.
+     *
+     * @see #newModelContext()
+     * @since 1.10
+     */
+    public final ModelContext getModelContext() throws ModelException
+    {
+        if ( this.modelContext == null )
+        {
+            this.modelContext = this.newModelContext();
+            this.modelContext.setExecutorService( this.getExecutorService() );
+            this.modelContext.getListeners().add( new ModelContext.Listener()
+            {
+
+                @Override
+                public void onLog( final Level level, final String message, final Throwable t )
+                {
+                    super.onLog( level, message, t );
+                    System.out.println( "[" + level.getLocalizedName() + "] " + message );
+                }
+
+            } );
+
+        }
+
+        return this.modelContext;
+    }
+
+    /**
+     * Creates a new {@code ModelContext} instance to test.
+     *
+     * @return A new {@code ModelContext} instance to test.
+     *
+     * @see #getModelContext()
+     * @since 1.10
+     */
+    protected ModelContext newModelContext()
+    {
+        return ModelContextFactory.newInstance().newModelContext();
+    }
+
+    /**
+     * Gets the {@code ExecutorService} backing the tests.
+     *
+     * @return The {@code ExecutorService} backing the tests.
+     *
+     * @see #newExecutorService()
+     * @since 1.10
+     */
+    public final ExecutorService getExecutorService()
+    {
+        if ( this.executorService == null )
+        {
+            this.executorService = this.newExecutorService();
+        }
+
+        return this.executorService;
+    }
+
+    /**
+     * Creates a new {@code ExecutorService} backing the tests.
+     *
+     * @return A new {@code ExecutorService} backing the tests, or {@code null}.
+     *
+     * @see #getExecutorService()
+     * @since 1.10
+     */
+    protected ExecutorService newExecutorService()
+    {
+        return null;
+    }
+
+    /**
+     * Shuts down the {@code ExecutorService} backing the tests, if not {@code null}.
+     */
+    @After
+    public final void shutdown()
+    {
+        if ( this.executorService != null )
+        {
+            this.executorService.shutdown();
+            this.executorService = null;
+        }
     }
 
     /**
@@ -105,7 +214,7 @@ public class ModletProviderTest
 
         try
         {
-            this.getModletProvider().findModlets( ModelContextFactory.newInstance().newModelContext(), null );
+            this.getModletProvider().findModlets( this.getModelContext(), null );
             fail( "Expected NullPointerException not thrown." );
         }
         catch ( final NullPointerException e )
