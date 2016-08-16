@@ -751,7 +751,7 @@ public abstract class ModelContext
      * @see #processModlets(org.jomc.modlet.Modlets)
      * @see #validateModlets(org.jomc.modlet.Modlets)
      */
-    public final Modlets getModlets() throws ModelException
+    public synchronized final Modlets getModlets() throws ModelException
     {
         if ( this.modlets == null )
         {

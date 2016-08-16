@@ -193,14 +193,14 @@ public class DefaultServiceFactory implements ServiceFactory
             {
                 if ( context.getExecutorService() != null && service.getProperty().size() > 1 )
                 {
-                    final List<Callable<Void>> propertyInitializationTasks =
+                    final List<Callable<Void>> tasks =
                         new ArrayList<Callable<Void>>( service.getProperty().size() );
 
                     for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
                     {
                         final Property p = service.getProperty().get( i );
 
-                        propertyInitializationTasks.add( new Callable<Void>()
+                        tasks.add( new Callable<Void>()
                         {
 
                             public Void call() throws ModelException
@@ -212,10 +212,9 @@ public class DefaultServiceFactory implements ServiceFactory
                         } );
                     }
 
-                    for ( final Future<Void> propertyInitializationTask
-                              : context.getExecutorService().invokeAll( propertyInitializationTasks ) )
+                    for ( final Future<Void> task : context.getExecutorService().invokeAll( tasks ) )
                     {
-                        propertyInitializationTask.get();
+                        task.get();
                     }
                 }
                 else

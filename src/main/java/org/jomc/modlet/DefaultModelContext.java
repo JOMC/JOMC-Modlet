@@ -532,12 +532,12 @@ public class DefaultModelContext extends ModelContext
 
             if ( this.getExecutorService() != null && modletValidators.size() > 1 )
             {
-                final List<Callable<ModelValidationReport>> modletValidationTasks =
+                final List<Callable<ModelValidationReport>> tasks =
                     new ArrayList<Callable<ModelValidationReport>>( modletValidators.size() );
 
                 for ( final ModletValidator modletValidator : modletValidators )
                 {
-                    modletValidationTasks.add( new Callable<ModelValidationReport>()
+                    tasks.add( new Callable<ModelValidationReport>()
                     {
 
                         public ModelValidationReport call() throws ModelException
@@ -553,10 +553,9 @@ public class DefaultModelContext extends ModelContext
                     } );
                 }
 
-                for ( final Future<ModelValidationReport> modletValidationTask
-                          : this.getExecutorService().invokeAll( modletValidationTasks ) )
+                for ( final Future<ModelValidationReport> task : this.getExecutorService().invokeAll( tasks ) )
                 {
-                    final ModelValidationReport current = modletValidationTask.get();
+                    final ModelValidationReport current = task.get();
 
                     if ( current != null )
                     {
@@ -765,12 +764,12 @@ public class DefaultModelContext extends ModelContext
 
             if ( this.getExecutorService() != null && modelValidators.size() > 1 )
             {
-                final List<Callable<ModelValidationReport>> modelValidationTasks =
+                final List<Callable<ModelValidationReport>> tasks =
                     new ArrayList<Callable<ModelValidationReport>>( modelValidators.size() );
 
                 for ( final ModelValidator validator : modelValidators )
                 {
-                    modelValidationTasks.add( new Callable<ModelValidationReport>()
+                    tasks.add( new Callable<ModelValidationReport>()
                     {
 
                         public ModelValidationReport call() throws ModelException
@@ -789,10 +788,9 @@ public class DefaultModelContext extends ModelContext
 
                 }
 
-                for ( final Future<ModelValidationReport> modelValidationTask
-                          : this.getExecutorService().invokeAll( modelValidationTasks ) )
+                for ( final Future<ModelValidationReport> task : this.getExecutorService().invokeAll( tasks ) )
                 {
-                    final ModelValidationReport currentReport = modelValidationTask.get();
+                    final ModelValidationReport currentReport = task.get();
 
                     if ( currentReport != null )
                     {
