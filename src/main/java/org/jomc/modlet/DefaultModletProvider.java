@@ -549,8 +549,7 @@ public class DefaultModletProvider implements ModletProvider
                 if ( context.getExecutorService() != null && modletResources.size() > 1 )
                 {
                     final ThreadLocal<Unmarshaller> threadLocalUnmarshaller = new ThreadLocal<Unmarshaller>();
-                    final List<Callable<Object>> unmarshalTasks =
-                        new ArrayList<Callable<Object>>( modletResources.size() );
+                    final List<Callable<Object>> tasks = new ArrayList<Callable<Object>>( modletResources.size() );
 
                     class UnmarshalTask implements Callable<Object>
                     {
@@ -590,13 +589,12 @@ public class DefaultModletProvider implements ModletProvider
 
                     for ( final URI modletResoure : modletResources )
                     {
-                        unmarshalTasks.add( new UnmarshalTask( modletResoure, contextValidating ) );
+                        tasks.add( new UnmarshalTask( modletResoure, contextValidating ) );
                     }
 
-                    for ( final Future<Object> unmarshalTask
-                              : context.getExecutorService().invokeAll( unmarshalTasks ) )
+                    for ( final Future<Object> task : context.getExecutorService().invokeAll( tasks ) )
                     {
-                        Object content = unmarshalTask.get();
+                        Object content = task.get();
                         if ( content instanceof JAXBElement<?> )
                         {
                             content = ( (JAXBElement<?>) content ).getValue();

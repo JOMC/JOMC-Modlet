@@ -451,12 +451,12 @@ public class DefaultModletProcessor implements ModletProcessor
                     final ThreadLocal<TransformerFactory> threadLocalTransformerFactory =
                         new ThreadLocal<TransformerFactory>();
 
-                    final List<Callable<Transformer>> createTransformerTasks =
+                    final List<Callable<Transformer>> tasks =
                         new ArrayList<Callable<Transformer>>( transformerResources.size() );
 
                     for ( final URI transformerResource : transformerResources )
                     {
-                        createTransformerTasks.add( new Callable<Transformer>()
+                        tasks.add( new Callable<Transformer>()
                         {
 
                             public Transformer call() throws TransformerConfigurationException, URISyntaxException
@@ -476,10 +476,9 @@ public class DefaultModletProcessor implements ModletProcessor
                         } );
                     }
 
-                    for ( final Future<Transformer> createTransformerTask
-                              : context.getExecutorService().invokeAll( createTransformerTasks ) )
+                    for ( final Future<Transformer> task : context.getExecutorService().invokeAll( tasks ) )
                     {
-                        transformers.add( createTransformerTask.get() );
+                        transformers.add( task.get() );
                     }
                 }
                 else
