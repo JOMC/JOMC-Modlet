@@ -535,7 +535,7 @@ public class DefaultModletProvider implements ModletProvider
                 contextValidating = (Boolean) context.getAttribute( VALIDATING_ATTRIBUTE_NAME );
             }
 
-            Modlets modlets = null;
+            final Modlets modlets = new Modlets();
             final long t0 = System.nanoTime();
             final Enumeration<URL> modletResourceEnumeration = context.findResources( location );
             final Set<URI> modletResources = new HashSet<URI>();
@@ -548,6 +548,8 @@ public class DefaultModletProvider implements ModletProvider
             {
                 if ( context.getExecutorService() != null && modletResources.size() > 1 )
                 {
+                    final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
+                    final javax.xml.validation.Schema schema = context.createSchema( ModletObject.MODEL_PUBLIC_ID );
                     final ThreadLocal<Unmarshaller> threadLocalUnmarshaller = new ThreadLocal<Unmarshaller>();
                     final List<Callable<Object>> tasks = new ArrayList<Callable<Object>>( modletResources.size() );
 
@@ -567,22 +569,20 @@ public class DefaultModletProvider implements ModletProvider
 
                         public Object call() throws ModelException, JAXBException, MalformedURLException
                         {
-                            Unmarshaller u = threadLocalUnmarshaller.get();
-
-                            if ( u == null )
+                            Unmarshaller unmarshaller = threadLocalUnmarshaller.get();
+                            if ( unmarshaller == null )
                             {
-                                final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
-                                u = ctx.createUnmarshaller();
+                                unmarshaller = ctx.createUnmarshaller();
 
                                 if ( this.validating )
                                 {
-                                    u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
+                                    unmarshaller.setSchema( schema );
                                 }
 
-                                threadLocalUnmarshaller.set( u );
+                                threadLocalUnmarshaller.set( unmarshaller );
                             }
 
-                            return u.unmarshal( this.resource.toURL() );
+                            return unmarshaller.unmarshal( this.resource.toURL() );
                         }
 
                     }
@@ -602,20 +602,10 @@ public class DefaultModletProvider implements ModletProvider
 
                         if ( content instanceof Modlet )
                         {
-                            if ( modlets == null )
-                            {
-                                modlets = new Modlets();
-                            }
-
                             modlets.getModlet().add( (Modlet) content );
                         }
                         else if ( content instanceof Modlets )
                         {
-                            if ( modlets == null )
-                            {
-                                modlets = new Modlets();
-                            }
-
                             modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
                         }
                     }
@@ -641,20 +631,10 @@ public class DefaultModletProvider implements ModletProvider
 
                         if ( content instanceof Modlet )
                         {
-                            if ( modlets == null )
-                            {
-                                modlets = new Modlets();
-                            }
-
                             modlets.getModlet().add( (Modlet) content );
                         }
                         else if ( content instanceof Modlets )
                         {
-                            if ( modlets == null )
-                            {
-                                modlets = new Modlets();
-                            }
-
                             modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
                         }
                     }
@@ -664,12 +644,12 @@ public class DefaultModletProvider implements ModletProvider
             if ( context.isLoggable( Level.FINE ) )
             {
                 context.log( Level.FINE, getMessage( "contextReport",
-                                                     modlets != null ? modlets.getModlet().size() : 0,
+                                                     modlets.getModlet().size(),
                                                      location, System.nanoTime() - t0 ), null );
 
             }
 
-            return modlets == null || modlets.getModlet().isEmpty() ? null : modlets;
+            return modlets.getModlet().isEmpty() ? null : modlets;
         }
         catch ( final URISyntaxException e )
         {
@@ -722,13 +702,13 @@ public class DefaultModletProvider implements ModletProvider
             }
             else if ( e.getCause() instanceof JAXBException )
             {
-                String message = getMessage( e );
+                String message = getMessage( e.getCause() );
                 if ( message == null && ( (JAXBException) e.getCause() ).getLinkedException() != null )
                 {
                     message = getMessage( ( (JAXBException) e.getCause() ).getLinkedException() );
                 }
 
-                throw new ModelException( message, e );
+                throw new ModelException( message, e.getCause() );
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
@@ -740,7 +720,7 @@ public class DefaultModletProvider implements ModletProvider
             }
             else
             {
-                throw new ModelException( getMessage( e ), e );
+                throw new ModelException( getMessage( e.getCause() ), e.getCause() );
             }
         }
     }

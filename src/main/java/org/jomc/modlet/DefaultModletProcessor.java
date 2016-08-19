@@ -538,13 +538,13 @@ public class DefaultModletProcessor implements ModletProcessor
             }
             else if ( e.getCause() instanceof TransformerConfigurationException )
             {
-                String message = getMessage( e );
+                String message = getMessage( e.getCause() );
                 if ( message == null && ( (TransformerConfigurationException) e.getCause() ).getException() != null )
                 {
                     message = getMessage( ( (TransformerConfigurationException) e.getCause() ).getException() );
                 }
 
-                throw new ModelException( message, e );
+                throw new ModelException( message, e.getCause() );
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
@@ -556,7 +556,7 @@ public class DefaultModletProcessor implements ModletProcessor
             }
             else
             {
-                throw new ModelException( getMessage( e ), e );
+                throw new ModelException( getMessage( e.getCause() ), e.getCause() );
             }
         }
     }
