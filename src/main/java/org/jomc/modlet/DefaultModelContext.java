@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -770,7 +771,29 @@ public class DefaultModelContext extends ModelContext
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
-                throw (RuntimeException) e.getCause();
+                // The fork-join framework breaks the exception handling contract of Callable by re-throwing any
+                // exception caught using a runtime exception.
+                if ( e.getCause().getCause() instanceof ModelException )
+                {
+                    throw (ModelException) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof RuntimeException )
+                {
+                    throw (RuntimeException) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Error )
+                {
+                    throw (Error) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Exception )
+                {
+                    // Checked exception not declared to be thrown by the Callable's 'call' method.
+                    throw new UndeclaredThrowableException( e.getCause().getCause() );
+                }
+                else
+                {
+                    throw (RuntimeException) e.getCause();
+                }
             }
             else if ( e.getCause() instanceof Error )
             {
@@ -778,7 +801,8 @@ public class DefaultModelContext extends ModelContext
             }
             else
             {
-                throw new ModelException( getMessage( "failedValidatingModel", model.getIdentifier() ), e.getCause() );
+                // Checked exception not declared to be thrown by the Callable's 'call' method.
+                throw new UndeclaredThrowableException( e.getCause() );
             }
         }
     }
@@ -1974,14 +1998,14 @@ public class DefaultModelContext extends ModelContext
 
                 Collections.sort( sortedClasspathServices,
                                   new Comparator<Object>()
+                              {
+
+                                  public int compare( final Object o1, final Object o2 )
                                   {
+                                      return ordinalOf( o1 ) - ordinalOf( o2 );
+                                  }
 
-                                      public int compare( final Object o1, final Object o2 )
-                                      {
-                                          return ordinalOf( o1 ) - ordinalOf( o2 );
-                                      }
-
-                                  } );
+                              } );
 
                 reader.close();
                 reader = null;

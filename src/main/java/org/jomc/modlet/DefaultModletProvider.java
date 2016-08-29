@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -651,6 +652,14 @@ public class DefaultModletProvider implements ModletProvider
 
             return modlets.getModlet().isEmpty() ? null : modlets;
         }
+        catch ( final CancellationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final InterruptedException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
         catch ( final URISyntaxException e )
         {
             throw new ModelException( getMessage( e ), e );
@@ -686,14 +695,6 @@ public class DefaultModletProvider implements ModletProvider
 
             throw new ModelException( message, e );
         }
-        catch ( final CancellationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final InterruptedException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
         catch ( final ExecutionException e )
         {
             if ( e.getCause() instanceof ModelException )
@@ -712,7 +713,43 @@ public class DefaultModletProvider implements ModletProvider
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
-                throw (RuntimeException) e.getCause();
+                // The fork-join framework breaks the exception handling contract of Callable by re-throwing any
+                // exception caught using a runtime exception.
+                if ( e.getCause().getCause() instanceof ModelException )
+                {
+                    throw (ModelException) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof JAXBException )
+                {
+                    String message = getMessage( e.getCause().getCause() );
+                    if ( message == null && ( (JAXBException) e.getCause().getCause() ).getLinkedException() != null )
+                    {
+                        message = getMessage( ( (JAXBException) e.getCause().getCause() ).getLinkedException() );
+                    }
+
+                    throw new ModelException( message, e.getCause().getCause() );
+                }
+                else if ( e.getCause().getCause() instanceof MalformedURLException )
+                {
+                    throw new ModelException( getMessage( e.getCause().getCause() ), e.getCause().getCause() );
+                }
+                else if ( e.getCause().getCause() instanceof RuntimeException )
+                {
+                    throw (RuntimeException) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Error )
+                {
+                    throw (Error) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Exception )
+                {
+                    // Checked exception not declared to be thrown by the Callable's 'call' method.
+                    throw new UndeclaredThrowableException( e.getCause().getCause() );
+                }
+                else
+                {
+                    throw (RuntimeException) e.getCause();
+                }
             }
             else if ( e.getCause() instanceof Error )
             {
@@ -720,7 +757,8 @@ public class DefaultModletProvider implements ModletProvider
             }
             else
             {
-                throw new ModelException( getMessage( e.getCause() ), e.getCause() );
+                // Checked exception not declared to be thrown by the Callable's 'call' method.
+                throw new UndeclaredThrowableException( e.getCause() );
             }
         }
     }

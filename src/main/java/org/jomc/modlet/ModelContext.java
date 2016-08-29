@@ -44,14 +44,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -595,9 +590,9 @@ public abstract class ModelContext
     }
 
     /**
-     * Gets the {@code ExecutorService} used to run tasks in parallel.
+     * Gets an {@code ExecutorService} used to run tasks in parallel.
      *
-     * @return The {@code ExecutorService} used to run tasks in parallel or {@code null}, if no such service has been
+     * @return An {@code ExecutorService} used to run tasks in parallel or {@code null}, if no such service has been
      * provided by an application.
      *
      * @since 1.10
@@ -626,108 +621,7 @@ public abstract class ModelContext
      */
     public final void setExecutorService( final ExecutorService value )
     {
-        if ( value != null )
-        {
-            this.executorService = new ExecutorService()
-            {
-
-                public void shutdown()
-                {
-                    // To protect against incorrect usage.
-                    throw new UnsupportedOperationException();
-                }
-
-                public List<Runnable> shutdownNow()
-                {
-                    // To protect against incorrect usage.
-                    throw new UnsupportedOperationException();
-                }
-
-                public boolean isShutdown()
-                {
-                    return value.isShutdown();
-                }
-
-                public boolean isTerminated()
-                {
-                    return value.isTerminated();
-                }
-
-                public boolean awaitTermination( final long timeout, final TimeUnit unit ) throws InterruptedException
-                {
-                    return value.awaitTermination( timeout, unit );
-                }
-
-                public <T> Future<T> submit( final Callable<T> task )
-                {
-                    return value.submit( task );
-                }
-
-                public <T> Future<T> submit( final Runnable task, final T result )
-                {
-                    return value.submit( task, result );
-                }
-
-                public Future<?> submit( final Runnable task )
-                {
-                    return value.submit( task );
-                }
-
-                public <T> List<Future<T>> invokeAll( final Collection<? extends Callable<T>> tasks )
-                    throws InterruptedException
-                {
-                    return value.invokeAll( tasks );
-                }
-
-                public <T> List<Future<T>> invokeAll( final Collection<? extends Callable<T>> tasks,
-                                                      final long timeout, final TimeUnit unit )
-                    throws InterruptedException
-                {
-                    return value.invokeAll( tasks, timeout, unit );
-                }
-
-                public <T> T invokeAny( final Collection<? extends Callable<T>> tasks )
-                    throws InterruptedException, ExecutionException
-                {
-                    return value.invokeAny( tasks );
-                }
-
-                public <T> T invokeAny( final Collection<? extends Callable<T>> tasks, final long timeout,
-                                        final TimeUnit unit )
-                    throws InterruptedException, ExecutionException, TimeoutException
-                {
-                    return value.invokeAny( tasks, timeout, unit );
-                }
-
-                public void execute( final Runnable command )
-                {
-                    value.execute( command );
-                }
-
-                @Override
-                public String toString()
-                {
-                    return value.toString();
-                }
-
-                @Override
-                public boolean equals( final Object o )
-                {
-                    return value.equals( o );
-                }
-
-                @Override
-                public int hashCode()
-                {
-                    return value.hashCode();
-                }
-
-            };
-        }
-        else
-        {
-            this.executorService = null;
-        }
+        this.executorService = value;
     }
 
     /**
@@ -1446,8 +1340,8 @@ public abstract class ModelContext
 
     private static String getMessage( final String key, final Object... args )
     {
-        return MessageFormat.format( ResourceBundle.getBundle(
-            ModelContext.class.getName().replace( '.', '/' ), Locale.getDefault() ).getString( key ), args );
+        return MessageFormat.format( ResourceBundle.getBundle( ModelContext.class.getName(), Locale.getDefault() ).
+            getString( key ), args );
 
     }
 

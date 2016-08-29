@@ -33,6 +33,7 @@ package org.jomc.modlet;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -253,7 +254,29 @@ public class DefaultServiceFactory implements ServiceFactory
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
-                throw (RuntimeException) e.getCause();
+                // The fork-join framework breaks the exception handling contract of Callable by re-throwing any
+                // exception caught using a runtime exception.
+                if ( e.getCause().getCause() instanceof ModelException )
+                {
+                    throw (ModelException) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof RuntimeException )
+                {
+                    throw (RuntimeException) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Error )
+                {
+                    throw (Error) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Exception )
+                {
+                    // Checked exception not declared to be thrown by the Callable's 'call' method.
+                    throw new UndeclaredThrowableException( e.getCause().getCause() );
+                }
+                else
+                {
+                    throw (RuntimeException) e.getCause();
+                }
             }
             else if ( e.getCause() instanceof Error )
             {
@@ -261,7 +284,8 @@ public class DefaultServiceFactory implements ServiceFactory
             }
             else
             {
-                throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e.getCause() );
+                // Checked exception not declared to be thrown by the Callable's 'call' method.
+                throw new UndeclaredThrowableException( e.getCause() );
             }
         }
     }
