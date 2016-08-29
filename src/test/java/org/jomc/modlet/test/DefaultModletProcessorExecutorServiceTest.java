@@ -58,7 +58,7 @@ public class DefaultModletProcessorExecutorServiceTest
     @Override
     protected ExecutorService newExecutorService()
     {
-        return Executors.newFixedThreadPool( 32 );
+        return Executors.newFixedThreadPool( Runtime.getRuntime().availableProcessors() * 4 );
     }
 
 }

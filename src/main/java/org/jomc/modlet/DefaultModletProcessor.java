@@ -33,6 +33,7 @@ package org.jomc.modlet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -504,6 +505,14 @@ public class DefaultModletProcessor implements ModletProcessor
 
             return transformers.isEmpty() ? null : transformers;
         }
+        catch ( final CancellationException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
+        catch ( final InterruptedException e )
+        {
+            throw new ModelException( getMessage( e ), e );
+        }
         catch ( final IOException e )
         {
             throw new ModelException( getMessage( e ), e );
@@ -522,19 +531,11 @@ public class DefaultModletProcessor implements ModletProcessor
 
             throw new ModelException( message, e );
         }
-        catch ( final CancellationException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final InterruptedException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
         catch ( final ExecutionException e )
         {
-            if ( e.getCause() instanceof ModelException )
+            if ( e.getCause() instanceof URISyntaxException )
             {
-                throw (ModelException) e.getCause();
+                throw new ModelException( getMessage( e.getCause() ), e.getCause() );
             }
             else if ( e.getCause() instanceof TransformerConfigurationException )
             {
@@ -548,7 +549,42 @@ public class DefaultModletProcessor implements ModletProcessor
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
-                throw (RuntimeException) e.getCause();
+                // The fork-join framework breaks the exception handling contract of Callable by re-throwing any
+                // exception caught using a runtime exception.
+                if ( e.getCause().getCause() instanceof TransformerConfigurationException )
+                {
+                    String message = getMessage( e.getCause().getCause() );
+                    if ( message == null
+                             && ( (TransformerConfigurationException) e.getCause().getCause() ).getException() != null )
+                    {
+                        message = getMessage( ( (TransformerConfigurationException) e.getCause().getCause() ).
+                            getException() );
+
+                    }
+
+                    throw new ModelException( message, e.getCause().getCause() );
+                }
+                else if ( e.getCause().getCause() instanceof URISyntaxException )
+                {
+                    throw new ModelException( getMessage( e.getCause().getCause() ), e.getCause().getCause() );
+                }
+                else if ( e.getCause().getCause() instanceof RuntimeException )
+                {
+                    throw (RuntimeException) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Error )
+                {
+                    throw (Error) e.getCause().getCause();
+                }
+                else if ( e.getCause().getCause() instanceof Exception )
+                {
+                    // Checked exception not declared to be thrown by the Callable's 'call' method.
+                    throw new UndeclaredThrowableException( e.getCause().getCause() );
+                }
+                else
+                {
+                    throw (RuntimeException) e.getCause();
+                }
             }
             else if ( e.getCause() instanceof Error )
             {
@@ -556,7 +592,8 @@ public class DefaultModletProcessor implements ModletProcessor
             }
             else
             {
-                throw new ModelException( getMessage( e.getCause() ), e.getCause() );
+                // Checked exception not declared to be thrown by the Callable's 'call' method.
+                throw new UndeclaredThrowableException( e.getCause() );
             }
         }
     }
