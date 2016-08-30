@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -1964,7 +1965,7 @@ public class DefaultModelContext extends ModelContext
 
             int count = 0;
             final long t0 = System.nanoTime();
-            final List<T> sortedClasspathServices = new ArrayList<T>();
+            final List<T> sortedClasspathServices = new LinkedList<T>();
 
             while ( classpathServices.hasMoreElements() )
             {
