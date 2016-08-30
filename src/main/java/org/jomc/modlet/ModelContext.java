@@ -613,6 +613,18 @@ public abstract class ModelContext
     public final void setExecutorService( final ExecutorService value )
     {
         this.executorService = value;
+
+        if ( this.executorService != null )
+        {
+            this.getModletSchemaSystemId();
+            this.getLogLevel();
+
+            if ( this instanceof DefaultModelContext )
+            {
+                ( (DefaultModelContext) this ).getProviderLocation();
+                ( (DefaultModelContext) this ).getPlatformProviderLocation();
+            }
+        }
     }
 
     /**
