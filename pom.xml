@@ -38,14 +38,14 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jomc-modlet</artifactId>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.10</version>
   <name>JOMC ⁑ Modlet</name>
   <description>JOMC Modlet is a model context application programming interface based on JAXB and JAXP.</description>
   <url>${jomc.base.url}/${jomc.site.location}</url>
   <scm>
-    <connection>${jomc.scm.connection}/branches/jomc-modlet-1.x</connection>
-    <developerConnection>${jomc.scm.developerConnection}/branches/jomc-modlet-1.x</developerConnection>
-    <url>${jomc.scm.url}/branches/jomc-modlet-1.x</url>
+    <connection>${jomc.scm.connection}/tags/jomc-modlet-1.10</connection>
+    <developerConnection>${jomc.scm.developerConnection}/tags/jomc-modlet-1.10</developerConnection>
+    <url>${jomc.scm.url}/tags/jomc-modlet-1.10</url>
   </scm>
   <build>
     <resources>
