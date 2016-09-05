@@ -460,18 +460,35 @@ public class DefaultModletProcessor implements ModletProcessor
                         tasks.add( new Callable<Transformer>()
                         {
 
-                            public Transformer call() throws TransformerConfigurationException, URISyntaxException
+                            public Transformer call() throws ModelException
                             {
-                                TransformerFactory transformerFactory = threadLocalTransformerFactory.get();
-                                if ( transformerFactory == null )
+                                try
                                 {
-                                    transformerFactory = TransformerFactory.newInstance();
-                                    threadLocalTransformerFactory.set( transformerFactory );
+                                    TransformerFactory transformerFactory = threadLocalTransformerFactory.get();
+                                    if ( transformerFactory == null )
+                                    {
+                                        transformerFactory = TransformerFactory.newInstance();
+                                        threadLocalTransformerFactory.set( transformerFactory );
+                                    }
+
+                                    return createTransformer( context, transformerFactory, transformerParameters,
+                                                              transformerResource );
+
                                 }
+                                catch ( final TransformerConfigurationException e )
+                                {
+                                    String message = getMessage( e );
+                                    if ( message == null && e.getException() != null )
+                                    {
+                                        message = getMessage( e.getException() );
+                                    }
 
-                                return createTransformer( context, transformerFactory, transformerParameters,
-                                                          transformerResource );
-
+                                    throw new ModelException( message, e );
+                                }
+                                catch ( final URISyntaxException e )
+                                {
+                                    throw new ModelException( getMessage( e ), e );
+                                }
                             }
 
                         } );
@@ -533,40 +550,17 @@ public class DefaultModletProcessor implements ModletProcessor
         }
         catch ( final ExecutionException e )
         {
-            if ( e.getCause() instanceof URISyntaxException )
+            if ( e.getCause() instanceof ModelException )
             {
-                throw new ModelException( getMessage( e.getCause() ), e.getCause() );
-            }
-            else if ( e.getCause() instanceof TransformerConfigurationException )
-            {
-                String message = getMessage( e.getCause() );
-                if ( message == null && ( (TransformerConfigurationException) e.getCause() ).getException() != null )
-                {
-                    message = getMessage( ( (TransformerConfigurationException) e.getCause() ).getException() );
-                }
-
-                throw new ModelException( message, e.getCause() );
+                throw (ModelException) e.getCause();
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
                 // The fork-join framework breaks the exception handling contract of Callable by re-throwing any
                 // exception caught using a runtime exception.
-                if ( e.getCause().getCause() instanceof TransformerConfigurationException )
+                if ( e.getCause().getCause() instanceof ModelException )
                 {
-                    String message = getMessage( e.getCause().getCause() );
-                    if ( message == null
-                             && ( (TransformerConfigurationException) e.getCause().getCause() ).getException() != null )
-                    {
-                        message = getMessage( ( (TransformerConfigurationException) e.getCause().getCause() ).
-                            getException() );
-
-                    }
-
-                    throw new ModelException( message, e.getCause().getCause() );
-                }
-                else if ( e.getCause().getCause() instanceof URISyntaxException )
-                {
-                    throw new ModelException( getMessage( e.getCause().getCause() ), e.getCause().getCause() );
+                    throw (ModelException) e.getCause().getCause();
                 }
                 else if ( e.getCause().getCause() instanceof RuntimeException )
                 {

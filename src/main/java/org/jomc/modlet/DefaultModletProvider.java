@@ -31,17 +31,12 @@
 package org.jomc.modlet;
 
 import java.lang.reflect.UndeclaredThrowableException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -539,63 +534,42 @@ public class DefaultModletProvider implements ModletProvider
             final Modlets modlets = new Modlets();
             final long t0 = System.nanoTime();
             final Enumeration<URL> modletResourceEnumeration = context.findResources( location );
-            final Set<URI> modletResources = new HashSet<URI>();
-            while ( modletResourceEnumeration.hasMoreElements() )
-            {
-                modletResources.add( modletResourceEnumeration.nextElement().toURI() );
-            }
+            final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
+            final javax.xml.validation.Schema schema = contextValidating
+                                                           ? context.createSchema( ModletObject.MODEL_PUBLIC_ID )
+                                                           : null;
 
-            if ( !modletResources.isEmpty() )
+            final ThreadLocal<Unmarshaller> threadLocalUnmarshaller = new ThreadLocal<Unmarshaller>();
+
+            class UnmarshalTask implements Callable<Modlets>
             {
-                if ( context.getExecutorService() != null && modletResources.size() > 1 )
+
+                final URL resource;
+
+                final javax.xml.validation.Schema schema;
+
+                UnmarshalTask( final URL resource, final javax.xml.validation.Schema schema )
                 {
-                    final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
-                    final javax.xml.validation.Schema schema = context.createSchema( ModletObject.MODEL_PUBLIC_ID );
-                    final ThreadLocal<Unmarshaller> threadLocalUnmarshaller = new ThreadLocal<Unmarshaller>();
-                    final List<Callable<Object>> tasks = new ArrayList<Callable<Object>>( modletResources.size() );
+                    super();
+                    this.resource = resource;
+                    this.schema = schema;
+                }
 
-                    class UnmarshalTask implements Callable<Object>
+                public Modlets call() throws ModelException
+                {
+                    try
                     {
-
-                        final URI resource;
-
-                        final boolean validating;
-
-                        UnmarshalTask( final URI resource, final boolean validating )
+                        final Modlets modlets = new Modlets();
+                        Unmarshaller unmarshaller = threadLocalUnmarshaller.get();
+                        if ( unmarshaller == null )
                         {
-                            super();
-                            this.resource = resource;
-                            this.validating = validating;
+                            unmarshaller = ctx.createUnmarshaller();
+                            unmarshaller.setSchema( this.schema );
+
+                            threadLocalUnmarshaller.set( unmarshaller );
                         }
 
-                        public Object call() throws ModelException, JAXBException, MalformedURLException
-                        {
-                            Unmarshaller unmarshaller = threadLocalUnmarshaller.get();
-                            if ( unmarshaller == null )
-                            {
-                                unmarshaller = ctx.createUnmarshaller();
-
-                                if ( this.validating )
-                                {
-                                    unmarshaller.setSchema( schema );
-                                }
-
-                                threadLocalUnmarshaller.set( unmarshaller );
-                            }
-
-                            return unmarshaller.unmarshal( this.resource.toURL() );
-                        }
-
-                    }
-
-                    for ( final URI modletResoure : modletResources )
-                    {
-                        tasks.add( new UnmarshalTask( modletResoure, contextValidating ) );
-                    }
-
-                    for ( final Future<Object> task : context.getExecutorService().invokeAll( tasks ) )
-                    {
-                        Object content = task.get();
+                        Object content = unmarshaller.unmarshal( this.resource );
                         if ( content instanceof JAXBElement<?> )
                         {
                             content = ( (JAXBElement<?>) content ).getValue();
@@ -609,36 +583,55 @@ public class DefaultModletProvider implements ModletProvider
                         {
                             modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
                         }
+
+                        return modlets;
+                    }
+                    catch ( final UnmarshalException e )
+                    {
+                        String message = getMessage( e );
+                        if ( message == null && e.getLinkedException() != null )
+                        {
+                            message = getMessage( e.getLinkedException() );
+                        }
+
+                        message = getMessage( "unmarshalException", this.resource.toExternalForm(),
+                                              message != null ? " " + message : "" );
+
+                        throw new ModelException( message, e );
+                    }
+                    catch ( final JAXBException e )
+                    {
+                        String message = getMessage( e );
+                        if ( message == null && e.getLinkedException() != null )
+                        {
+                            message = getMessage( e.getLinkedException() );
+                        }
+
+                        throw new ModelException( message, e );
                     }
                 }
-                else
+
+            }
+
+            final List<UnmarshalTask> tasks = new LinkedList<UnmarshalTask>();
+
+            while ( modletResourceEnumeration.hasMoreElements() )
+            {
+                tasks.add( new UnmarshalTask( modletResourceEnumeration.nextElement(), schema ) );
+            }
+
+            if ( context.getExecutorService() != null && tasks.size() > 1 )
+            {
+                for ( final Future<Modlets> task : context.getExecutorService().invokeAll( tasks ) )
                 {
-                    final JAXBContext ctx = context.createContext( ModletObject.MODEL_PUBLIC_ID );
-                    final Unmarshaller u = ctx.createUnmarshaller();
-
-                    if ( contextValidating )
-                    {
-                        u.setSchema( context.createSchema( ModletObject.MODEL_PUBLIC_ID ) );
-                    }
-
-                    for ( final URI modletResource : modletResources )
-                    {
-                        url = modletResource.toURL();
-                        Object content = u.unmarshal( url );
-                        if ( content instanceof JAXBElement<?> )
-                        {
-                            content = ( (JAXBElement<?>) content ).getValue();
-                        }
-
-                        if ( content instanceof Modlet )
-                        {
-                            modlets.getModlet().add( (Modlet) content );
-                        }
-                        else if ( content instanceof Modlets )
-                        {
-                            modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
-                        }
-                    }
+                    modlets.getModlet().addAll( task.get().getModlet() );
+                }
+            }
+            else
+            {
+                for ( final UnmarshalTask task : tasks )
+                {
+                    modlets.getModlet().addAll( task.call().getModlet() );
                 }
             }
 
@@ -660,56 +653,11 @@ public class DefaultModletProvider implements ModletProvider
         {
             throw new ModelException( getMessage( e ), e );
         }
-        catch ( final URISyntaxException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final MalformedURLException e )
-        {
-            throw new ModelException( getMessage( e ), e );
-        }
-        catch ( final UnmarshalException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getLinkedException() != null )
-            {
-                message = getMessage( e.getLinkedException() );
-            }
-
-            if ( url != null )
-            {
-                message = getMessage( "unmarshalException", url.toExternalForm(),
-                                      message != null ? " " + message : "" );
-
-            }
-
-            throw new ModelException( message, e );
-        }
-        catch ( final JAXBException e )
-        {
-            String message = getMessage( e );
-            if ( message == null && e.getLinkedException() != null )
-            {
-                message = getMessage( e.getLinkedException() );
-            }
-
-            throw new ModelException( message, e );
-        }
         catch ( final ExecutionException e )
         {
             if ( e.getCause() instanceof ModelException )
             {
                 throw (ModelException) e.getCause();
-            }
-            else if ( e.getCause() instanceof JAXBException )
-            {
-                String message = getMessage( e.getCause() );
-                if ( message == null && ( (JAXBException) e.getCause() ).getLinkedException() != null )
-                {
-                    message = getMessage( ( (JAXBException) e.getCause() ).getLinkedException() );
-                }
-
-                throw new ModelException( message, e.getCause() );
             }
             else if ( e.getCause() instanceof RuntimeException )
             {
@@ -718,20 +666,6 @@ public class DefaultModletProvider implements ModletProvider
                 if ( e.getCause().getCause() instanceof ModelException )
                 {
                     throw (ModelException) e.getCause().getCause();
-                }
-                else if ( e.getCause().getCause() instanceof JAXBException )
-                {
-                    String message = getMessage( e.getCause().getCause() );
-                    if ( message == null && ( (JAXBException) e.getCause().getCause() ).getLinkedException() != null )
-                    {
-                        message = getMessage( ( (JAXBException) e.getCause().getCause() ).getLinkedException() );
-                    }
-
-                    throw new ModelException( message, e.getCause().getCause() );
-                }
-                else if ( e.getCause().getCause() instanceof MalformedURLException )
-                {
-                    throw new ModelException( getMessage( e.getCause().getCause() ), e.getCause().getCause() );
                 }
                 else if ( e.getCause().getCause() instanceof RuntimeException )
                 {
