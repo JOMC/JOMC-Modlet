@@ -237,7 +237,7 @@ public class DefaultModelContext extends ModelContext
      */
     public final String getProviderLocation()
     {
-        String location = null;
+        String location = this.providerLocation;
 
         if ( this.providerLocation == null )
         {
@@ -324,7 +324,7 @@ public class DefaultModelContext extends ModelContext
      */
     public final String getPlatformProviderLocation()
     {
-        String location = null;
+        String location = this.platformProviderLocation;
 
         if ( this.platformProviderLocation == null )
         {
