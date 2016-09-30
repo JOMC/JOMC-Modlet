@@ -237,31 +237,30 @@ public class DefaultModelContext extends ModelContext
      */
     public final String getProviderLocation()
     {
+        String location = null;
+
         if ( this.providerLocation == null )
         {
             this.providerLocation = getDefaultProviderLocation();
+            location = this.providerLocation;
 
-            if ( DEFAULT_PROVIDER_LOCATION.equals( this.providerLocation )
-                     && this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+            if ( this.isLoggable( Level.CONFIG ) )
             {
-                final String contextProviderLocation = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
-
-                if ( this.isLoggable( Level.CONFIG ) )
-                {
-                    this.log( Level.CONFIG, getMessage( "contextProviderLocationInfo",
-                                                        contextProviderLocation ), null );
-                }
-
-                this.providerLocation = null;
-                return contextProviderLocation;
-            }
-            else if ( this.isLoggable( Level.CONFIG ) )
-            {
-                this.log( Level.CONFIG, getMessage( "defaultProviderLocationInfo", this.providerLocation ), null );
+                this.log( Level.CONFIG, getMessage( "defaultProviderLocationInfo", location ), null );
             }
         }
 
-        return this.providerLocation;
+        if ( this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+        {
+            location = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
+
+            if ( this.isLoggable( Level.CONFIG ) )
+            {
+                this.log( Level.CONFIG, getMessage( "contextProviderLocationInfo", location ), null );
+            }
+        }
+
+        return location;
     }
 
     /**
@@ -325,35 +324,30 @@ public class DefaultModelContext extends ModelContext
      */
     public final String getPlatformProviderLocation()
     {
+        String location = null;
+
         if ( this.platformProviderLocation == null )
         {
             this.platformProviderLocation = getDefaultPlatformProviderLocation();
+            location = this.platformProviderLocation;
 
-            if ( DEFAULT_PLATFORM_PROVIDER_LOCATION.equals( this.platformProviderLocation )
-                     && this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+            if ( this.isLoggable( Level.CONFIG ) )
             {
-                final String contextPlatformProviderLocation =
-                    (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
-
-                if ( this.isLoggable( Level.CONFIG ) )
-                {
-                    this.log( Level.CONFIG, getMessage( "contextPlatformProviderLocationInfo",
-                                                        contextPlatformProviderLocation ), null );
-
-                }
-
-                this.platformProviderLocation = null;
-                return contextPlatformProviderLocation;
-            }
-            else if ( this.isLoggable( Level.CONFIG ) )
-            {
-                this.log( Level.CONFIG,
-                          getMessage( "defaultPlatformProviderLocationInfo", this.platformProviderLocation ), null );
-
+                this.log( Level.CONFIG, getMessage( "defaultPlatformProviderLocationInfo", location ), null );
             }
         }
 
-        return this.platformProviderLocation;
+        if ( this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+        {
+            location = (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
+
+            if ( this.isLoggable( Level.CONFIG ) )
+            {
+                this.log( Level.CONFIG, getMessage( "contextPlatformProviderLocationInfo", location ), null );
+            }
+        }
+
+        return location;
     }
 
     /**
