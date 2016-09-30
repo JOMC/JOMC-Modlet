@@ -34,12 +34,12 @@
   <parent>
     <groupId>org.jomc</groupId>
     <artifactId>jomc-pom</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jomc-modlet</artifactId>
   <name>JOMC ⁑ Modlet</name>
-  <version>2.0-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
   <description>JOMC Modlet is a model context application programming interface based on JAXB and JAXP.</description>
   <url>${jomc.base.url}/${jomc.site.location}</url>
   <scm>
