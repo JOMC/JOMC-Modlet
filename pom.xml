@@ -38,7 +38,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jomc-modlet</artifactId>
-  <version>1.11-SNAPSHOT</version>
+  <version>1.10.2-SNAPSHOT</version>
   <name>JOMC ⁑ Modlet</name>
   <description>JOMC Modlet is a model context application programming interface based on JAXB and JAXP.</description>
   <url>${jomc.base.url}/${jomc.site.location}</url>
