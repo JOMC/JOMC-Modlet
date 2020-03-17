@@ -32,7 +32,7 @@
  * Model context application programming interface.
  * <p>
  * This package contains reference model classes defined in the {@code http://jomc.org/modlet} XML namespace prepared
- * for use with JAXB 2.3.
+ * for use with JAXB 2.1.
  * </p>
  * @see org.jomc.modlet.ModelContextFactory
  * @see org.jomc.modlet.ModelContext
