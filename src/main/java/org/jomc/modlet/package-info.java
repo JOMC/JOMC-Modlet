@@ -28,6 +28,17 @@
  *   $JOMC$
  *
  */
+/**
+ * Model context application programming interface.
+ * <p>
+ * This package contains reference model classes defined in the {@code http://jomc.org/modlet} XML namespace prepared
+ * for use with JAXB 2.3.
+ * </p>
+ * @see org.jomc.modlet.ModelContextFactory
+ * @see org.jomc.modlet.ModelContext
+ * @see org.jomc.modlet.ModletObject
+ * @see <a href="http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd">jomc-modlet-1.9.xsd</a>
+ */
 @XmlSchema( namespace = "http://jomc.org/modlet", elementFormDefault = XmlNsForm.QUALIFIED,
             location = "http://xml.jomc.org/modlet/jomc-modlet-1.9.xsd", xmlns =
             {
