@@ -63,6 +63,7 @@ public class ModletValidatorTest
      * The {@code ExecutorService} backing the tests.
      *
      * @since 1.10
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     private volatile ExecutorService executorService;
 
@@ -132,6 +133,7 @@ public class ModletValidatorTest
      *
      * @see #newExecutorService()
      * @since 1.10
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     public final ExecutorService getExecutorService()
     {
@@ -150,6 +152,7 @@ public class ModletValidatorTest
      *
      * @see #getExecutorService()
      * @since 1.10
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     protected ExecutorService newExecutorService()
     {

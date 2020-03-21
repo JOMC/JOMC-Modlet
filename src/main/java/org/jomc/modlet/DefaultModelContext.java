@@ -133,7 +133,7 @@ public class DefaultModelContext extends ModelContext
      */
     private static final String DEFAULT_PLATFORM_PROVIDER_LOCATION =
         new StringBuilder( 255 ).append( System.getProperty( "java.home" ) ).append( File.separator ).append( "lib" ).
-        append( File.separator ).append( "jomc.properties" ).toString();
+            append( File.separator ).append( "jomc.properties" ).toString();
 
     /**
      * Constant for the service identifier of marshaller listener services.
@@ -521,6 +521,7 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "modlets" );
         }
 
+        final Modlets cloned = modlets.clone();
         final ModelValidationReport report = new ModelValidationReport();
 
         for ( final ModletValidator modletValidator
@@ -531,7 +532,7 @@ public class DefaultModelContext extends ModelContext
                 this.log( Level.FINER, getMessage( "validatingModlets", modletValidator.toString() ), null );
             }
 
-            final ModelValidationReport current = modletValidator.validateModlets( this, modlets );
+            final ModelValidationReport current = modletValidator.validateModlets( this, cloned );
 
             if ( current != null )
             {
@@ -633,7 +634,7 @@ public class DefaultModelContext extends ModelContext
             throw new NullPointerException( "model" );
         }
 
-        Model processed = model;
+        Model processed = model.clone();
         final long t0 = System.nanoTime();
 
         for ( final ModelProcessor processor

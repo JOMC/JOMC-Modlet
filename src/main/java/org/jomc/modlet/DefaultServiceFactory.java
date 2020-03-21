@@ -313,7 +313,7 @@ public class DefaultServiceFactory implements ServiceFactory
             }
 
             final String methodNameSuffix = String.valueOf( chars );
-            Method getterMethod = null;
+            Method getterMethod;
 
             try
             {
@@ -423,7 +423,7 @@ public class DefaultServiceFactory implements ServiceFactory
                 unboxedPropertyType = Double.TYPE;
             }
 
-            Method setterMethod = null;
+            Method setterMethod;
 
             try
             {

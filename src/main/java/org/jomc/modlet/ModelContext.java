@@ -185,6 +185,7 @@ public abstract class ModelContext
      * The {@code ExecutorService} of the instance.
      *
      * @since 1.10
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     private volatile ExecutorService executorService;
 
@@ -598,6 +599,7 @@ public abstract class ModelContext
      * @since 1.10
      *
      * @see #setExecutorService(java.util.concurrent.ExecutorService)
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     public final ExecutorService getExecutorService()
     {
@@ -618,6 +620,7 @@ public abstract class ModelContext
      * @since 1.10
      *
      * @see #getExecutorService()
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     public final void setExecutorService( final ExecutorService value )
     {

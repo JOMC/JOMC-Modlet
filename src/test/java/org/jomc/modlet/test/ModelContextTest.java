@@ -137,6 +137,7 @@ public class ModelContextTest
 
     /**
      * The {@code ExecutorService} backing the tests.
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     private volatile ExecutorService executorService;
 
@@ -199,6 +200,7 @@ public class ModelContextTest
      *
      * @see #newExecutorService()
      * @since 1.10
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     public final ExecutorService getExecutorService()
     {
@@ -217,6 +219,7 @@ public class ModelContextTest
      *
      * @see #getExecutorService()
      * @since 1.10
+     * @deprecated As of 2.0, replaced by parallel Java streams.
      */
     protected ExecutorService newExecutorService()
     {
