@@ -686,6 +686,7 @@ public class DefaultModelContext extends ModelContext
 
         try
         {
+            final Model cloned = model.clone();
             final long t0 = System.nanoTime();
             final ModelValidationReport resultReport = new ModelValidationReport();
 
@@ -712,7 +713,7 @@ public class DefaultModelContext extends ModelContext
 
                             }
 
-                            return validator.validateModel( DefaultModelContext.this, model );
+                            return validator.validateModel( DefaultModelContext.this, cloned );
                         }
 
                     } );
