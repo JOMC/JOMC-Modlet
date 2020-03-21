@@ -57,11 +57,13 @@ public final class ServicesNotFoundModletProvider implements ModletProvider
         super();
     }
 
+    @Override
     public int getOrdinal()
     {
         return 40;
     }
 
+    @Override
     public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
     {
         final Modlets provided = modlets.clone();
@@ -70,7 +72,7 @@ public final class ServicesNotFoundModletProvider implements ModletProvider
 
         if ( sortedProviders == null )
         {
-            sortedProviders = new LinkedList<Class>();
+            sortedProviders = new LinkedList<>();
             context.setAttribute( "SORTING_TEST", sortedProviders );
         }
 

@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import org.jomc.modlet.DefaultModletValidator;
 import org.jomc.modlet.ModelContext;
@@ -147,26 +148,21 @@ public class ModletValidatorTest
     @Test
     public final void testValidateModlets() throws Exception
     {
-        try
-        {
-            this.getModletValidator().validateModlets( null, new Modlets() );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertNullPointerException( ()  -> this.getModletValidator().validateModlets( null, new Modlets() ) );
+        assertNullPointerException( ()  -> this.getModletValidator().validateModlets( this.getModelContext(), null ) );
+    }
 
+    private static void assertNullPointerException( final Callable<?> testcase ) throws Exception
+    {
         try
         {
-            this.getModletValidator().validateModlets( this.getModelContext(), null );
+            testcase.call();
             fail( "Expected 'NullPointerException' not thrown." );
         }
         catch ( final NullPointerException e )
         {
+            System.out.println( e );
             assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
         }
     }
 

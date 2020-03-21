@@ -117,6 +117,7 @@ public final class TestModelValidator implements ModelValidator
         super();
     }
 
+    @Override
     public ModelValidationReport validateModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
@@ -154,7 +155,7 @@ public final class TestModelValidator implements ModelValidator
 
     public boolean isUnboxedBooleanProperty()
     {
-        return this.unboxedBooleanProperty ? true : false;
+        return this.unboxedBooleanProperty;
     }
 
     public void setUnboxedBooleanProperty( final Boolean value )

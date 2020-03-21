@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.Callable;
 import org.jomc.modlet.Service;
 import org.jomc.modlet.Services;
 import org.junit.Test;
@@ -58,28 +59,8 @@ public class ServicesTest
     public final void testGetServices() throws Exception
     {
         final Services services = new Services();
-
-        try
-        {
-            services.getServices( (String) null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        try
-        {
-            services.getServices( (Class) null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertNullPointerException( ()  -> services.getServices( (String) null ) );
+        assertNullPointerException( ()  -> services.getServices( (Class) null ) );
 
         final Service s1 = new Service();
         s1.setOrdinal( 1000 );
@@ -103,6 +84,20 @@ public class ServicesTest
         assertEquals( 2, services.getServices( this.getClass().getName() ).size() );
         assertEquals( "Service 2", services.getServices( this.getClass().getName() ).get( 0 ).getClazz() );
         assertEquals( "Service 1", services.getServices( this.getClass().getName() ).get( 1 ).getClazz() );
+    }
+
+    private static void assertNullPointerException( final Callable<?> testcase ) throws Exception
+    {
+        try
+        {
+            testcase.call();
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            System.out.println( e );
+            assertNotNull( e.getMessage() );
+        }
     }
 
 }

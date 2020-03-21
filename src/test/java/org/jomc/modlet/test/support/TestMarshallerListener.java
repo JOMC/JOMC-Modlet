@@ -150,7 +150,7 @@ public final class TestMarshallerListener extends Marshaller.Listener
 
     public boolean isUnboxedBooleanProperty()
     {
-        return this.unboxedBooleanProperty ? true : false;
+        return this.unboxedBooleanProperty;
     }
 
     public void setUnboxedBooleanProperty( final Boolean value )

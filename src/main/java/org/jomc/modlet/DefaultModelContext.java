@@ -638,12 +638,11 @@ public class DefaultModelContext extends ModelContext
     @Override
     public ModelValidationReport validateModel( final Model model ) throws ModelException
     {
-        final Model cloned = model.clone();
+        final Model cloned = Objects.requireNonNull( model, "model" ).clone();
         final long t0 = System.nanoTime();
         final ModelValidationReport resultReport = new ModelValidationReport();
         final Collection<? extends ModelValidator> modelValidators =
-            this.createServiceObjects( Objects.requireNonNull( model, "model" ).getIdentifier(),
-                                       ModelValidator.class.getName(), ModelValidator.class );
+            this.createServiceObjects( cloned.getIdentifier(), ModelValidator.class.getName(), ModelValidator.class );
 
         try ( final Stream<? extends ModelValidator> s1 = modelValidators.parallelStream() )
         {

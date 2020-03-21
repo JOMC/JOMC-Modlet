@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.Callable;
 import org.jomc.modlet.ModelContextFactory;
 import org.jomc.modlet.ModelContextFactoryError;
 import org.jomc.modlet.test.support.ClassCastExceptionModelContextFactory;
@@ -86,131 +87,65 @@ public class ModelContextFactoryTest
     @Test
     public final void testModelContextFactoryClassNotFound() throws Exception
     {
-        try
+        assertModelContextFactoryError( ()  ->
         {
             System.setProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY, "DOES_NOT_EXIST" );
             ModelContextFactory.newInstance();
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-        finally
-        {
-            System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY );
-        }
+            return null;
+        }, ()  -> System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY ) );
 
-        try
-        {
-            ModelContextFactory.newInstance( "DOES_NOT_EXIST" );
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelContextFactoryError( ()  -> ModelContextFactory.newInstance( "DOES_NOT_EXIST" ) );
     }
 
     @Test
     public final void testModelContextFactoryIllegalClass() throws Exception
     {
-        try
+        assertModelContextFactoryError( ()  ->
         {
             System.setProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY,
                                 ClassCastExceptionModelContextFactory.class.getName() );
 
             ModelContextFactory.newInstance();
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-        finally
-        {
-            System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY );
-        }
+            return null;
+        }, ()  -> System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY ) );
 
-        try
-        {
-            ModelContextFactory.newInstance( ClassCastExceptionModelContextFactory.class.getName() );
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelContextFactoryError( ()  -> ModelContextFactory.newInstance(
+            ClassCastExceptionModelContextFactory.class.getName() ) );
+
     }
 
     @Test
     public final void testModelContextFactoryInstantiationException() throws Exception
     {
-        try
+        assertModelContextFactoryError( ()  ->
         {
             System.setProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY,
                                 InstantiationExceptionModelContextFactory.class.getName() );
 
             ModelContextFactory.newInstance();
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-        finally
-        {
-            System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY );
-        }
+            return null;
+        }, ()  -> System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY ) );
 
-        try
-        {
-            ModelContextFactory.newInstance( InstantiationExceptionModelContextFactory.class.getName() );
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelContextFactoryError( ()  -> ModelContextFactory.newInstance(
+            InstantiationExceptionModelContextFactory.class.getName() ) );
+
     }
 
     @Test
     public final void testModelContextFactoryIllegalAccessException() throws Exception
     {
-        try
+        assertModelContextFactoryError( ()  ->
         {
             System.setProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY,
                                 IllegalAccessExceptionModelContextFactory.class.getName() );
 
             ModelContextFactory.newInstance();
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-        finally
-        {
-            System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY );
-        }
+            return null;
+        }, ()  -> System.clearProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY ) );
 
-        try
-        {
-            ModelContextFactory.newInstance( IllegalAccessExceptionModelContextFactory.class.getName() );
-            fail( "Expected 'ModelContextFactoryError' not thrown." );
-        }
-        catch ( final ModelContextFactoryError e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelContextFactoryError( ()  -> ModelContextFactory.newInstance(
+            IllegalAccessExceptionModelContextFactory.class.getName() ) );
+
     }
 
     @Test
@@ -219,6 +154,28 @@ public class ModelContextFactoryTest
         assertNotNull( ModelContextFactory.newInstance().newModelContext() );
         assertNotNull( ModelContextFactory.newInstance().newModelContext( null ) );
         assertNotNull( ModelContextFactory.newInstance().newModelContext( this.getClass().getClassLoader() ) );
+    }
+
+    private static void assertModelContextFactoryError( final Callable<?> testcase, final Callable<?>... _finally )
+        throws Exception
+    {
+        try
+        {
+            testcase.call();
+            fail( "Expected 'ModelContextFactoryError' exception not thrown." );
+        }
+        catch ( final ModelContextFactoryError e )
+        {
+            System.out.println( e );
+            assertNotNull( e.getMessage() );
+        }
+        finally
+        {
+            if ( _finally.length > 0 )
+            {
+                _finally[0].call();
+            }
+        }
     }
 
 }

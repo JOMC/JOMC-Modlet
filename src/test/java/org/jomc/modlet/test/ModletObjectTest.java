@@ -32,6 +32,7 @@ package org.jomc.modlet.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import org.jomc.modlet.ModletObject;
@@ -78,41 +79,39 @@ public class ModletObjectTest
     public final void testGetAnyElement() throws Exception
     {
         final TestModletObject modletObject = new TestModletObject();
-        final List<Object> any = new ArrayList<Object>( 10 );
+        final List<Object> any = new ArrayList<>( 10 );
         final QName name = new QName( "http://jomc.org/modlet", "test" );
-        final JAXBElement<Object> element = new JAXBElement<Object>( name, Object.class, null, null );
+        final JAXBElement<Object> element = new JAXBElement<>( name, Object.class, null, null );
         any.add( element );
         any.add( element );
 
-        try
-        {
-            modletObject.getAnyElement( any, "http://jomc.org/modlet", "test", Object.class );
-            fail( "Expected 'IllegalStateException' not thrown." );
-        }
-        catch ( final IllegalStateException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertIllegalStateException( ()  -> modletObject.getAnyElement( any, "http://jomc.org/modlet", "test",
+                                                                         Object.class ) );
+
     }
 
     @Test
     public final void testGetAnyObject() throws Exception
     {
         final TestModletObject modletObject = new TestModletObject();
-        final List<Object> any = new ArrayList<Object>( 10 );
+        final List<Object> any = new ArrayList<>( 10 );
         any.add( "TEST" );
         any.add( "TEST" );
 
+        assertIllegalStateException( ()  -> modletObject.getAnyObject( any, String.class ) );
+    }
+
+    private static void assertIllegalStateException( final Callable<?> testcase ) throws Exception
+    {
         try
         {
-            modletObject.getAnyObject( any, String.class );
+            testcase.call();
             fail( "Expected 'IllegalStateException' not thrown." );
         }
         catch ( final IllegalStateException e )
         {
-            assertNotNull( e.getMessage() );
             System.out.println( e );
+            assertNotNull( e.getMessage() );
         }
     }
 

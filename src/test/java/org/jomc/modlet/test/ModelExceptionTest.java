@@ -30,7 +30,6 @@
  */
 package org.jomc.modlet.test;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import org.jomc.modlet.ModelException;
 import org.junit.Test;
@@ -62,34 +61,12 @@ public class ModelExceptionTest
     @Test
     public final void testModelException() throws Exception
     {
-        ObjectInputStream in = null;
-
-        try
+        try ( final ObjectInputStream in = new ObjectInputStream( this.getClass().getResourceAsStream(
+            ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelException.ser" ) ) )
         {
-            in = new ObjectInputStream( this.getClass().getResourceAsStream(
-                ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelException.ser" ) );
-
             final ModelException e = (ModelException) in.readObject();
-
-            in.close();
-            in = null;
-
             assertNotNull( e );
             assertEquals( "ModelException", e.getMessage() );
-        }
-        finally
-        {
-            try
-            {
-                if ( in != null )
-                {
-                    in.close();
-                }
-            }
-            catch ( final IOException e )
-            {
-                e.printStackTrace();
-            }
         }
     }
 

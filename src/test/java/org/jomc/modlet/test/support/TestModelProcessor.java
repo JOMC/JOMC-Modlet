@@ -118,6 +118,7 @@ public final class TestModelProcessor implements ModelProcessor
         super();
     }
 
+    @Override
     public Model processModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
@@ -161,7 +162,7 @@ public final class TestModelProcessor implements ModelProcessor
 
     public boolean isUnboxedBooleanProperty()
     {
-        return this.unboxedBooleanProperty ? true : false;
+        return this.unboxedBooleanProperty;
     }
 
     public void setUnboxedBooleanProperty( final Boolean value )

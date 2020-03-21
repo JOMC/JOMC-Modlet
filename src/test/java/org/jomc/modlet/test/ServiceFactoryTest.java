@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import org.jomc.modlet.DefaultServiceFactory;
 import org.jomc.modlet.ModelContext;
@@ -147,39 +148,30 @@ public class ServiceFactoryTest
 
     @Test
     public final void CreateServiceFactoryMethodThrowsNullPointerExceptionWithNonNullMessageOnNullParameter()
-        throws ModelException
+        throws Exception
+    {
+        assertNullPointerException( ()  -> this.getServiceFactory().createServiceObject( null, new Service(),
+                                                                                          Object.class ) );
+
+        assertNullPointerException( ()  -> this.getServiceFactory().createServiceObject( this.getModelContext(), null,
+                                                                                          Object.class ) );
+
+        assertNullPointerException( ()  -> this.getServiceFactory().createServiceObject( this.getModelContext(),
+                                                                                          new Service(), null ) );
+
+    }
+
+    private static void assertNullPointerException( final Callable<?> testcase ) throws Exception
     {
         try
         {
-            this.getServiceFactory().createServiceObject( null, new Service(), Object.class );
+            testcase.call();
             fail( "Expected 'NullPointerException' not thrown." );
         }
         catch ( final NullPointerException e )
         {
+            System.out.println( e );
             assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getServiceFactory().createServiceObject( this.getModelContext(), null, Object.class );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getServiceFactory().createServiceObject( this.getModelContext(), new Service(), null );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
         }
     }
 

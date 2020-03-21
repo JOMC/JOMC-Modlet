@@ -50,6 +50,7 @@ public final class NullModelValidator implements ModelValidator
         super();
     }
 
+    @Override
     public ModelValidationReport validateModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )

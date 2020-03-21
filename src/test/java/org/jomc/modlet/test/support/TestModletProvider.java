@@ -126,6 +126,7 @@ public final class TestModletProvider implements ModletProvider
         super();
     }
 
+    @Override
     public int getOrdinal()
     {
         return this.ordinal;
@@ -136,6 +137,7 @@ public final class TestModletProvider implements ModletProvider
         this.ordinal = value;
     }
 
+    @Override
     public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
     {
         final Modlets provided = modlets.clone();
@@ -144,7 +146,7 @@ public final class TestModletProvider implements ModletProvider
 
         if ( sortedProviders == null )
         {
-            sortedProviders = new LinkedList<Class>();
+            sortedProviders = new LinkedList<>();
             context.setAttribute( "SORTING_TEST", sortedProviders );
         }
 
@@ -199,7 +201,7 @@ public final class TestModletProvider implements ModletProvider
 
     public boolean isUnboxedBooleanProperty()
     {
-        return this.unboxedBooleanProperty ? true : false;
+        return this.unboxedBooleanProperty;
     }
 
     public void setUnboxedBooleanProperty( final Boolean value )

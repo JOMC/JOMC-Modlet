@@ -93,30 +93,12 @@ public class ModelValidationReportTest
 
     private <T> T readObject( final String location, final Class<T> type ) throws IOException, ClassNotFoundException
     {
-        ObjectInputStream in = null;
-
-        try
+        try ( final ObjectInputStream in = new ObjectInputStream( this.getClass().getResourceAsStream( location ) ) )
         {
-            in = new ObjectInputStream( this.getClass().getResourceAsStream( location ) );
             assertNotNull( in );
+            @SuppressWarnings( "unchecked" )
             final T object = (T) in.readObject();
-            in.close();
-            in = null;
             return object;
-        }
-        finally
-        {
-            try
-            {
-                if ( in != null )
-                {
-                    in.close();
-                }
-            }
-            catch ( final IOException e )
-            {
-                e.printStackTrace();
-            }
         }
     }
 

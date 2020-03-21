@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import org.jomc.modlet.DefaultModletProcessor;
 import org.jomc.modlet.ModelContext;
@@ -148,26 +149,21 @@ public class ModletProcessorTest
     @Test
     public final void testProcessModlets() throws Exception
     {
-        try
-        {
-            this.getModletProcessor().processModlets( null, new Modlets() );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertNullPointerException( ()  -> this.getModletProcessor().processModlets( null, new Modlets() ) );
+        assertNullPointerException( ()  -> this.getModletProcessor().processModlets( this.getModelContext(), null ) );
+    }
 
+    private static void assertNullPointerException( final Callable<?> testcase ) throws Exception
+    {
         try
         {
-            this.getModletProcessor().processModlets( this.getModelContext(), null );
-            fail( "Expected NullPointerException not thrown." );
+            testcase.call();
+            fail( "Expected 'NullPointerException' not thrown." );
         }
         catch ( final NullPointerException e )
         {
+            System.out.println( e );
             assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
         }
     }
 

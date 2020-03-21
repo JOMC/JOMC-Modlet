@@ -49,6 +49,7 @@ public final class NullModelProvider implements ModelProvider
         super();
     }
 
+    @Override
     public Model findModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )

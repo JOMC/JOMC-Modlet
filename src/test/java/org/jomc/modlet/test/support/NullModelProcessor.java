@@ -49,6 +49,7 @@ public final class NullModelProcessor implements ModelProcessor
         super();
     }
 
+    @Override
     public Model processModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )

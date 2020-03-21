@@ -51,18 +51,20 @@ public final class NullModletProvider implements ModletProvider
         super();
     }
 
+    @Override
     public int getOrdinal()
     {
         return 10;
     }
 
+    @Override
     public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
     {
         List<Class> sortedProviders = (List<Class>) context.getAttribute( "SORTING_TEST" );
 
         if ( sortedProviders == null )
         {
-            sortedProviders = new LinkedList<Class>();
+            sortedProviders = new LinkedList<>();
             context.setAttribute( "SORTING_TEST", sortedProviders );
         }
 

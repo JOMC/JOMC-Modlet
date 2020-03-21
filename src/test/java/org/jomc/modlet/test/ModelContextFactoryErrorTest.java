@@ -30,7 +30,6 @@
  */
 package org.jomc.modlet.test;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import org.jomc.modlet.ModelContextFactoryError;
 import org.junit.Test;
@@ -62,34 +61,12 @@ public class ModelContextFactoryErrorTest
     @Test
     public final void testModelContextFactoryError() throws Exception
     {
-        ObjectInputStream in = null;
-
-        try
+        try ( final ObjectInputStream in = new ObjectInputStream( this.getClass().getResourceAsStream(
+            ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelContextFactoryError.ser" ) ) )
         {
-            in = new ObjectInputStream( this.getClass().getResourceAsStream(
-                ABSOLUTE_RESOURCE_NAME_PREFIX + "ModelContextFactoryError.ser" ) );
-
             final ModelContextFactoryError e = (ModelContextFactoryError) in.readObject();
-
-            in.close();
-            in = null;
-
             assertNotNull( e );
             assertEquals( "ModelContextFactoryError", e.getMessage() );
-        }
-        finally
-        {
-            try
-            {
-                if ( in != null )
-                {
-                    in.close();
-                }
-            }
-            catch ( final IOException e )
-            {
-                e.printStackTrace();
-            }
         }
     }
 

@@ -37,6 +37,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -116,16 +117,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", "java.lang.Object" );
         this.writePropertiesFile( properties, tmpFile );
@@ -136,16 +128,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", TestModletProvider.class.getName() );
         this.writePropertiesFile( properties, tmpFile );
@@ -167,16 +150,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         DefaultModelContext.setDefaultProviderLocation( "META-INF/illegal-services" );
@@ -184,16 +158,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         DefaultModelContext.setDefaultProviderLocation( null );
@@ -205,126 +170,32 @@ public class DefaultModelContextTest extends ModelContextTest
         Modlets modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        try
-        {
-            this.getModelContext().findModel( IllegalServicesModletProvider.class.getName() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModel(
+            IllegalServicesModletProvider.class.getName() ) );
 
-        Model model = new Model();
-        model.setIdentifier( IllegalServicesModletProvider.class.getName() );
+        final Model m1 = new Model();
+        m1.setIdentifier( IllegalServicesModletProvider.class.getName() );
 
-        try
-        {
-            this.getModelContext().processModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().validateModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createMarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createUnmarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().processModel( m1 ) );
+        assertModelException( ()  -> this.getModelContext().validateModel( m1 ) );
+        assertModelException( ()  -> this.getModelContext().createMarshaller( m1.getIdentifier() ) );
+        assertModelException( ()  -> this.getModelContext().createUnmarshaller( m1.getIdentifier() ) );
 
         this.getModelContext().setProviderLocation( "META-INF/non-existent-services-modlet" );
         this.getModelContext().setModlets( null );
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        try
-        {
-            this.getModelContext().findModel( ServicesNotFoundModletProvider.class.getName() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModel(
+            ServicesNotFoundModletProvider.class.getName() ) );
 
-        model = new Model();
-        model.setIdentifier( ServicesNotFoundModletProvider.class.getName() );
+        final Model m2 = new Model();
+        m2.setIdentifier( ServicesNotFoundModletProvider.class.getName() );
 
-        try
-        {
-            this.getModelContext().processModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().validateModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createMarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createUnmarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().processModel( m2 ) );
+        assertModelException( ()  -> this.getModelContext().validateModel( m2 ) );
+        assertModelException( ()  -> this.getModelContext().createMarshaller( m2.getIdentifier() ) );
+        assertModelException( ()  -> this.getModelContext().createUnmarshaller( m2.getIdentifier() ) );
 
         this.getModelContext().setProviderLocation( "META-INF/extended-services" );
         this.getModelContext().setModlets( null );
@@ -351,55 +222,18 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-1" );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-2" );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-3" );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().findModlets( null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
+        assertNullPointerException( ()  -> this.getModelContext().findModlets( null ) );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         DefaultModelContext.setDefaultProviderLocation( null );
@@ -429,16 +263,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "DOES_NOT_EXIST" );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", "java.lang.Object" );
         this.writePropertiesFile( properties, tmpFile );
@@ -454,16 +279,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "DOES_NOT_EXIST" );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         properties.setProperty( "org.jomc.modlet.ModletProvider.0", TestModletProvider.class.getName() );
         this.writePropertiesFile( properties, tmpFile );
@@ -493,16 +309,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/non-existent-services" );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         DefaultModelContext.setDefaultProviderLocation( null );
@@ -513,16 +320,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/illegal-services" );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         DefaultModelContext.setDefaultProviderLocation( null );
@@ -535,63 +333,16 @@ public class DefaultModelContextTest extends ModelContextTest
         Modlets modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        try
-        {
-            this.getModelContext().findModel( IllegalServicesModletProvider.class.getName() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModel(
+            IllegalServicesModletProvider.class.getName() ) );
 
-        Model model = new Model();
-        model.setIdentifier( IllegalServicesModletProvider.class.getName() );
+        final Model m3 = new Model();
+        m3.setIdentifier( IllegalServicesModletProvider.class.getName() );
 
-        try
-        {
-            this.getModelContext().processModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().validateModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createMarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createUnmarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().processModel( m3 ) );
+        assertModelException( ()  -> this.getModelContext().validateModel( m3 ) );
+        assertModelException( ()  -> this.getModelContext().createMarshaller( m3.getIdentifier() ) );
+        assertModelException( ()  -> this.getModelContext().createUnmarshaller( m3.getIdentifier() ) );
 
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/non-existent-services-modlet" );
@@ -601,63 +352,16 @@ public class DefaultModelContextTest extends ModelContextTest
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        try
-        {
-            this.getModelContext().findModel( ServicesNotFoundModletProvider.class.getName() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModel(
+            ServicesNotFoundModletProvider.class.getName() ) );
 
-        model = new Model();
-        model.setIdentifier( ServicesNotFoundModletProvider.class.getName() );
+        final Model m4 = new Model();
+        m4.setIdentifier( ServicesNotFoundModletProvider.class.getName() );
 
-        try
-        {
-            this.getModelContext().processModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().validateModel( model );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createMarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-
-        try
-        {
-            this.getModelContext().createUnmarshaller( model.getIdentifier() );
-            fail( "Expected ModelException not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().processModel( m4 ) );
+        assertModelException( ()  -> this.getModelContext().validateModel( m4 ) );
+        assertModelException( ()  -> this.getModelContext().createMarshaller( m4.getIdentifier() ) );
+        assertModelException( ()  -> this.getModelContext().createUnmarshaller( m4.getIdentifier() ) );
 
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/extended-services" );
@@ -690,16 +394,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/illegal-extended-services-2" );
@@ -707,16 +402,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/illegal-extended-services-3" );
@@ -724,16 +410,7 @@ public class DefaultModelContextTest extends ModelContextTest
         this.getModelContext().setProviderLocation( null );
         this.getModelContext().setModlets( null );
 
-        try
-        {
-            this.getModelContext().findModlets( new Modlets() );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertModelException( ()  -> this.getModelContext().findModlets( new Modlets() ) );
 
         DefaultModelContext.setDefaultPlatformProviderLocation( null );
         DefaultModelContext.setDefaultProviderLocation( null );
@@ -897,80 +574,50 @@ public class DefaultModelContextTest extends ModelContextTest
         final LSResourceResolver resourceResolver = this.getModelContext().createResourceResolver( MODLET_TEST_NS );
         assertNotNull( resourceResolver );
 
-        try
+        assertModelException( ()  ->
         {
             this.getModelContext().setModlets( null );
             this.getModelContext().createMarshaller( MODLET_TEST_NS );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            System.out.println( e.toString() );
-            assertNotNull( e.getMessage() );
-        }
+            return null;
+        } );
 
-        try
+        assertModelException( ()  ->
         {
             this.getModelContext().setModlets( null );
             this.getModelContext().createUnmarshaller( MODLET_TEST_NS );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            System.out.println( e.toString() );
-            assertNotNull( e.getMessage() );
-        }
+            return null;
+        } );
 
-        try
+        assertModelException( ()  ->
         {
             this.getModelContext().setModlets( null );
             this.getModelContext().findModel( MODLET_TEST_NS );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            System.out.println( e.toString() );
-            assertNotNull( e.getMessage() );
-        }
+            return null;
+        } );
 
-        final Model model = new Model();
-        model.setIdentifier( MODLET_TEST_NS );
+        final Model m5 = new Model();
+        m5.setIdentifier( MODLET_TEST_NS );
 
-        try
+        assertModelException( ()  ->
         {
             this.getModelContext().setModlets( null );
-            this.getModelContext().findModel( model );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            System.out.println( e.toString() );
-            assertNotNull( e.getMessage() );
-        }
+            this.getModelContext().findModel( m5 );
+            return null;
+        } );
 
-        try
+        assertModelException( ()  ->
         {
             this.getModelContext().setModlets( null );
-            this.getModelContext().processModel( model );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            System.out.println( e.toString() );
-            assertNotNull( e.getMessage() );
-        }
+            this.getModelContext().processModel( m5 );
+            return null;
+        } );
 
-        try
+        assertModelException( ()  ->
         {
             this.getModelContext().setModlets( null );
-            this.getModelContext().validateModel( model );
-            fail( "Expected 'ModelException' not thrown." );
-        }
-        catch ( final ModelException e )
-        {
-            System.out.println( e.toString() );
-            assertNotNull( e.getMessage() );
-        }
+            this.getModelContext().validateModel( m5 );
+            return null;
+        } );
 
         DefaultModletProvider.setDefaultModletLocation( null );
     }
@@ -1022,28 +669,37 @@ public class DefaultModelContextTest extends ModelContextTest
 
     private void writePropertiesFile( final Properties properties, final File file ) throws IOException
     {
-        OutputStream out = null;
+        try ( final OutputStream out = new FileOutputStream( file ) )
+        {
+            properties.store( out, this.getClass().getName() );
+        }
+    }
 
+    private static void assertNullPointerException( final Callable<?> callable ) throws Exception
+    {
         try
         {
-            out = new FileOutputStream( file );
-            properties.store( out, this.getClass().getName() );
-            out.close();
-            out = null;
+            callable.call();
+            fail( "Expected 'NullPointerException' exception not thrown." );
         }
-        finally
+        catch ( final NullPointerException e )
         {
-            try
-            {
-                if ( out != null )
-                {
-                    out.close();
-                }
-            }
-            catch ( final IOException e )
-            {
-                e.printStackTrace();
-            }
+            System.out.println( e );
+            assertNotNull( e.getMessage() );
+        }
+    }
+
+    private static void assertModelException( final Callable<?> callable ) throws Exception
+    {
+        try
+        {
+            callable.call();
+            fail( "Expected 'ModelException' exception not thrown." );
+        }
+        catch ( final ModelException e )
+        {
+            System.out.println( e );
+            assertNotNull( e.getMessage() );
         }
     }
 

@@ -118,6 +118,7 @@ public final class TestModelProvider implements ModelProvider
         super();
     }
 
+    @Override
     public Model findModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
@@ -158,7 +159,7 @@ public final class TestModelProvider implements ModelProvider
 
     public boolean isUnboxedBooleanProperty()
     {
-        return this.unboxedBooleanProperty ? true : false;
+        return this.unboxedBooleanProperty;
     }
 
     public void setUnboxedBooleanProperty( final Boolean value )

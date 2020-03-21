@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.Callable;
 import org.jomc.modlet.DefaultModletProvider;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -76,27 +77,10 @@ public class DefaultModletProviderTest extends ModletProviderTest
     @Test
     public final void testFindModletsAtLocation() throws Exception
     {
-        try
-        {
-            this.getModletProvider().findModlets( null, "TEST" );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertNullPointerException( ()  -> this.getModletProvider().findModlets( null, "TEST" ) );
+        assertNullPointerException( ()  -> this.getModletProvider().findModlets( this.getModelContext(),
+                                                                                  (String) null ) );
 
-        try
-        {
-            this.getModletProvider().findModlets( this.getModelContext(), (String) null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
     }
 
     @Test
@@ -213,6 +197,20 @@ public class DefaultModletProviderTest extends ModletProviderTest
 
         DefaultModletProvider.setDefaultOrdinal( null );
         this.getModletProvider().setOrdinal( null );
+    }
+
+    private static void assertNullPointerException( final Callable<?> callable ) throws Exception
+    {
+        try
+        {
+            callable.call();
+            fail( "Expected 'NullPointerException' exception not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            System.out.println( e );
+            assertNotNull( e.getMessage() );
+        }
     }
 
 }

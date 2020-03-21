@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.concurrent.Callable;
 import org.jomc.modlet.DefaultModletProcessor;
 import org.jomc.modlet.Modlets;
 import org.junit.Test;
@@ -79,27 +80,8 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
     @Test
     public final void testFindTransformers() throws Exception
     {
-        try
-        {
-            this.getModletProcessor().findTransformers( this.getModelContext(), null );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
-
-        try
-        {
-            this.getModletProcessor().findTransformers( null, "" );
-            fail( "Expected NullPointerException not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e );
-        }
+        assertNullPointerException( ()  -> this.getModletProcessor().findTransformers( this.getModelContext(), null ) );
+        assertNullPointerException( ()  -> this.getModletProcessor().findTransformers( null, "" ) );
 
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         this.getModletProcessor().setTransformerLocation( null );
@@ -252,6 +234,20 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
 
         DefaultModletProcessor.setDefaultOrdinal( null );
         this.getModletProcessor().setOrdinal( null );
+    }
+
+    private static void assertNullPointerException( final Callable<?> callable ) throws Exception
+    {
+        try
+        {
+            callable.call();
+            fail( "Expected 'NullPointerException' exception not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            System.out.println( e );
+            assertNotNull( e.getMessage() );
+        }
     }
 
 }
