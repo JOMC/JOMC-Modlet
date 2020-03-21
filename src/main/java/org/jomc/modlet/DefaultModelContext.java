@@ -638,6 +638,7 @@ public class DefaultModelContext extends ModelContext
     @Override
     public ModelValidationReport validateModel( final Model model ) throws ModelException
     {
+        final Model cloned = model.clone();
         final long t0 = System.nanoTime();
         final ModelValidationReport resultReport = new ModelValidationReport();
         final Collection<? extends ModelValidator> modelValidators =
@@ -668,7 +669,7 @@ public class DefaultModelContext extends ModelContext
 
                     }
 
-                    r.report = validator.validateModel( DefaultModelContext.this, model );
+                    r.report = validator.validateModel( DefaultModelContext.this, cloned );
                 }
                 catch ( final ModelException e )
                 {
