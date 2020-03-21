@@ -691,7 +691,7 @@ public class DefaultModelContext extends ModelContext
             final ModelValidationReport resultReport = new ModelValidationReport();
 
             final Collection<? extends ModelValidator> modelValidators =
-                this.createServiceObjects( model.getIdentifier(), ModelValidator.class.getName(),
+                this.createServiceObjects( cloned.getIdentifier(), ModelValidator.class.getName(),
                                            ModelValidator.class );
 
             if ( this.getExecutorService() != null && modelValidators.size() > 1 )
