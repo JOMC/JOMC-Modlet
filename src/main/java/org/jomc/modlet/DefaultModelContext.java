@@ -58,10 +58,12 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -1843,12 +1845,27 @@ public class DefaultModelContext extends ModelContext
 
                     }
 
+                    final Function<String, String> parallelToLowerCase = ( s  ->
+                    {
+                        final char[] chars = s.toCharArray();
+
+                        try ( final IntStream s2 = IntStream.range( 0, chars.length ).parallel().unordered() )
+                        {
+                            s2.forEach( idx  ->
+                            {
+                                chars[idx] = Character.toLowerCase( chars[idx] );
+                            } );
+                        }
+
+                        return String.valueOf( chars );
+                    } );
+
                     final Map<Boolean, List<CreateUriResult>> results = s1.filter( entry  ->
                     {
                         try ( final Stream<String> s2 = Arrays.asList( SCHEMA_EXTENSIONS ).parallelStream() )
                         {
-                            final boolean found = s2.filter( ext  -> entry.getKey().toLowerCase().
-                                endsWith( '.' + ext.toLowerCase() ) ).findAny().isPresent();
+                            final boolean found = s2.filter( ext  -> parallelToLowerCase.apply( entry.getKey() ).
+                                endsWith( '.' + parallelToLowerCase.apply( ext ) ) ).findAny().isPresent();
 
                             if ( found && isLoggable( Level.FINEST ) )
                             {
