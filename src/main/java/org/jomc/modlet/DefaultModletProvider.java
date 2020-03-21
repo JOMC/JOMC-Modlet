@@ -708,8 +708,8 @@ public class DefaultModletProvider implements ModletProvider
      * @see #findModlets(org.jomc.modlet.ModelContext, java.lang.String)
      * @see #ENABLED_ATTRIBUTE_NAME
      * @see #MODLET_LOCATION_ATTRIBUTE_NAME
-     * @deprecated As of JOMC 1.6, this method has been replaced by {@link #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)}.
-     * This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.6, this method has been replaced by {@link #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)}.
+     * This method will be removed in 2.0.
      */
     @Deprecated
     public Modlets findModlets( final ModelContext context ) throws ModelException

@@ -372,8 +372,8 @@ public class DefaultModelContext extends ModelContext
      * @see #getProviderLocation()
      * @see #getPlatformProviderLocation()
      * @see ModletProvider#findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)
-     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
-     * removed in JOMC 2.0.
+     * @deprecated As of 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
+     * removed in 2.0.
      */
     @Override
     @Deprecated
@@ -1015,8 +1015,8 @@ public class DefaultModelContext extends ModelContext
      * @see #getPlatformProviderLocation()
      * @see ServiceFactory#createServiceObject(org.jomc.modlet.ModelContext, org.jomc.modlet.Service, java.lang.Class)
      * @since 1.2
-     * @deprecated As of JOMC 1.9, please use method {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)}.
-     * This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.9, please use method {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)}.
+     * This method will be removed in 2.0.
      */
     @Override
     @Deprecated

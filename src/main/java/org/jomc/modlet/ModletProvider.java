@@ -58,8 +58,8 @@ public interface ModletProvider
      *
      * @throws NullPointerException if {@code context} is {@code null}.
      * @throws ModelException if searching the context fails.
-     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)}.
-     * This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.6, replaced by {@link #findModlets(org.jomc.modlet.ModelContext, org.jomc.modlet.Modlets)}.
+     * This method will be removed in 2.0.
      */
     @Deprecated
     Modlets findModlets( ModelContext context ) throws NullPointerException, ModelException;

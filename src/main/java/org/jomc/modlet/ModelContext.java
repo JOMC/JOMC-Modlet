@@ -185,8 +185,9 @@ public abstract class ModelContext
      * The {@code ExecutorService} of the instance.
      *
      * @since 1.10
-     * @deprecated As of 2.0, replaced by parallel Java streams.
+     * @deprecated As of 2.0, replaced by parallel Java streams. This field will be removed in 2.0.
      */
+    @Deprecated
     private volatile ExecutorService executorService;
 
     /**
@@ -599,8 +600,9 @@ public abstract class ModelContext
      * @since 1.10
      *
      * @see #setExecutorService(java.util.concurrent.ExecutorService)
-     * @deprecated As of 2.0, replaced by parallel Java streams.
+     * @deprecated As of 2.0, replaced by parallel Java streams. This method will be removed in 2.0.
      */
+    @Deprecated
     public final ExecutorService getExecutorService()
     {
         return this.executorService;
@@ -620,8 +622,9 @@ public abstract class ModelContext
      * @since 1.10
      *
      * @see #getExecutorService()
-     * @deprecated As of 2.0, replaced by parallel Java streams.
+     * @deprecated As of 2.0, replaced by parallel Java streams. This method will be removed in 2.0.
      */
+    @Deprecated
     public final void setExecutorService( final ExecutorService value )
     {
         this.executorService = value;
@@ -869,8 +872,8 @@ public abstract class ModelContext
      *
      * @see ModletProvider META-INF/services/org.jomc.modlet.ModletProvider
      * @see #getModlets()
-     * @deprecated As of JOMC 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
-     * removed in JOMC 2.0.
+     * @deprecated As of 1.6, replaced by {@link #findModlets(org.jomc.modlet.Modlets)}. This method will be
+     * removed in 2.0.
      */
     @Deprecated
     public abstract Modlets findModlets() throws ModelException;
@@ -967,8 +970,7 @@ public abstract class ModelContext
      *
      * @see #setModelContextClassName(java.lang.String)
      *
-     * @deprecated As of JOMC 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in version
-     * 2.0.
+     * @deprecated As of 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in 2.0.
      */
     @Deprecated
     public static String getModelContextClassName()
@@ -990,8 +992,7 @@ public abstract class ModelContext
      *
      * @see #getModelContextClassName()
      *
-     * @deprecated As of JOMC 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in version
-     * 2.0.
+     * @deprecated As of 1.2, replaced by class {@link ModelContextFactory}. This method will be removed in 2.0.
      */
     @Deprecated
     public static void setModelContextClassName( final String value )
@@ -1011,9 +1012,10 @@ public abstract class ModelContext
      *
      * @see #getModelContextClassName()
      *
-     * @deprecated As of JOMC 1.2, replaced by method {@link ModelContextFactory#newModelContext(java.lang.ClassLoader)}.
+     * @deprecated As of 1.2, replaced by method {@link ModelContextFactory#newModelContext(java.lang.ClassLoader)}.
      * This method will be removed in version 2.0.
      */
+    @Deprecated
     public static ModelContext createModelContext( final ClassLoader classLoader ) throws ModelException
     {
         if ( getModelContextClassName().equals( DefaultModelContext.class.getName() ) )
@@ -1145,7 +1147,7 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in 2.0.
      */
     @Deprecated
     public abstract EntityResolver createEntityResolver( URI publicId ) throws ModelException;
@@ -1176,7 +1178,7 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in 2.0.
      */
     @Deprecated
     public abstract LSResourceResolver createResourceResolver( URI publicId ) throws ModelException;
@@ -1207,7 +1209,7 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in 2.0.
      */
     @Deprecated
     public abstract javax.xml.validation.Schema createSchema( URI publicId ) throws ModelException;
@@ -1238,7 +1240,7 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in 2.0.
      */
     @Deprecated
     public abstract JAXBContext createContext( URI publicId ) throws ModelException;
@@ -1269,7 +1271,7 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in 2.0.
      */
     @Deprecated
     public abstract Marshaller createMarshaller( URI publicId ) throws ModelException;
@@ -1300,7 +1302,7 @@ public abstract class ModelContext
      *
      * @see ModletObject#PUBLIC_ID
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in 2.0.
      */
     @Deprecated
     public abstract Unmarshaller createUnmarshaller( URI publicId ) throws ModelException;
@@ -1347,8 +1349,8 @@ public abstract class ModelContext
      * @see ServiceFactory
      *
      * @since 1.2
-     * @deprecated As of JOMC 1.9, please use method {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)}.
-     * This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.9, please use method {@link #createServiceObjects(java.lang.String, java.lang.String, java.lang.Class)}.
+     * This method will be removed in 2.0.
      */
     @Deprecated
     public abstract <T> T createServiceObject( final Service service, final Class<T> type ) throws ModelException;
