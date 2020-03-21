@@ -39,12 +39,13 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -102,10 +103,7 @@ public abstract class ModelContext
          */
         public void onLog( final Level level, final String message, final Throwable t )
         {
-            if ( level == null )
-            {
-                throw new NullPointerException( "level" );
-            }
+            Objects.requireNonNull( level, "level" );
         }
 
     }
@@ -138,7 +136,7 @@ public abstract class ModelContext
     /**
      * The attributes of the instance.
      */
-    private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>( 32, .75f, 1 );
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>( 32, .75f, 1 );
 
     /**
      * The class loader of the instance.
@@ -155,7 +153,7 @@ public abstract class ModelContext
     /**
      * The listeners of the instance.
      */
-    private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
+    private final List<Listener> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * Log level of the instance.
@@ -171,13 +169,6 @@ public abstract class ModelContext
      * Modlet namespace schema system id of the instance.
      */
     private volatile String modletSchemaSystemId;
-
-    /**
-     * The {@code ExecutorService} of the instance.
-     *
-     * @since 1.10
-     */
-    private volatile ExecutorService executorService;
 
     /**
      * Creates a new {@code ModelContext} instance.
@@ -237,12 +228,7 @@ public abstract class ModelContext
      */
     public Object getAttribute( final String name )
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-
-        return this.attributes.get( name );
+        return this.attributes.get( Objects.requireNonNull( name, "name" ) );
     }
 
     /**
@@ -261,12 +247,7 @@ public abstract class ModelContext
      */
     public Object getAttribute( final String name, final Object def )
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-
-        Object value = this.getAttribute( name );
+        Object value = this.getAttribute( Objects.requireNonNull( name, "name" ) );
 
         if ( value == null )
         {
@@ -292,16 +273,9 @@ public abstract class ModelContext
      */
     public Object setAttribute( final String name, final Object value )
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-        if ( value == null )
-        {
-            throw new NullPointerException( "value" );
-        }
+        return this.attributes.put( Objects.requireNonNull( name, "name" ),
+                                    Objects.requireNonNull( value, "value" ) );
 
-        return this.attributes.put( name, value );
     }
 
     /**
@@ -317,12 +291,7 @@ public abstract class ModelContext
      */
     public void clearAttribute( final String name )
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-
-        this.attributes.remove( name );
+        this.attributes.remove( Objects.requireNonNull( name, "name" ) );
     }
 
     /**
@@ -544,12 +513,7 @@ public abstract class ModelContext
      */
     public boolean isLoggable( final Level level )
     {
-        if ( level == null )
-        {
-            throw new NullPointerException( "level" );
-        }
-
-        return level.intValue() >= this.getLogLevel().intValue();
+        return Objects.requireNonNull( level, "level" ).intValue() >= this.getLogLevel().intValue();
     }
 
     /**
@@ -566,63 +530,11 @@ public abstract class ModelContext
      */
     public void log( final Level level, final String message, final Throwable throwable )
     {
-        if ( level == null )
+        if ( this.isLoggable( Objects.requireNonNull( level, "level" ) ) )
         {
-            throw new NullPointerException( "level" );
-        }
-
-        if ( this.isLoggable( level ) )
-        {
-            for ( final Listener l : this.getListeners() )
+            try ( final Stream<Listener> s1 = this.getListeners().parallelStream() )
             {
-                l.onLog( level, message, throwable );
-            }
-        }
-    }
-
-    /**
-     * Gets an {@code ExecutorService} used to run tasks in parallel.
-     *
-     * @return An {@code ExecutorService} used to run tasks in parallel or {@code null}, if no such service has been
-     * provided by an application.
-     *
-     * @since 1.10
-     *
-     * @see #setExecutorService(java.util.concurrent.ExecutorService)
-     */
-    public final ExecutorService getExecutorService()
-    {
-        return this.executorService;
-    }
-
-    /**
-     * Sets the {@code ExecutorService} to be used to run tasks in parallel.
-     * <p>
-     * The {@code ExecutorService} to be used to run tasks in parallel is an optional entity. If no such service is
-     * provided by an application, no parallelization is performed. Configuration or lifecycle management of the given
-     * {@code ExecutorService} is the responsibility of the application.
-     * </p>
-     *
-     * @param value The {@code ExecutorService} to be used to run tasks in parallel or {@code null}, to disable any
-     * parallelization.
-     *
-     * @since 1.10
-     *
-     * @see #getExecutorService()
-     */
-    public final void setExecutorService( final ExecutorService value )
-    {
-        this.executorService = value;
-
-        if ( this.executorService != null )
-        {
-            this.getModletSchemaSystemId();
-            this.getLogLevel();
-
-            if ( this instanceof DefaultModelContext )
-            {
-                ( (DefaultModelContext) this ).getProviderLocation();
-                ( (DefaultModelContext) this ).getPlatformProviderLocation();
+                s1.forEach( l  -> l.onLog( level, message, throwable ) );
             }
         }
     }
@@ -712,12 +624,15 @@ public abstract class ModelContext
                                                   System.nanoTime() - t0 ), null );
             }
 
-            for ( final ModelValidationReport.Detail detail : report.getDetails() )
+            try ( final Stream<ModelValidationReport.Detail> s1 = report.getDetails().parallelStream() )
             {
-                if ( this.isLoggable( detail.getLevel() ) )
+                s1.forEach( d  ->
                 {
-                    this.log( detail.getLevel(), detail.getMessage(), null );
-                }
+                    if ( isLoggable( d.getLevel() ) )
+                    {
+                        log( d.getLevel(), d.getMessage(), null );
+                    }
+                } );
             }
 
             if ( !report.isModelValid() )
@@ -756,14 +671,9 @@ public abstract class ModelContext
      */
     public Class<?> findClass( final String name ) throws ModelException
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-
         try
         {
-            return Class.forName( name, false, this.getClassLoader() );
+            return Class.forName( Objects.requireNonNull( name, "name" ), false, this.getClassLoader() );
         }
         catch ( final ClassNotFoundException e )
         {
@@ -790,15 +700,10 @@ public abstract class ModelContext
      */
     public URL findResource( final String name ) throws ModelException
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-
         final long t0 = System.nanoTime();
         final URL resource = this.getClassLoader() == null
-                                 ? ClassLoader.getSystemResource( name )
-                                 : this.getClassLoader().getResource( name );
+                                 ? ClassLoader.getSystemResource( Objects.requireNonNull( name, "name" ) )
+                                 : this.getClassLoader().getResource( Objects.requireNonNull( name, "name" ) );
 
         if ( this.isLoggable( Level.FINE ) )
         {
@@ -823,17 +728,13 @@ public abstract class ModelContext
      */
     public Enumeration<URL> findResources( final String name ) throws ModelException
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-
         try
         {
             final long t0 = System.nanoTime();
-            final Enumeration<URL> resources = this.getClassLoader() == null
-                                                   ? ClassLoader.getSystemResources( name )
-                                                   : this.getClassLoader().getResources( name );
+            final Enumeration<URL> resources =
+                this.getClassLoader() == null
+                    ? ClassLoader.getSystemResources( Objects.requireNonNull( name, "name" ) )
+                    : this.getClassLoader().getResources( Objects.requireNonNull( name, "name" ) );
 
             if ( this.isLoggable( Level.FINE ) )
             {

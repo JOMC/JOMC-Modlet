@@ -31,11 +31,12 @@
 package org.jomc.modlet;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.JAXBElement;
 
 /**
@@ -180,7 +181,7 @@ public class ModelValidationReport implements Serializable
      *
      * @serial
      */
-    private final List<Detail> details = new CopyOnWriteArrayList<Detail>();
+    private final List<Detail> details = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new {@code ModelValidationReport} instance.
@@ -214,21 +215,13 @@ public class ModelValidationReport implements Serializable
      */
     public List<Detail> getDetails( final String identifier )
     {
-        final List<Detail> list = new ArrayList<Detail>( this.getDetails().size() );
-
-        for ( final Detail detail : this.getDetails() )
+        try ( final Stream<Detail> s1 = this.getDetails().parallelStream() )
         {
-            if ( identifier == null && detail.getIdentifier() == null )
-            {
-                list.add( detail );
-            }
-            if ( identifier != null && identifier.equals( detail.getIdentifier() ) )
-            {
-                list.add( detail );
-            }
+            return Collections.unmodifiableList(
+                s1.filter( d  -> ( identifier == null && d.getIdentifier() == null )
+                                      || ( identifier != null && identifier.equals( d.getIdentifier() ) ) ).
+                    collect( Collectors.toList() ) );
         }
-
-        return Collections.unmodifiableList( list );
     }
 
     /**
@@ -241,15 +234,10 @@ public class ModelValidationReport implements Serializable
      */
     public boolean isModelValid()
     {
-        for ( final Detail detail : this.getDetails() )
+        try ( final Stream<Detail> s1 = this.getDetails().parallelStream() )
         {
-            if ( detail.getLevel() != null && detail.getLevel().intValue() > Level.WARNING.intValue() )
-            {
-                return false;
-            }
+            return s1.noneMatch( d  -> d.getLevel() != null && d.getLevel().intValue() > Level.WARNING.intValue() );
         }
-
-        return true;
     }
 
 }

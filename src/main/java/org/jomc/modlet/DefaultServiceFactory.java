@@ -33,16 +33,14 @@ package org.jomc.modlet;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Default {@code ServiceFactory} implementation.
@@ -130,6 +128,7 @@ public class DefaultServiceFactory implements ServiceFactory
      * @see #getDefaultOrdinal()
      * @see #setOrdinal(java.lang.Integer)
      */
+    @Override
     public final int getOrdinal()
     {
         if ( this.ordinal == null )
@@ -152,21 +151,13 @@ public class DefaultServiceFactory implements ServiceFactory
         this.ordinal = value;
     }
 
+    @Override
     public <T> T createServiceObject( final ModelContext context, final Service service, final Class<T> type )
         throws ModelException
     {
-        if ( context == null )
-        {
-            throw new NullPointerException( "context" );
-        }
-        if ( service == null )
-        {
-            throw new NullPointerException( "service" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
+        Objects.requireNonNull( context, "context" );
+        Objects.requireNonNull( service, "service" );
+        Objects.requireNonNull( type, "type" );
 
         try
         {
@@ -192,101 +183,45 @@ public class DefaultServiceFactory implements ServiceFactory
 
             if ( !service.getProperty().isEmpty() )
             {
-                if ( context.getExecutorService() != null && service.getProperty().size() > 1 )
+                try ( final Stream<Property> s1 = service.getProperty().parallelStream() )
                 {
-                    final List<Callable<Void>> tasks =
-                        new ArrayList<Callable<Void>>( service.getProperty().size() );
-
-                    for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+                    final class InitPropertyResult
                     {
-                        final Property p = service.getProperty().get( i );
 
-                        tasks.add( new Callable<Void>()
+                        ModelException modelException;
+
+                    }
+
+                    final Map<Boolean, List<InitPropertyResult>> results = s1.map( p  ->
+                    {
+                        final InitPropertyResult r = new InitPropertyResult();
+
+                        try
                         {
+                            initProperty( context, serviceObject, p.getName(), p.getValue() );
+                        }
+                        catch ( final ModelException e )
+                        {
+                            r.modelException = e;
+                        }
 
-                            public Void call() throws ModelException
-                            {
-                                initProperty( context, serviceObject, p.getName(), p.getValue() );
-                                return null;
-                            }
+                        return r;
+                    } ).collect( Collectors.groupingBy( r  -> r.modelException == null ) );
 
-                        } );
-                    }
+                    final List<InitPropertyResult> exceptionResults = results.get( false );
 
-                    for ( final Future<Void> task : context.getExecutorService().invokeAll( tasks ) )
+                    if ( exceptionResults != null && !exceptionResults.isEmpty() )
                     {
-                        task.get();
-                    }
-                }
-                else
-                {
-                    for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
-                    {
-                        final Property p = service.getProperty().get( i );
-                        this.initProperty( context, serviceObject, p.getName(), p.getValue() );
+                        throw exceptionResults.get( 0 ).modelException;
                     }
                 }
             }
 
             return serviceObject;
         }
-        catch ( final CancellationException e )
+        catch ( final InstantiationException | IllegalAccessException e )
         {
             throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
-        }
-        catch ( final InterruptedException e )
-        {
-            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
-        }
-        catch ( final InstantiationException e )
-        {
-            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
-        }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( "failedCreatingObject", service.getClazz() ), e );
-        }
-        catch ( final ExecutionException e )
-        {
-            if ( e.getCause() instanceof ModelException )
-            {
-                throw (ModelException) e.getCause();
-            }
-            else if ( e.getCause() instanceof RuntimeException )
-            {
-                // The fork-join framework breaks the exception handling contract of Callable by re-throwing any
-                // exception caught using a runtime exception.
-                if ( e.getCause().getCause() instanceof ModelException )
-                {
-                    throw (ModelException) e.getCause().getCause();
-                }
-                else if ( e.getCause().getCause() instanceof RuntimeException )
-                {
-                    throw (RuntimeException) e.getCause().getCause();
-                }
-                else if ( e.getCause().getCause() instanceof Error )
-                {
-                    throw (Error) e.getCause().getCause();
-                }
-                else if ( e.getCause().getCause() instanceof Exception )
-                {
-                    // Checked exception not declared to be thrown by the Callable's 'call' method.
-                    throw new UndeclaredThrowableException( e.getCause().getCause() );
-                }
-                else
-                {
-                    throw (RuntimeException) e.getCause();
-                }
-            }
-            else if ( e.getCause() instanceof Error )
-            {
-                throw (Error) e.getCause();
-            }
-            else
-            {
-                // Checked exception not declared to be thrown by the Callable's 'call' method.
-                throw new UndeclaredThrowableException( e.getCause() );
-            }
         }
     }
 
@@ -294,14 +229,8 @@ public class DefaultServiceFactory implements ServiceFactory
                                    final String propertyValue )
         throws ModelException
     {
-        if ( object == null )
-        {
-            throw new NullPointerException( "object" );
-        }
-        if ( propertyName == null )
-        {
-            throw new NullPointerException( "propertyName" );
-        }
+        Objects.requireNonNull( object, "object" );
+        Objects.requireNonNull( propertyName, "propertyName" );
 
         try
         {
@@ -313,7 +242,7 @@ public class DefaultServiceFactory implements ServiceFactory
             }
 
             final String methodNameSuffix = String.valueOf( chars );
-            Method getterMethod = null;
+            Method getterMethod;
 
             try
             {
@@ -423,7 +352,7 @@ public class DefaultServiceFactory implements ServiceFactory
                 unboxedPropertyType = Double.TYPE;
             }
 
-            Method setterMethod = null;
+            Method setterMethod;
 
             try
             {
@@ -529,19 +458,7 @@ public class DefaultServiceFactory implements ServiceFactory
                 setterMethod.invoke( object, (Object) null );
             }
         }
-        catch ( final IllegalAccessException e )
-        {
-            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
-                                                  object.getClass().getName() ), e );
-
-        }
-        catch ( final InvocationTargetException e )
-        {
-            throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
-                                                  object.getClass().getName() ), e );
-
-        }
-        catch ( final InstantiationException e )
+        catch ( final IllegalAccessException | InvocationTargetException | InstantiationException e )
         {
             throw new ModelException( getMessage( "failedSettingProperty", propertyName, object.toString(),
                                                   object.getClass().getName() ), e );

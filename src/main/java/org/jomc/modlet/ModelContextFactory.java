@@ -79,17 +79,10 @@ public abstract class ModelContextFactory
      */
     public static ModelContextFactory newInstance() throws ModelContextFactoryError
     {
-        return newInstance( AccessController.doPrivileged( new PrivilegedAction<String>()
-        {
+        return newInstance( AccessController.doPrivileged( (PrivilegedAction<String>) ()  ->
+            System.getProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY,
+                                DEFAULT_MODEL_CONTEXT_FACTORY_CLASS_NAME ) ) );
 
-            public String run()
-            {
-                return System.getProperty( MODEL_CONTEXT_FACTORY_CLASS_NAME_PROPERTY,
-                                           DEFAULT_MODEL_CONTEXT_FACTORY_CLASS_NAME );
-
-            }
-
-        } ) );
     }
 
     /**

@@ -30,7 +30,6 @@
  */
 package org.jomc.modlet.test;
 
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import org.jomc.modlet.DefaultModletProcessor;
 import org.jomc.modlet.ModelContext;
@@ -38,7 +37,6 @@ import org.jomc.modlet.ModelContextFactory;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModletProcessor;
 import org.jomc.modlet.Modlets;
-import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -59,13 +57,6 @@ public class ModletProcessorTest
      * @since 1.10
      */
     private volatile ModelContext modelContext;
-
-    /**
-     * The {@code ExecutorService} backing the tests.
-     *
-     * @since 1.10
-     */
-    private volatile ExecutorService executorService;
 
     /**
      * The {@code ModletProcessor} instance tests are performed with.
@@ -95,7 +86,6 @@ public class ModletProcessorTest
         if ( this.modelContext == null )
         {
             this.modelContext = this.newModelContext();
-            this.modelContext.setExecutorService( this.getExecutorService() );
             this.modelContext.getListeners().add( new ModelContext.Listener()
             {
 
@@ -124,50 +114,6 @@ public class ModletProcessorTest
     protected ModelContext newModelContext()
     {
         return ModelContextFactory.newInstance().newModelContext();
-    }
-
-    /**
-     * Gets the {@code ExecutorService} backing the tests.
-     *
-     * @return The {@code ExecutorService} backing the tests.
-     *
-     * @see #newExecutorService()
-     * @since 1.10
-     */
-    public final ExecutorService getExecutorService()
-    {
-        if ( this.executorService == null )
-        {
-            this.executorService = this.newExecutorService();
-        }
-
-        return this.executorService;
-    }
-
-    /**
-     * Creates a new {@code ExecutorService} backing the tests.
-     *
-     * @return A new {@code ExecutorService} backing the tests, or {@code null}.
-     *
-     * @see #getExecutorService()
-     * @since 1.10
-     */
-    protected ExecutorService newExecutorService()
-    {
-        return null;
-    }
-
-    /**
-     * Shuts down the {@code ExecutorService} backing the tests, if not {@code null}.
-     */
-    @After
-    public final void shutdown()
-    {
-        if ( this.executorService != null )
-        {
-            this.executorService.shutdown();
-            this.executorService = null;
-        }
     }
 
     /**

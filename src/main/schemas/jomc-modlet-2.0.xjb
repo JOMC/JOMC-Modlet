@@ -41,7 +41,9 @@
     <!-- *********************************************************************************************************** -->
     <jaxb:bindings node="xs:complexType[@name='ModletObject']">
       <ci:code><![CDATA[
-    /** Public identifier of the modlet model. */
+    /**
+     * Public identifier of the modlet model.
+     */
     public static final String MODEL_PUBLIC_ID = "http://jomc.org/modlet";
 
     /**
@@ -67,47 +69,32 @@
                                                                final String localPart,
                                                                final Class<T> type )
     {
-        if ( any == null )
-        {
-            throw new NullPointerException( "any" );
-        }
-        if ( namespaceURI == null )
-        {
-            throw new NullPointerException( "namespaceURI" );
-        }
-        if ( localPart == null )
-        {
-            throw new NullPointerException( "localPart" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
+        java.util.Objects.requireNonNull( any, "any" );
+        java.util.Objects.requireNonNull( namespaceURI, "namespaceURI" );
+        java.util.Objects.requireNonNull( localPart, "localPart" );
+        java.util.Objects.requireNonNull( type, "type" );
 
         javax.xml.bind.JAXBElement<?> anyElement = null;
 
-        for ( int i = 0, s0 = any.size(); i < s0; i++ )
+        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
         {
-            final Object o = any.get( i );
+            final java.util.List<javax.xml.bind.JAXBElement<?>> candidates =
+                s1.filter( o  -> o instanceof javax.xml.bind.JAXBElement<?> ).
+                    map( o  -> (javax.xml.bind.JAXBElement<?>) o ).
+                    filter( e  -> namespaceURI.equals( e.getName().getNamespaceURI() )
+                                       && localPart.equals( e.getName().getLocalPart() ) ).
+                    collect( java.util.stream.Collectors.toList() );
 
-            if ( o instanceof javax.xml.bind.JAXBElement<?> )
+            if ( candidates.size() > 1 )
             {
-                final javax.xml.bind.JAXBElement<?> e = (javax.xml.bind.JAXBElement<?>) o;
+                throw new IllegalStateException( getMessage( "nonUniqueElement", this.getClass().getName(),
+                                                             namespaceURI, localPart ) );
 
-                if ( namespaceURI.equals( e.getName().getNamespaceURI() )
-                     && localPart.equals( e.getName().getLocalPart() ) )
-                {
-                    if ( anyElement == null )
-                    {
-                        anyElement = e;
-                    }
-                    else
-                    {
-                        throw new IllegalStateException( getMessage( "nonUniqueElement", this.getClass().getName(),
-                                                                     namespaceURI, localPart ) );
+            }
 
-                    }
-                }
+            if ( !candidates.isEmpty() )
+            {
+                anyElement = candidates.get( 0 );
             }
         }
 
@@ -145,44 +132,27 @@
                                                                                 final String localPart,
                                                                                 final Class<T> type )
     {
-        if ( any == null )
-        {
-            throw new NullPointerException( "any" );
-        }
-        if ( namespaceURI == null )
-        {
-            throw new NullPointerException( "namespaceURI" );
-        }
-        if ( localPart == null )
-        {
-            throw new NullPointerException( "localPart" );
-        }
-        if ( type == null )
-        {
-            throw new NullPointerException( "type" );
-        }
+        java.util.Objects.requireNonNull( any, "any" );
+        java.util.Objects.requireNonNull( namespaceURI, "namespaceURI" );
+        java.util.Objects.requireNonNull( localPart, "localPart" );
+        java.util.Objects.requireNonNull( type, "type" );
 
-        final java.util.List<javax.xml.bind.JAXBElement<T>> anyElements =
-            new java.util.ArrayList<javax.xml.bind.JAXBElement<T>>( any.size() );
+        final java.util.List<javax.xml.bind.JAXBElement<T>> anyElements = new java.util.ArrayList<>( any.size() );
 
-        for ( int i = 0, s0 = any.size(); i < s0; i++ )
+        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
         {
-            final Object o = any.get( i );
-
-            if ( o instanceof javax.xml.bind.JAXBElement<?> )
-            {
-                final javax.xml.bind.JAXBElement<?> e = (javax.xml.bind.JAXBElement<?>) o;
-
-                if ( namespaceURI.equals( e.getName().getNamespaceURI() )
-                     && localPart.equals( e.getName().getLocalPart() )
-                     && e.getValue() != null && e.getValue().getClass().equals( type ) )
+            anyElements.addAll( s1.filter( o  -> o instanceof javax.xml.bind.JAXBElement<?> ).
+                map( o  -> (javax.xml.bind.JAXBElement<?>) o ).
+                filter( e  -> namespaceURI.equals( e.getName().getNamespaceURI() )
+                                   && localPart.equals( e.getName().getLocalPart() )
+                                   && e.getValue() != null && e.getValue().getClass().equals( type ) ).
+                map( e  ->
                 {
-                    @SuppressWarnings( "unchecked" ) final javax.xml.bind.JAXBElement<T> anyElement =
-                        (javax.xml.bind.JAXBElement<T>) e;
+                    @SuppressWarnings( "unchecked" )
+                    final javax.xml.bind.JAXBElement<T> g = (javax.xml.bind.JAXBElement<T>) e;
+                    return g;
+                } ).collect( java.util.stream.Collectors.toList() ) );
 
-                    anyElements.add( anyElement );
-                }
-            }
         }
 
         return java.util.Collections.unmodifiableList( anyElements );
@@ -202,39 +172,35 @@
      */
     protected <T> T getAnyObject( final java.util.List<Object> any, final Class<T> clazz )
     {
-        if ( any == null )
-        {
-            throw new NullPointerException( "any" );
-        }
-        if ( clazz == null )
-        {
-            throw new NullPointerException( "clazz" );
-        }
+        java.util.Objects.requireNonNull( any, "any" );
+        java.util.Objects.requireNonNull( clazz, "clazz" );
 
         T anyObject = null;
 
-        for ( int i = 0, s0 = any.size(); i < s0; i++ )
+        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
         {
-            Object o = any.get( i );
-
-            if ( o instanceof javax.xml.bind.JAXBElement<?> )
+            final java.util.List<?> candidates = s1.map( o  ->
             {
-                o = ( (javax.xml.bind.JAXBElement<?>) o ).getValue();
+                Object mapped = o;
+
+                if ( o instanceof javax.xml.bind.JAXBElement<?> )
+                {
+                    mapped = ( (javax.xml.bind.JAXBElement<?>) o ).getValue();
+                }
+
+                return mapped;
+            } ).filter( o  -> clazz.equals( o.getClass() ) ).collect( java.util.stream.Collectors.toList() );
+
+            if ( candidates.size() > 1 )
+            {
+                throw new IllegalStateException( getMessage( "nonUniqueObject", this.getClass().getName(),
+                                                             clazz.getName() ) );
+
             }
-
-            if ( clazz.equals( o.getClass() ) )
+            if ( !candidates.isEmpty() )
             {
-                if ( anyObject == null )
-                {
-                    @SuppressWarnings( "unchecked" ) final T object = (T) o;
-                    anyObject = object;
-                }
-                else
-                {
-                    throw new IllegalStateException( getMessage( "nonUniqueObject", this.getClass().getName(),
-                                                                 clazz.getName() ) );
-
-                }
+                @SuppressWarnings( "unchecked" ) final T object = (T) candidates.get( 0 );
+                anyObject = object;
             }
         }
 
@@ -255,31 +221,31 @@
      */
     protected <T> java.util.List<T> getAnyObjects( final java.util.List<Object> any, final Class<T> clazz )
     {
-        if ( any == null )
-        {
-            throw new NullPointerException( "any" );
-        }
-        if ( clazz == null )
-        {
-            throw new NullPointerException( "namespaceURI" );
-        }
+        java.util.Objects.requireNonNull( any, "any" );
+        java.util.Objects.requireNonNull( clazz, "clazz" );
 
-        final java.util.List<T> anyElements = new java.util.ArrayList<T>( any.size() );
+        final java.util.List<T> anyElements = new java.util.ArrayList<>( any.size() );
 
-        for ( int i = 0, s0 = any.size(); i < s0; i++ )
+        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
         {
-            Object o = any.get( i );
-
-            if ( o instanceof javax.xml.bind.JAXBElement<?> )
+            anyElements.addAll( s1.map( o  ->
             {
-                o = ( (javax.xml.bind.JAXBElement<?>) o ).getValue();
-            }
+                Object mapped = o;
 
-            if ( clazz.equals( o.getClass() ) )
-            {
-                @SuppressWarnings( "unchecked" ) final T object = (T) o;
-                anyElements.add( object );
-            }
+                if ( o instanceof javax.xml.bind.JAXBElement<?> )
+                {
+                    mapped = ( (javax.xml.bind.JAXBElement<?>) o ).getValue();
+                }
+
+                return mapped;
+            } ).filter( o  -> clazz.equals( o.getClass() ) ).
+                map( o  ->
+                {
+                    @SuppressWarnings( "unchecked" ) final T object = (T) o;
+                    return object;
+                } ).
+                collect( java.util.stream.Collectors.toList() ) );
+
         }
 
         return java.util.Collections.unmodifiableList( anyElements );
@@ -407,22 +373,12 @@
      */
     public Modlet getModlet( final String name )
     {
-        if ( name == null )
+        java.util.Objects.requireNonNull( name, "name" );
+        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
         {
-            throw new NullPointerException( "name" );
+            final java.util.Optional<Modlet> candidate = s1.filter( m  -> name.equals( m.getName() ) ).findFirst();
+            return candidate.isPresent() ? candidate.get() : null;
         }
-
-        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
-        {
-            final Modlet m = this.getModlet().get( i );
-
-            if ( name.equals( m.getName() ) )
-            {
-                return m;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -440,75 +396,70 @@
      */
     public Modlet getMergedModlet( final String name, final String model )
     {
-        if ( name == null )
-        {
-            throw new NullPointerException( "name" );
-        }
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
         final Modlet mergedModlet = new Modlet();
-        mergedModlet.setName( name );
-        mergedModlet.setModel( model );
+        mergedModlet.setName( java.util.Objects.requireNonNull( name, "name" ) );
+        mergedModlet.setModel( java.util.Objects.requireNonNull( model, "model" ) );
 
-        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
+        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
         {
-            final Modlet m = this.getModlet().get( i );
+            s1.reduce( mergedModlet, ( m1, m2 )  ->
+                   {
+                       if ( m1.getModel().equals( m2.getModel() ) )
+                       {
+                           if ( m2.getSchemas() != null )
+                           {
+                               if ( m1.getSchemas() == null )
+                               {
+                                   m1.setSchemas( new Schemas() );
+                               }
 
-            if ( model.equals( m.getModel() ) )
-            {
-                if ( m.getSchemas() != null )
-                {
-                    if ( mergedModlet.getSchemas() == null )
-                    {
-                        mergedModlet.setSchemas( new Schemas() );
-                    }
+                               try ( final java.util.stream.Stream<Schema> s2 =
+                                   m2.getSchemas().getSchema().parallelStream() )
+                               {
+                                   m1.getSchemas().getSchema().addAll(
+                                       s2.filter( s  -> m1.getSchemas().getSchemaBySystemId(
+                                           s.getSystemId() ) == null ).
+                                           collect( java.util.stream.Collectors.toList() ) );
 
-                    for ( int j = 0, s1 = m.getSchemas().getSchema().size(); j < s1; j++ )
-                    {
-                        final Schema s = m.getSchemas().getSchema().get( j );
+                               }
+                           }
 
-                        if ( mergedModlet.getSchemas().getSchemaBySystemId( s.getSystemId() ) == null )
-                        {
-                            mergedModlet.getSchemas().getSchema().add( s );
-                        }
-                    }
-                }
+                           if ( m2.getServices() != null )
+                           {
+                               if ( m1.getServices() == null )
+                               {
+                                   m1.setServices( new Services() );
+                               }
 
-                if ( m.getServices() != null )
-                {
-                    if ( mergedModlet.getServices() == null )
-                    {
-                        mergedModlet.setServices( new Services() );
-                    }
+                               try ( final java.util.stream.Stream<Service> s2 =
+                                   m2.getServices().getService().parallelStream() )
+                               {
+                                   m1.getServices().getService().addAll( s2.map( sl  ->
+                                   {
+                                       final java.util.concurrent.atomic.AtomicBoolean merged =
+                                           new java.util.concurrent.atomic.AtomicBoolean();
 
-                    for ( int j = 0, s1 = m.getServices().getService().size(); j < s1; j++ )
-                    {
-                        final Service s = m.getServices().getService().get( j );
-                        boolean merged = false;
+                                       try ( final java.util.stream.Stream<Service> s3 =
+                                           m1.getServices().getServices( sl.getIdentifier() ).parallelStream() )
+                                       {
+                                           s3.filter( s  -> s.getClazz().equals( sl.getClazz() )
+                                                                 && s.getOrdinal() < sl.getOrdinal() ).
+                                               forEach( s  ->
+                                               {
+                                                   s.setOrdinal( sl.getOrdinal() );
+                                                   merged.set( true );
+                                               } );
 
-                        for ( Service mergedService : mergedModlet.getServices().getServices( s.getIdentifier() ) )
-                        {
-                            if ( mergedService.getClazz().equals( s.getClazz() ) )
-                            {
-                                if ( mergedService.getOrdinal() < s.getOrdinal() )
-                                {
-                                    mergedService.setOrdinal( s.getOrdinal() );
-                                }
+                                       }
 
-                                merged = true;
-                            }
-                        }
+                                       return merged.get() ? null : sl;
+                                   } ).filter( s  -> s != null ).collect( java.util.stream.Collectors.toList() ) );
+                               }
+                           }
+                       }
 
-                        if ( !merged )
-                        {
-                            mergedModlet.getServices().getService().add( s );
-                        }
-                    }
-                }
-            }
+                       return m1;
+                   } );
         }
 
         return mergedModlet;
@@ -528,31 +479,25 @@
      */
     public Schemas getSchemas( final String model )
     {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
+        java.util.Objects.requireNonNull( model, "model" );
         final Schemas schemas = new Schemas();
-        boolean modelFound = false;
+        final java.util.concurrent.atomic.AtomicBoolean modelFound = new java.util.concurrent.atomic.AtomicBoolean();
 
-        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
+        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
         {
-            final Modlet m = this.getModlet().get( i );
+            schemas.getSchema().addAll(
+                s1.filter( m  -> m.getSchemas() != null && !m.getSchemas().getSchema().isEmpty()
+                                      && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
+                                           || model.equals( m.getModel() ) ) ).
+                    flatMap( m  ->
+                    {
+                        modelFound.compareAndSet( false, model.equals( m.getModel() ) );
+                        return m.getSchemas().getSchema().parallelStream();
+                    } ).collect( java.util.stream.Collectors.toList() ) );
 
-            if ( m.getSchemas() != null && !m.getSchemas().getSchema().isEmpty()
-                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() ) || model.equals( m.getModel() ) ) )
-            {
-                modelFound |= model.equals( m.getModel() );
-
-                for ( int j = 0, s1 = m.getSchemas().getSchema().size(); j < s1; j++ )
-                {
-                    schemas.getSchema().add( m.getSchemas().getSchema().get( j ) );
-                }
-            }
         }
 
-        return modelFound && !schemas.getSchema().isEmpty() ? schemas : null;
+        return modelFound.get() && !schemas.getSchema().isEmpty() ? schemas : null;
     }
 
     /**
@@ -569,31 +514,25 @@
      */
     public Services getServices( final String model )
     {
-        if ( model == null )
-        {
-            throw new NullPointerException( "model" );
-        }
-
+        java.util.Objects.requireNonNull( model, "model" );
         final Services services = new Services();
-        boolean modelFound = false;
+        final java.util.concurrent.atomic.AtomicBoolean modelFound = new java.util.concurrent.atomic.AtomicBoolean();
 
-        for ( int i = 0, s0 = this.getModlet().size(); i < s0; i++ )
+        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
         {
-            final Modlet m = this.getModlet().get( i );
+            services.getService().addAll(
+                s1.filter( m  -> m.getServices() != null && !m.getServices().getService().isEmpty()
+                                      && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
+                                           || model.equals( m.getModel() ) ) ).
+                    flatMap( m  ->
+                    {
+                        modelFound.compareAndSet( false, model.equals( m.getModel() ) );
+                        return m.getServices().getService().parallelStream();
+                    } ).collect( java.util.stream.Collectors.toList() ) );
 
-            if ( m.getServices() != null && !m.getServices().getService().isEmpty()
-                     && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() ) || model.equals( m.getModel() ) ) )
-            {
-                modelFound |= model.equals( m.getModel() );
-
-                for ( int j = 0, s1 = m.getServices().getService().size(); j < s1; j++ )
-                {
-                    services.getService().add( m.getServices().getService().get( j ) );
-                }
-            }
         }
 
-        return modelFound && !services.getService().isEmpty() ? services : null;
+        return modelFound.get() && !services.getService().isEmpty() ? services : null;
     }]]>
       </ci:code>
     </jaxb:bindings>
@@ -725,22 +664,14 @@
      */
     public Schema getSchemaByPublicId( final String publicId )
     {
-        if ( publicId == null )
+        java.util.Objects.requireNonNull( publicId, "publicId" );
+        try ( final java.util.stream.Stream<Schema> s1 = this.getSchema().parallelStream() )
         {
-            throw new NullPointerException( "publicId" );
+            final java.util.Optional<Schema> candidate =
+                s1.filter( s  -> publicId.equals( s.getPublicId() ) ).findFirst();
+
+            return candidate.isPresent() ? candidate.get() : null;
         }
-
-        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
-        {
-            final Schema s = this.getSchema().get( i );
-
-            if ( publicId.equals( s.getPublicId() ) )
-            {
-                return s;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -757,22 +688,14 @@
      */
     public Schema getSchemaBySystemId( final String systemId )
     {
-        if ( systemId == null )
+        java.util.Objects.requireNonNull( systemId, "systemId" );
+        try ( final java.util.stream.Stream<Schema> s1 = this.getSchema().parallelStream() )
         {
-            throw new NullPointerException( "systemId" );
+            final java.util.Optional<Schema> candidate =
+                s1.filter( s  -> systemId.equals( s.getSystemId() ) ).findFirst();
+
+            return candidate.isPresent() ? candidate.get() : null;
         }
-
-        for ( int i = 0, s0 = this.getSchema().size(); i < s0; i++ )
-        {
-            final Schema s = this.getSchema().get( i );
-
-            if ( systemId.equals( s.getSystemId() ) )
-            {
-                return s;
-            }
-        }
-
-        return null;
     }]]>
       </ci:code>
     </jaxb:bindings>
@@ -904,33 +827,17 @@
      */
     public List<Service> getServices( final String identifier )
     {
-        if ( identifier == null )
+        java.util.Objects.requireNonNull( identifier, "identifier" );
+        final java.util.List<Service> services = new java.util.ArrayList<>( this.getService().size() );
+
+        try ( final java.util.stream.Stream<Service> s1 = this.getService().parallelStream() )
         {
-            throw new NullPointerException( "identifier" );
+            services.addAll( s1.filter( s  -> identifier.equals( s.getIdentifier() ) ).
+                collect( java.util.stream.Collectors.toList() ) );
+
         }
 
-        final java.util.List<Service> services = new java.util.ArrayList<Service>( this.getService().size() );
-
-        for ( int i = 0, s0 = this.getService().size(); i < s0; i++ )
-        {
-            final Service s = this.getService().get( i );
-
-            if ( identifier.equals( s.getIdentifier() ) )
-            {
-                services.add( s );
-            }
-        }
-
-        java.util.Collections.sort( services, new java.util.Comparator<Service>()
-        {
-
-            public int compare( final Service s1, final Service s2 )
-            {
-                return s1.getOrdinal() - s2.getOrdinal();
-            }
-
-        } );
-
+        java.util.Collections.sort( services, ( s1, s2 )  -> s1.getOrdinal() - s2.getOrdinal() );
         return java.util.Collections.unmodifiableList( services );
     }
 
@@ -948,14 +855,9 @@
      */
     public List<Service> getServices( final Class<?> clazz )
     {
-        if ( clazz == null )
-        {
-            throw new NullPointerException( "clazz" );
-        }
-
+        java.util.Objects.requireNonNull( clazz, "clazz" );
         return this.getServices( clazz.getName() );
-    }
-]]>
+    }]]>
       </ci:code>
     </jaxb:bindings>
     <!-- *********************************************************************************************************** -->
