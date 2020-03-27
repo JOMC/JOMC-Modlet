@@ -47,7 +47,7 @@
     /**
      * Public identifier of the modlet schema.
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement.
+     * @deprecated As of 1.8, removed without replacement.
      */
     @Deprecated
     public static final java.net.URI PUBLIC_ID;
@@ -77,7 +77,7 @@
      * @throws NullPointerException if {@code any}, {@code namespaceURI} or {@code localPart} is {@code null}.
      * @throws IllegalStateException if {@code any} contains more than one matching element.
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -140,7 +140,7 @@
      *
      * @throws NullPointerException if {@code any}, {@code namespaceURI} or {@code localPart} is {@code null}.
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElements(java.util.List, java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -456,7 +456,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -479,7 +479,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -755,7 +755,7 @@
      * @see Modlet#getSchemas()
      * @see Schemas#getSchemasByPublicId(java.net.URI)
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
     @Deprecated
     public Schemas getSchemas( final java.net.URI publicId )
@@ -860,7 +860,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -883,7 +883,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -1060,7 +1060,7 @@
      * @see #getSchema()
      * @see Schema#getPublicIdUri()
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
     @Deprecated
     public List<Schema> getSchemasByPublicId( final java.net.URI publicId )
@@ -1124,7 +1124,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -1147,7 +1147,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -1250,7 +1250,7 @@
      * @return The public identifier of the referenced schema as an {@code URI} or {@code null}.
      *
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
     @Deprecated
     public java.net.URI getPublicIdUri()
@@ -1278,7 +1278,7 @@
      * @return The system identifier of the referenced schema as an {@code URI} or {@code null}.
      *
      * @since 1.2
-     * @deprecated As of JOMC 1.8, removed without replacement. This method will be removed in JOMC 2.0.
+     * @deprecated As of 1.8, removed without replacement. This method will be removed in JOMC 2.0.
      */
     @Deprecated
     public java.net.URI getSystemIdUri()
@@ -1404,7 +1404,7 @@
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElement(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated
@@ -1427,7 +1427,7 @@
      *
      * @see #getAnyElements(java.util.List, java.lang.String, java.lang.String)
      *
-     * @deprecated As of JOMC 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
+     * @deprecated As of 1.1, please use method {@link #getAnyElements(java.lang.String, java.lang.String, java.lang.Class)}.
      * This method will be removed in version 2.0.
      */
     @Deprecated

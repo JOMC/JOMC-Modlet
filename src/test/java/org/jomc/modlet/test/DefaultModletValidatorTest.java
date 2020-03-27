@@ -31,6 +31,11 @@
 package org.jomc.modlet.test;
 
 import org.jomc.modlet.DefaultModletValidator;
+import org.jomc.modlet.ModelValidationReport;
+import org.jomc.modlet.Modlet;
+import org.jomc.modlet.Modlets;
+import org.jomc.modlet.Schema;
+import org.jomc.modlet.Schemas;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -127,6 +132,44 @@ public class DefaultModletValidatorTest extends ModletValidatorTest
 
         DefaultModletValidator.setDefaultOrdinal( null );
         this.getModletValidator().setOrdinal( null );
+    }
+
+    @Test
+    public final void testDefaultValidateModlets() throws Exception
+    {
+
+        final Modlets modlets = new Modlets();
+
+        for ( int i = 0; i < 100; i++ )
+        {
+            final Modlet modlet = new Modlet();
+            modlets.getModlet().add( modlet );
+
+            modlet.setModel( "TEST" );
+            modlet.setName( Integer.toString( i ) );
+
+            final Schemas schemas = new Schemas();
+            modlet.setSchemas( schemas );
+
+            for ( int j = 0; j < 100; j++ )
+            {
+                final Schema schema = new Schema();
+                schemas.getSchema().add( schema );
+
+                schema.setPublicId( "PUBLIC ID" );
+                schema.setSystemId( "SYSTEM_ID" );
+            }
+        }
+
+        final ModelValidationReport report = this.getModletValidator().
+            validateModlets( this.getModelContext(), modlets );
+
+        assertTrue( "Unexpected number of report details. Expected 999999, got " + report.getDetails().size() + ".",
+                    report.getDetails( "MODEL_SCHEMA_PUBLIC_ID_CONSTRAINT" ).size() == 9999 );
+
+        assertTrue( "Unexpected number of report details. Expected 999999, got " + report.getDetails().size() + ".",
+                    report.getDetails( "MODEL_SCHEMA_SYSTEM_ID_CONSTRAINT" ).size() == 9999 );
+
     }
 
 }
