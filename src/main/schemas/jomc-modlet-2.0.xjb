@@ -76,14 +76,20 @@
 
         javax.xml.bind.JAXBElement<?> anyElement = null;
 
-        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
+        try ( final java.util.stream.Stream<?> st0 = any.parallelStream().unordered() )
         {
             final java.util.List<javax.xml.bind.JAXBElement<?>> candidates =
-                s1.filter( o  -> o instanceof javax.xml.bind.JAXBElement<?> ).
+                st0.filter( o  -> o instanceof javax.xml.bind.JAXBElement<?> ).
                     map( o  -> (javax.xml.bind.JAXBElement<?>) o ).
                     filter( e  -> namespaceURI.equals( e.getName().getNamespaceURI() )
                                        && localPart.equals( e.getName().getLocalPart() ) ).
-                    collect( java.util.stream.Collectors.toList() );
+                    collect( java.util.stream.Collector.of( java.util.concurrent.CopyOnWriteArrayList::new,
+                                                            java.util.List::add, ( l1, l2 )  ->
+                                                        {
+                                                            l1.addAll( l2 );
+                                                            return l1;
+                                                        }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                            java.util.stream.Collector.Characteristics.UNORDERED ) );
 
             if ( candidates.size() > 1 )
             {
@@ -139,9 +145,9 @@
 
         final java.util.List<javax.xml.bind.JAXBElement<T>> anyElements = new java.util.ArrayList<>( any.size() );
 
-        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
+        try ( final java.util.stream.Stream<?> st0 = any.parallelStream().unordered() )
         {
-            anyElements.addAll( s1.filter( o  -> o instanceof javax.xml.bind.JAXBElement<?> ).
+            anyElements.addAll( st0.filter( o  -> o instanceof javax.xml.bind.JAXBElement<?> ).
                 map( o  -> (javax.xml.bind.JAXBElement<?>) o ).
                 filter( e  -> namespaceURI.equals( e.getName().getNamespaceURI() )
                                    && localPart.equals( e.getName().getLocalPart() )
@@ -151,7 +157,14 @@
                     @SuppressWarnings( "unchecked" )
                     final javax.xml.bind.JAXBElement<T> g = (javax.xml.bind.JAXBElement<T>) e;
                     return g;
-                } ).collect( java.util.stream.Collectors.toList() ) );
+                } ).
+                collect( java.util.stream.Collector.of( java.util.concurrent.CopyOnWriteArrayList::new,
+                                                        java.util.List::add, ( l1, l2 )  ->
+                                                    {
+                                                        l1.addAll( l2 );
+                                                        return l1;
+                                                    }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                        java.util.stream.Collector.Characteristics.UNORDERED ) ) );
 
         }
 
@@ -177,9 +190,9 @@
 
         T anyObject = null;
 
-        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
+        try ( final java.util.stream.Stream<?> st0 = any.parallelStream().unordered() )
         {
-            final java.util.List<?> candidates = s1.map( o  ->
+            final java.util.List<?> candidates = st0.map( o  ->
             {
                 Object mapped = o;
 
@@ -189,7 +202,14 @@
                 }
 
                 return mapped;
-            } ).filter( o  -> clazz.equals( o.getClass() ) ).collect( java.util.stream.Collectors.toList() );
+            } ).filter( o  -> clazz.equals( o.getClass() ) ).
+                collect( java.util.stream.Collector.of( java.util.concurrent.CopyOnWriteArrayList::new,
+                                                        java.util.List::add, ( l1, l2 )  ->
+                                                    {
+                                                        l1.addAll( l2 );
+                                                        return l1;
+                                                    }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                        java.util.stream.Collector.Characteristics.UNORDERED ) );
 
             if ( candidates.size() > 1 )
             {
@@ -226,9 +246,9 @@
 
         final java.util.List<T> anyElements = new java.util.ArrayList<>( any.size() );
 
-        try ( final java.util.stream.Stream<?> s1 = any.parallelStream() )
+        try ( final java.util.stream.Stream<?> st0 = any.parallelStream().unordered() )
         {
-            anyElements.addAll( s1.map( o  ->
+            anyElements.addAll( st0.map( o  ->
             {
                 Object mapped = o;
 
@@ -244,7 +264,13 @@
                     @SuppressWarnings( "unchecked" ) final T object = (T) o;
                     return object;
                 } ).
-                collect( java.util.stream.Collectors.toList() ) );
+                collect( java.util.stream.Collector.of( java.util.concurrent.CopyOnWriteArrayList::new,
+                                                        java.util.List::add, ( l1, l2 )  ->
+                                                    {
+                                                        l1.addAll( l2 );
+                                                        return l1;
+                                                    }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                        java.util.stream.Collector.Characteristics.UNORDERED ) ) );
 
         }
 
@@ -374,10 +400,9 @@
     public Modlet getModlet( final String name )
     {
         java.util.Objects.requireNonNull( name, "name" );
-        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
+        try ( final java.util.stream.Stream<Modlet> st0 = this.getModlet().parallelStream().unordered() )
         {
-            final java.util.Optional<Modlet> candidate = s1.filter( m  -> name.equals( m.getName() ) ).findFirst();
-            return candidate.isPresent() ? candidate.get() : null;
+            return st0.filter( m  -> name.equals( m.getName() ) ).findFirst().orElse( null );
         }
     }
 
@@ -400,66 +425,83 @@
         mergedModlet.setName( java.util.Objects.requireNonNull( name, "name" ) );
         mergedModlet.setModel( java.util.Objects.requireNonNull( model, "model" ) );
 
-        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
+        try ( final java.util.stream.Stream<Modlet> st0 = this.getModlet().parallelStream() )
         {
-            s1.reduce( mergedModlet, ( m1, m2 )  ->
-                   {
-                       if ( m1.getModel().equals( m2.getModel() ) )
-                       {
-                           if ( m2.getSchemas() != null )
-                           {
-                               if ( m1.getSchemas() == null )
-                               {
-                                   m1.setSchemas( new Schemas() );
-                               }
+            st0.reduce( mergedModlet, ( m1, m2 )  ->
+                    {
+                        if ( m1.getModel().equals( m2.getModel() ) )
+                        {
+                            if ( m2.getSchemas() != null )
+                            {
+                                if ( m1.getSchemas() == null )
+                                {
+                                    m1.setSchemas( new Schemas() );
+                                }
 
-                               try ( final java.util.stream.Stream<Schema> s2 =
-                                   m2.getSchemas().getSchema().parallelStream() )
-                               {
-                                   m1.getSchemas().getSchema().addAll(
-                                       s2.filter( s  -> m1.getSchemas().getSchemaBySystemId(
-                                           s.getSystemId() ) == null ).
-                                           collect( java.util.stream.Collectors.toList() ) );
+                                try ( final java.util.stream.Stream<Schema> st1 =
+                                    m2.getSchemas().getSchema().parallelStream().unordered() )
+                                {
+                                    m1.getSchemas().getSchema().addAll(
+                                        st1.filter( s  -> m1.getSchemas().getSchemaBySystemId(
+                                            s.getSystemId() ) == null ).
+                                            collect( java.util.stream.Collector.of(
+                                                java.util.concurrent.CopyOnWriteArrayList::new,
+                                                java.util.List::add, ( l1, l2 )  ->
+                                            {
+                                                l1.addAll( l2 );
+                                                return l1;
+                                            }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                java.util.stream.Collector.Characteristics.UNORDERED ) ) );
 
-                               }
-                           }
+                                }
+                            }
 
-                           if ( m2.getServices() != null )
-                           {
-                               if ( m1.getServices() == null )
-                               {
-                                   m1.setServices( new Services() );
-                               }
+                            if ( m2.getServices() != null )
+                            {
+                                if ( m1.getServices() == null )
+                                {
+                                    m1.setServices( new Services() );
+                                }
 
-                               try ( final java.util.stream.Stream<Service> s2 =
-                                   m2.getServices().getService().parallelStream() )
-                               {
-                                   m1.getServices().getService().addAll( s2.map( sl  ->
-                                   {
-                                       final java.util.concurrent.atomic.AtomicBoolean merged =
-                                           new java.util.concurrent.atomic.AtomicBoolean();
+                                try ( final java.util.stream.Stream<Service> st1 =
+                                    m2.getServices().getService().parallelStream().unordered() )
+                                {
+                                    m1.getServices().getService().addAll( st1.map( sl  ->
+                                    {
+                                        final java.util.concurrent.atomic.AtomicBoolean merged =
+                                            new java.util.concurrent.atomic.AtomicBoolean();
 
-                                       try ( final java.util.stream.Stream<Service> s3 =
-                                           m1.getServices().getServices( sl.getIdentifier() ).parallelStream() )
-                                       {
-                                           s3.filter( s  -> s.getClazz().equals( sl.getClazz() )
-                                                                 && s.getOrdinal() < sl.getOrdinal() ).
-                                               forEach( s  ->
-                                               {
-                                                   s.setOrdinal( sl.getOrdinal() );
-                                                   merged.set( true );
-                                               } );
+                                        try ( final java.util.stream.Stream<Service> st2 =
+                                            m1.getServices().getServices( sl.getIdentifier() ).parallelStream().
+                                                unordered() )
+                                        {
+                                            st2.filter( s  -> s.getClazz().equals( sl.getClazz() )
+                                                                   && s.getOrdinal() < sl.getOrdinal() ).
+                                                forEach( s  ->
+                                                {
+                                                    s.setOrdinal( sl.getOrdinal() );
+                                                    merged.set( true );
+                                                } );
 
-                                       }
+                                        }
 
-                                       return merged.get() ? null : sl;
-                                   } ).filter( s  -> s != null ).collect( java.util.stream.Collectors.toList() ) );
-                               }
-                           }
-                       }
+                                        return merged.get() ? null : sl;
+                                    } ).filter( s  -> s != null ).
+                                        collect( java.util.stream.Collector.of(
+                                            java.util.concurrent.CopyOnWriteArrayList::new,
+                                            java.util.List::add, ( l1, l2 )  ->
+                                        {
+                                            l1.addAll( l2 );
+                                            return l1;
+                                        }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                            java.util.stream.Collector.Characteristics.UNORDERED ) ) );
 
-                       return m1;
-                   } );
+                                }
+                            }
+                        }
+
+                        return m1;
+                    } );
         }
 
         return mergedModlet;
@@ -483,17 +525,24 @@
         final Schemas schemas = new Schemas();
         final java.util.concurrent.atomic.AtomicBoolean modelFound = new java.util.concurrent.atomic.AtomicBoolean();
 
-        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
+        try ( final java.util.stream.Stream<Modlet> st0 = this.getModlet().parallelStream().unordered() )
         {
             schemas.getSchema().addAll(
-                s1.filter( m  -> m.getSchemas() != null && !m.getSchemas().getSchema().isEmpty()
-                                      && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                                           || model.equals( m.getModel() ) ) ).
+                st0.filter( m  -> m.getSchemas() != null && !m.getSchemas().getSchema().isEmpty()
+                                       && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
+                                            || model.equals( m.getModel() ) ) ).
                     flatMap( m  ->
                     {
                         modelFound.compareAndSet( false, model.equals( m.getModel() ) );
-                        return m.getSchemas().getSchema().parallelStream();
-                    } ).collect( java.util.stream.Collectors.toList() ) );
+                        return m.getSchemas().getSchema().parallelStream().unordered();
+                    } ).
+                    collect( java.util.stream.Collector.of( java.util.concurrent.CopyOnWriteArrayList::new,
+                                                            java.util.List::add, ( l1, l2 )  ->
+                                                        {
+                                                            l1.addAll( l2 );
+                                                            return l1;
+                                                        }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                            java.util.stream.Collector.Characteristics.UNORDERED ) ) );
 
         }
 
@@ -518,17 +567,24 @@
         final Services services = new Services();
         final java.util.concurrent.atomic.AtomicBoolean modelFound = new java.util.concurrent.atomic.AtomicBoolean();
 
-        try ( final java.util.stream.Stream<Modlet> s1 = this.getModlet().parallelStream() )
+        try ( final java.util.stream.Stream<Modlet> st0 = this.getModlet().parallelStream().unordered() )
         {
             services.getService().addAll(
-                s1.filter( m  -> m.getServices() != null && !m.getServices().getService().isEmpty()
-                                      && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
-                                           || model.equals( m.getModel() ) ) ).
+                st0.filter( m  -> m.getServices() != null && !m.getServices().getService().isEmpty()
+                                       && ( ModletObject.MODEL_PUBLIC_ID.equals( m.getModel() )
+                                            || model.equals( m.getModel() ) ) ).
                     flatMap( m  ->
                     {
                         modelFound.compareAndSet( false, model.equals( m.getModel() ) );
-                        return m.getServices().getService().parallelStream();
-                    } ).collect( java.util.stream.Collectors.toList() ) );
+                        return m.getServices().getService().parallelStream().unordered();
+                    } ).
+                    collect( java.util.stream.Collector.of( java.util.concurrent.CopyOnWriteArrayList::new,
+                                                            java.util.List::add, ( l1, l2 )  ->
+                                                        {
+                                                            l1.addAll( l2 );
+                                                            return l1;
+                                                        }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                            java.util.stream.Collector.Characteristics.UNORDERED ) ) );
 
         }
 
@@ -665,12 +721,9 @@
     public Schema getSchemaByPublicId( final String publicId )
     {
         java.util.Objects.requireNonNull( publicId, "publicId" );
-        try ( final java.util.stream.Stream<Schema> s1 = this.getSchema().parallelStream() )
+        try ( final java.util.stream.Stream<Schema> st0 = this.getSchema().parallelStream() )
         {
-            final java.util.Optional<Schema> candidate =
-                s1.filter( s  -> publicId.equals( s.getPublicId() ) ).findFirst();
-
-            return candidate.isPresent() ? candidate.get() : null;
+            return st0.filter( s  -> publicId.equals( s.getPublicId() ) ).findFirst().orElse( null );
         }
     }
 
@@ -689,12 +742,9 @@
     public Schema getSchemaBySystemId( final String systemId )
     {
         java.util.Objects.requireNonNull( systemId, "systemId" );
-        try ( final java.util.stream.Stream<Schema> s1 = this.getSchema().parallelStream() )
+        try ( final java.util.stream.Stream<Schema> st0 = this.getSchema().parallelStream() )
         {
-            final java.util.Optional<Schema> candidate =
-                s1.filter( s  -> systemId.equals( s.getSystemId() ) ).findFirst();
-
-            return candidate.isPresent() ? candidate.get() : null;
+            return st0.filter( s  -> systemId.equals( s.getSystemId() ) ).findFirst().orElse( null );
         }
     }]]>
       </ci:code>
@@ -830,10 +880,16 @@
         java.util.Objects.requireNonNull( identifier, "identifier" );
         final java.util.List<Service> services = new java.util.ArrayList<>( this.getService().size() );
 
-        try ( final java.util.stream.Stream<Service> s1 = this.getService().parallelStream() )
+        try ( final java.util.stream.Stream<Service> st0 = this.getService().parallelStream().unordered() )
         {
-            services.addAll( s1.filter( s  -> identifier.equals( s.getIdentifier() ) ).
-                collect( java.util.stream.Collectors.toList() ) );
+            services.addAll( st0.filter( s  -> identifier.equals( s.getIdentifier() ) ).
+                collect( java.util.stream.Collector.of( java.util.concurrent.CopyOnWriteArrayList::new,
+                                                        java.util.List::add, ( l1, l2 )  ->
+                                                    {
+                                                        l1.addAll( l2 );
+                                                        return l1;
+                                                    }, java.util.stream.Collector.Characteristics.CONCURRENT,
+                                                        java.util.stream.Collector.Characteristics.UNORDERED ) ) );
 
         }
 

@@ -34,12 +34,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -183,36 +180,46 @@ public class DefaultServiceFactory implements ServiceFactory
 
             if ( !service.getProperty().isEmpty() )
             {
-                try ( final Stream<Property> s1 = service.getProperty().parallelStream() )
+                try ( final Stream<Property> st0 = service.getProperty().parallelStream().unordered() )
                 {
-                    final class InitPropertyResult
+                    final class InitPropertyFailure extends RuntimeException
                     {
 
-                        ModelException modelException;
+                        public InitPropertyFailure( final Throwable cause )
+                        {
+                            super( cause );
+                        }
+
+                        void propagate() throws ModelException
+                        {
+                            if ( this.getCause() instanceof ModelException )
+                            {
+                                throw new ModelException( this.getCause().getMessage(), this.getCause() );
+                            }
+
+                            throw new AssertionError( this );
+                        }
 
                     }
 
-                    final Map<Boolean, List<InitPropertyResult>> results = s1.map( p  ->
+                    try
                     {
-                        final InitPropertyResult r = new InitPropertyResult();
-
-                        try
+                        st0.forEach( p  ->
                         {
-                            initProperty( context, serviceObject, p.getName(), p.getValue() );
-                        }
-                        catch ( final ModelException e )
-                        {
-                            r.modelException = e;
-                        }
-
-                        return r;
-                    } ).collect( Collectors.groupingBy( r  -> r.modelException == null ) );
-
-                    final List<InitPropertyResult> exceptionResults = results.get( false );
-
-                    if ( exceptionResults != null && !exceptionResults.isEmpty() )
+                            try
+                            {
+                                initProperty( context, serviceObject, p.getName(), p.getValue() );
+                            }
+                            catch ( final ModelException e )
+                            {
+                                throw new InitPropertyFailure( e );
+                            }
+                        } );
+                    }
+                    catch ( final InitPropertyFailure e )
                     {
-                        throw exceptionResults.get( 0 ).modelException;
+                        e.propagate();
+                        throw new AssertionError( e );
                     }
                 }
             }

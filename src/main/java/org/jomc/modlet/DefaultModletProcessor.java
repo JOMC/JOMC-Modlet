@@ -41,12 +41,12 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -430,86 +430,79 @@ public class DefaultModletProcessor implements ModletProcessor
         final Properties parameters = getTransformerParameters();
         final ThreadLocal<TransformerFactory> threadLocalTransformerFactory = new ThreadLocal<>();
 
-        try ( final Stream<URL> s1 = Collections.list( transformerResourceEnumeration ).parallelStream() )
+        try ( final Stream<URL> st0 = Collections.list( transformerResourceEnumeration ).parallelStream().unordered() )
         {
-
-            final class CreateTransformerResult
+            final class CreateTransformerFailure extends RuntimeException
             {
 
-                Transformer transformer;
+                public CreateTransformerFailure( final Throwable cause )
+                {
+                    super( cause );
+                }
 
-                TransformerConfigurationException transformerConfigurationException;
+                void propagate() throws ModelException
+                {
+                    if ( this.getCause() instanceof URISyntaxException
+                             || this.getCause() instanceof TransformerConfigurationException )
+                    {
+                        throw new ModelException( DefaultModletProcessor.getMessage( this.getCause() ),
+                                                  this.getCause() );
 
-                URISyntaxException uriSyntaxException;
+                    }
+
+                    throw new AssertionError( this );
+                }
 
             }
 
-            final Map<Boolean, List<CreateTransformerResult>> results = s1.map( url  ->
+            try
             {
-                final CreateTransformerResult r = new CreateTransformerResult();
-
-                try
-                {
-                    TransformerFactory transformerFactory = threadLocalTransformerFactory.get();
-                    if ( transformerFactory == null )
+                transformers.addAll(
+                    st0.map( url  ->
                     {
-                        transformerFactory = TransformerFactory.newInstance();
-                        transformerFactory.setErrorListener( errorListener );
-                        threadLocalTransformerFactory.set( transformerFactory );
-                    }
+                        try
+                        {
+                            TransformerFactory transformerFactory = threadLocalTransformerFactory.get();
+                            if ( transformerFactory == null )
+                            {
+                                transformerFactory = TransformerFactory.newInstance();
+                                transformerFactory.setErrorListener( errorListener );
+                                threadLocalTransformerFactory.set( transformerFactory );
+                            }
 
-                    if ( context.isLoggable( Level.FINEST ) )
-                    {
-                        context.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
-                    }
+                            if ( context.isLoggable( Level.FINEST ) )
+                            {
+                                context.log( Level.FINEST, getMessage( "processing", url.toExternalForm() ), null );
+                            }
 
-                    r.transformer =
-                        transformerFactory.newTransformer( new StreamSource( url.toURI().toASCIIString() ) );
+                            final Transformer transformer =
+                                transformerFactory.newTransformer( new StreamSource( url.toURI().toASCIIString() ) );
 
-                    r.transformer.setErrorListener( errorListener );
+                            transformer.setErrorListener( errorListener );
 
-                    parameters.entrySet().forEach( e  ->
-                    {
-                        r.transformer.setParameter( e.getKey().toString(), e.getValue() );
-                    } );
-                }
-                catch ( final TransformerConfigurationException e )
-                {
-                    r.transformerConfigurationException = e;
-                }
-                catch ( final URISyntaxException e )
-                {
-                    r.uriSyntaxException = e;
-                }
+                            parameters.entrySet().forEach( e  ->
+                            {
+                                transformer.setParameter( e.getKey().toString(), e.getValue() );
+                            } );
 
-                return r;
-            } ).collect( Collectors.groupingBy( r  -> r.transformer != null ) );
+                            return transformer;
+                        }
+                        catch ( final TransformerConfigurationException | URISyntaxException e )
+                        {
+                            throw new CreateTransformerFailure( e );
+                        }
+                    } ).collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                           {
+                                               l1.addAll( l2 );
+                                               return l1;
+                                           }, Collector.Characteristics.CONCURRENT,
+                                               Collector.Characteristics.UNORDERED ) ) );
 
-            final List<CreateTransformerResult> transformerResults = results.get( true );
-            final List<CreateTransformerResult> exceptionResults = results.get( false );
-
-            if ( exceptionResults != null && !exceptionResults.isEmpty() )
-            {
-                final CreateTransformerResult r = exceptionResults.get( 0 );
-
-                if ( r.transformerConfigurationException != null )
-                {
-                    throw new ModelException( getMessage( r.transformerConfigurationException ),
-                                              r.transformerConfigurationException );
-
-                }
-                if ( r.uriSyntaxException != null )
-                {
-                    throw new ModelException( getMessage( r.uriSyntaxException ), r.uriSyntaxException );
-                }
             }
-
-            if ( transformerResults != null )
+            catch ( final CreateTransformerFailure e )
             {
-                try ( final Stream<CreateTransformerResult> s2 = transformerResults.parallelStream() )
-                {
-                    transformers.addAll( s2.map( r  -> r.transformer ).collect( Collectors.toList() ) );
-                }
+                e.propagate();
+                throw new AssertionError( e );
             }
         }
 

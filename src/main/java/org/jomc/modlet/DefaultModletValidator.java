@@ -32,10 +32,10 @@ package org.jomc.modlet;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBException;
@@ -279,82 +279,73 @@ public class DefaultModletValidator implements ModletValidator
                 validator.validate( new JAXBSource( context.createContext( ModletObject.MODEL_PUBLIC_ID ),
                                                     new ObjectFactory().createModlets( modlets ) ) );
 
-                final Map<String, Schemas> schemasByModel = new HashMap<>( 128 );
-                final Map<Schema, Modlet> modletBySchema = new HashMap<>( 128 );
+                final Map<String, Schemas> schemasByModel = new ConcurrentHashMap<>( 128 );
+                final Map<Schema, Modlet> modletBySchema = new ConcurrentHashMap<>( 128 );
 
-                try ( final Stream<Modlet> s1 = modlets.getModlet().parallelStream() )
+                try ( final Stream<Modlet> st0 = modlets.getModlet().parallelStream().unordered() )
                 {
-                    s1.forEach( modlet  ->
-                    {
-                        if ( modlet.getSchemas() != null )
+                    st0.filter( modlet  -> modlet.getSchemas() != null ).
+                        forEach( modlet  ->
                         {
-                            Schemas modelSchemas;
-                            synchronized ( schemasByModel )
-                            {
-                                modelSchemas = schemasByModel.get( modlet.getModel() );
+                            final Schemas modelSchemas =
+                                schemasByModel.computeIfAbsent( modlet.getModel(), k  -> new Schemas() );
 
-                                if ( modelSchemas == null )
-                                {
-                                    modelSchemas = new Schemas();
-                                    schemasByModel.put( modlet.getModel(), modelSchemas );
-                                }
-                            }
-
-                            final Schemas s = modelSchemas;
-                            try ( final Stream<Schema> s2 = modlet.getSchemas().getSchema().parallelStream() )
+                            try ( final Stream<Schema> st1 =
+                                modlet.getSchemas().getSchema().parallelStream().unordered() )
                             {
-                                s2.forEach( schema  ->
+                                st1.forEach( schema  ->
                                 {
-                                    synchronized ( modletBySchema )
+                                    modletBySchema.put( schema, modlet );
+
+                                    final Schema existingPublicIdSchema;
+                                    final Schema existingSystemIdSchema;
+                                    synchronized ( modelSchemas )
                                     {
-                                        modletBySchema.put( schema, modlet );
+                                        existingPublicIdSchema =
+                                            modelSchemas.getSchemaByPublicId( schema.getPublicId() );
 
-                                        final Schema existingPublicIdSchema =
-                                            s.getSchemaByPublicId( schema.getPublicId() );
+                                        existingSystemIdSchema =
+                                            modelSchemas.getSchemaBySystemId( schema.getSystemId() );
 
-                                        final Schema existingSystemIdSchema =
-                                            s.getSchemaBySystemId( schema.getSystemId() );
+                                        modelSchemas.getSchema().add( schema );
+                                    }
 
-                                        if ( existingPublicIdSchema != null )
-                                        {
-                                            final Modlet modletOfSchema =
-                                                modletBySchema.get( existingPublicIdSchema );
+                                    if ( existingPublicIdSchema != null )
+                                    {
+                                        final Modlet modletOfSchema =
+                                            modletBySchema.get( existingPublicIdSchema );
 
-                                            final ModelValidationReport.Detail detail =
-                                                new ModelValidationReport.Detail(
-                                                    "MODEL_SCHEMA_PUBLIC_ID_CONSTRAINT",
-                                                    Level.SEVERE,
-                                                    getMessage( "modelSchemaPublicIdConstraint", modlet.getModel(),
-                                                                modlet.getName(), modletOfSchema.getName(),
-                                                                schema.getPublicId() ),
-                                                    new ObjectFactory().createModlet( modlet ) );
+                                        final ModelValidationReport.Detail detail =
+                                            new ModelValidationReport.Detail(
+                                                "MODEL_SCHEMA_PUBLIC_ID_CONSTRAINT",
+                                                Level.SEVERE,
+                                                getMessage( "modelSchemaPublicIdConstraint", modlet.getModel(),
+                                                            modlet.getName(), modletOfSchema.getName(),
+                                                            schema.getPublicId() ),
+                                                new ObjectFactory().createModlet( modlet ) );
 
-                                            report.getDetails().add( detail );
-                                        }
+                                        report.getDetails().add( detail );
+                                    }
 
-                                        if ( existingSystemIdSchema != null )
-                                        {
-                                            final Modlet modletOfSchema =
-                                                modletBySchema.get( existingSystemIdSchema );
+                                    if ( existingSystemIdSchema != null )
+                                    {
+                                        final Modlet modletOfSchema =
+                                            modletBySchema.get( existingSystemIdSchema );
 
-                                            final ModelValidationReport.Detail detail =
-                                                new ModelValidationReport.Detail(
-                                                    "MODEL_SCHEMA_SYSTEM_ID_CONSTRAINT",
-                                                    Level.SEVERE,
-                                                    getMessage( "modelSchemaSystemIdConstraint", modlet.getModel(),
-                                                                modlet.getName(), modletOfSchema.getName(),
-                                                                schema.getSystemId() ),
-                                                    new ObjectFactory().createModlet( modlet ) );
+                                        final ModelValidationReport.Detail detail =
+                                            new ModelValidationReport.Detail(
+                                                "MODEL_SCHEMA_SYSTEM_ID_CONSTRAINT",
+                                                Level.SEVERE,
+                                                getMessage( "modelSchemaSystemIdConstraint", modlet.getModel(),
+                                                            modlet.getName(), modletOfSchema.getName(),
+                                                            schema.getSystemId() ),
+                                                new ObjectFactory().createModlet( modlet ) );
 
-                                            report.getDetails().add( detail );
-                                        }
-
-                                        s.getSchema().add( schema );
+                                        report.getDetails().add( detail );
                                     }
                                 } );
                             }
-                        }
-                    } );
+                        } );
                 }
             }
             else if ( context.isLoggable( Level.FINER ) )

@@ -35,11 +35,11 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -532,108 +532,106 @@ public class DefaultModletProvider implements ModletProvider
 
         final ThreadLocal<Unmarshaller> threadLocalUnmarshaller = new ThreadLocal<>();
 
-        try ( final Stream<URL> s1 = Collections.list( modletResourceEnumeration ).parallelStream() )
+        try ( final Stream<URL> st0 = Collections.list( modletResourceEnumeration ).parallelStream().unordered() )
         {
-            final class UnmarshalResult
+            final class UnmarshalFailure extends RuntimeException
             {
 
-                URL url;
+                final URL url;
 
-                Modlets modlets;
+                public UnmarshalFailure( final URL url, final Throwable cause )
+                {
+                    super( cause );
+                    this.url = Objects.requireNonNull( url, "url" );
+                }
 
-                UnmarshalException unmarshalException;
+                void propagate() throws ModelException
+                {
+                    if ( this.getCause() instanceof UnmarshalException )
+                    {
+                        String message = DefaultModletProvider.getMessage( this.getCause() );
+                        if ( message == null && ( (UnmarshalException) this.getCause() ).getLinkedException() != null )
+                        {
+                            message = DefaultModletProvider.getMessage( ( (JAXBException) this.getCause() ).
+                                getLinkedException() );
 
-                JAXBException jaxbException;
+                        }
+
+                        message = DefaultModletProvider.getMessage( "unmarshalException", this.url.toExternalForm(),
+                                                                    message != null ? " " + message : "" );
+
+                        throw new ModelException( message, this.getCause() );
+                    }
+                    else if ( this.getCause() instanceof JAXBException )
+                    {
+                        String message = DefaultModletProvider.getMessage( this.getCause() );
+                        if ( message == null && ( (JAXBException) this.getCause() ).getLinkedException() != null )
+                        {
+                            message = DefaultModletProvider.getMessage( ( (JAXBException) this.getCause() ).
+                                getLinkedException() );
+
+                        }
+
+                        throw new ModelException( message, this.getCause() );
+                    }
+
+                    throw new AssertionError( this );
+                }
 
             }
 
-            final Map<Boolean, List<UnmarshalResult>> results = s1.map( url  ->
+            try
             {
-                final UnmarshalResult r = new UnmarshalResult();
-                r.url = url;
-                r.modlets = new Modlets();
-
-                try
+                modlets.getModlet().addAll( st0.map( url  ->
                 {
-                    Unmarshaller unmarshaller = threadLocalUnmarshaller.get();
-                    if ( unmarshaller == null )
+                    try
                     {
-                        unmarshaller = ctx.createUnmarshaller();
-                        unmarshaller.setSchema( schema );
+                        final Modlets result = new Modlets();
 
-                        threadLocalUnmarshaller.set( unmarshaller );
+                        Unmarshaller unmarshaller = threadLocalUnmarshaller.get();
+                        if ( unmarshaller == null )
+                        {
+                            unmarshaller = ctx.createUnmarshaller();
+                            unmarshaller.setSchema( schema );
+
+                            threadLocalUnmarshaller.set( unmarshaller );
+                        }
+
+                        Object content = unmarshaller.unmarshal( url );
+
+                        if ( content instanceof JAXBElement<?> )
+                        {
+                            content = ( (JAXBElement<?>) content ).getValue();
+                        }
+
+                        if ( content instanceof Modlet )
+                        {
+                            result.getModlet().add( (Modlet) content );
+                        }
+                        else if ( content instanceof Modlets )
+                        {
+                            result.getModlet().addAll( ( (Modlets) content ).getModlet() );
+                        }
+
+                        return result;
                     }
-
-                    Object content = unmarshaller.unmarshal( url );
-
-                    if ( content instanceof JAXBElement<?> )
+                    catch ( final JAXBException e )
                     {
-                        content = ( (JAXBElement<?>) content ).getValue();
+                        throw new UnmarshalFailure( url, e );
                     }
+                } ).flatMap( m  -> m.getModlet().parallelStream().unordered() ).
+                    collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                       {
+                                           l1.addAll( l2 );
+                                           return l1;
+                                       }, Collector.Characteristics.CONCURRENT,
+                                           Collector.Characteristics.UNORDERED ) ) );
 
-                    if ( content instanceof Modlet )
-                    {
-                        r.modlets.getModlet().add( (Modlet) content );
-                    }
-                    else if ( content instanceof Modlets )
-                    {
-                        r.modlets.getModlet().addAll( ( (Modlets) content ).getModlet() );
-                    }
-                }
-                catch ( final UnmarshalException e )
-                {
-                    r.unmarshalException = e;
-                    r.modlets = null;
-                }
-                catch ( final JAXBException e )
-                {
-                    r.jaxbException = e;
-                    r.modlets = null;
-                }
-
-                return r;
-            } ).collect( Collectors.groupingBy( r  -> r.modlets != null ) );
-
-            final List<UnmarshalResult> modletResults = results.get( true );
-            final List<UnmarshalResult> exceptionResults = results.get( false );
-
-            if ( exceptionResults != null && !exceptionResults.isEmpty() )
-            {
-                final UnmarshalResult r = exceptionResults.get( 0 );
-
-                if ( r.unmarshalException != null )
-                {
-                    String message = getMessage( r.unmarshalException );
-                    if ( message == null && r.unmarshalException.getLinkedException() != null )
-                    {
-                        message = getMessage( r.unmarshalException.getLinkedException() );
-                    }
-
-                    message = getMessage( "unmarshalException", r.url.toExternalForm(),
-                                          message != null ? " " + message : "" );
-
-                    throw new ModelException( message, r.unmarshalException );
-                }
-                if ( r.jaxbException != null )
-                {
-                    String message = getMessage( r.jaxbException );
-                    if ( message == null && r.jaxbException.getLinkedException() != null )
-                    {
-                        message = getMessage( r.jaxbException.getLinkedException() );
-                    }
-
-                    throw new ModelException( message, r.jaxbException );
-                }
             }
-
-            if ( modletResults != null )
+            catch ( final UnmarshalFailure e )
             {
-                try ( final Stream<UnmarshalResult> s2 = modletResults.parallelStream() )
-                {
-                    modlets.getModlet().addAll( s2.flatMap( r  -> r.modlets.getModlet().parallelStream() ).
-                        collect( Collectors.toList() ) );
-
-                }
+                e.propagate();
+                throw new AssertionError( e );
             }
         }
 

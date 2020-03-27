@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBElement;
 
@@ -215,12 +215,18 @@ public class ModelValidationReport implements Serializable
      */
     public List<Detail> getDetails( final String identifier )
     {
-        try ( final Stream<Detail> s1 = this.getDetails().parallelStream() )
+        try ( final Stream<Detail> st0 = this.getDetails().parallelStream().unordered() )
         {
             return Collections.unmodifiableList(
-                s1.filter( d  -> ( identifier == null && d.getIdentifier() == null )
-                                      || ( identifier != null && identifier.equals( d.getIdentifier() ) ) ).
-                    collect( Collectors.toList() ) );
+                st0.filter( d  -> ( identifier == null && d.getIdentifier() == null )
+                                       || ( identifier != null && identifier.equals( d.getIdentifier() ) ) ).
+                    collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                       {
+                                           l1.addAll( l2 );
+                                           return l1;
+                                       }, Collector.Characteristics.CONCURRENT,
+                                           Collector.Characteristics.UNORDERED ) ) );
+
         }
     }
 
@@ -234,9 +240,9 @@ public class ModelValidationReport implements Serializable
      */
     public boolean isModelValid()
     {
-        try ( final Stream<Detail> s1 = this.getDetails().parallelStream() )
+        try ( final Stream<Detail> st0 = this.getDetails().parallelStream().unordered() )
         {
-            return s1.noneMatch( d  -> d.getLevel() != null && d.getLevel().intValue() > Level.WARNING.intValue() );
+            return st0.noneMatch( d  -> d.getLevel() != null && d.getLevel().intValue() > Level.WARNING.intValue() );
         }
     }
 

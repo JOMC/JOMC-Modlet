@@ -58,10 +58,12 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -399,9 +401,9 @@ public class DefaultModelContext extends ModelContext
 
         if ( this.isLoggable( Level.FINEST ) )
         {
-            try ( final Stream<Modlet> s1 = found.getModlet().parallelStream() )
+            try ( final Stream<Modlet> st0 = found.getModlet().parallelStream().unordered() )
             {
-                s1.forEach( m  ->
+                st0.forEach( m  ->
                 {
                     log( Level.FINEST,
                          getMessage( "modletInfo", m.getName(), m.getModel(),
@@ -412,9 +414,9 @@ public class DefaultModelContext extends ModelContext
 
                     if ( m.getSchemas() != null )
                     {
-                        try ( final Stream<Schema> s2 = m.getSchemas().getSchema().parallelStream() )
+                        try ( final Stream<Schema> st1 = m.getSchemas().getSchema().parallelStream().unordered() )
                         {
-                            s2.forEach( s  ->
+                            st1.forEach( s  ->
                             {
                                 log( Level.FINEST,
                                      getMessage( "modletSchemaInfo", m.getName(), s.getPublicId(), s.getSystemId(),
@@ -428,9 +430,9 @@ public class DefaultModelContext extends ModelContext
 
                     if ( m.getServices() != null )
                     {
-                        try ( final Stream<Service> s2 = m.getServices().getService().parallelStream() )
+                        try ( final Stream<Service> st1 = m.getServices().getService().parallelStream().unordered() )
                         {
-                            s2.forEach( s  ->
+                            st1.forEach( s  ->
                             {
                                 log( Level.FINEST, getMessage( "modletServiceInfo", m.getName(), s.getOrdinal(),
                                                                s.getIdentifier(), s.getClazz() ), null );
@@ -644,56 +646,60 @@ public class DefaultModelContext extends ModelContext
         final Collection<? extends ModelValidator> modelValidators =
             this.createServiceObjects( cloned.getIdentifier(), ModelValidator.class.getName(), ModelValidator.class );
 
-        try ( final Stream<? extends ModelValidator> s1 = modelValidators.parallelStream() )
+        try ( final Stream<? extends ModelValidator> st0 = modelValidators.parallelStream().unordered() )
         {
-            final class ValidateModelResult
+            final class ValidateModelFailure extends RuntimeException
             {
 
-                ModelValidationReport report;
-
-                ModelException modelException;
-
-            }
-
-            final Map<Boolean, List<ValidateModelResult>> results = s1.map( validator  ->
-            {
-                final ValidateModelResult r = new ValidateModelResult();
-
-                try
+                public ValidateModelFailure( final Throwable cause )
                 {
-                    if ( isLoggable( Level.FINER ) )
-                    {
-                        log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
-                                                      validator.toString() ), null );
+                    super( cause );
+                }
 
+                void propagate() throws ModelException
+                {
+                    if ( this.getCause() instanceof ModelException )
+                    {
+                        throw new ModelException( this.getCause().getMessage(), this.getCause() );
                     }
 
-                    r.report = validator.validateModel( DefaultModelContext.this, cloned );
-                }
-                catch ( final ModelException e )
-                {
-                    r.modelException = e;
+                    throw new AssertionError( this );
                 }
 
-                return r;
-            } ).collect( Collectors.groupingBy( r  -> r.report != null ) );
-
-            final List<ValidateModelResult> reportResults = results.get( true );
-            final List<ValidateModelResult> exceptionResults = results.get( false );
-
-            if ( exceptionResults != null && !exceptionResults.isEmpty() )
-            {
-                throw exceptionResults.get( 0 ).modelException;
             }
 
-            if ( reportResults != null )
+            try
             {
-                try ( final Stream<ValidateModelResult> s2 = reportResults.parallelStream() )
+                resultReport.getDetails().addAll( st0.map( modelValidator  ->
                 {
-                    resultReport.getDetails().addAll( s2.flatMap( r  -> r.report.getDetails().parallelStream() ).
-                        collect( Collectors.toList() ) );
+                    try
+                    {
+                        if ( isLoggable( Level.FINER ) )
+                        {
+                            log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
+                                                          modelValidator.toString() ), null );
 
-                }
+                        }
+
+                        return modelValidator.validateModel( DefaultModelContext.this, cloned );
+                    }
+                    catch ( final ModelException e )
+                    {
+                        throw new ValidateModelFailure( e );
+                    }
+                } ).flatMap( r  -> r.getDetails().parallelStream().unordered() ).
+                    collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                       {
+                                           l1.addAll( l2 );
+                                           return l1;
+                                       }, Collector.Characteristics.CONCURRENT,
+                                           Collector.Characteristics.UNORDERED ) ) );
+
+            }
+            catch ( final ValidateModelFailure e )
+            {
+                e.propagate();
+                throw new AssertionError( e );
             }
         }
 
@@ -830,12 +836,12 @@ public class DefaultModelContext extends ModelContext
                                 schemaName = schemaName.substring( lastIndexOfSlash + 1 );
                             }
 
-                            try ( final Stream<URI> s1 = getSchemaResources().parallelStream() )
+                            try ( final Stream<URI> st0 = getSchemaResources().parallelStream().unordered() )
                             {
                                 final String n = schemaName;
                                 final Optional<InputSource> candidate =
-                                    s1.filter( uri  -> uri.getSchemeSpecificPart() != null
-                                                            && uri.getSchemeSpecificPart().endsWith( n ) ).
+                                    st0.filter( uri  -> uri.getSchemeSpecificPart() != null
+                                                             && uri.getSchemeSpecificPart().endsWith( n ) ).
                                         map( uri  ->
                                         {
                                             final InputSource source = new InputSource();
@@ -853,10 +859,7 @@ public class DefaultModelContext extends ModelContext
                                             return source;
                                         } ).findFirst();
 
-                                if ( candidate.isPresent() )
-                                {
-                                    schemaSource = candidate.get();
-                                }
+                                schemaSource = candidate.orElse( null );
                             }
                         }
                         else
@@ -1153,64 +1156,58 @@ public class DefaultModelContext extends ModelContext
 
             if ( schemas != null )
             {
-                try ( final Stream<Schema> s1 = schemas.getSchema().parallelStream() )
+                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
                 {
-                    final class ResolveEntityResult
+                    final class ResolveEntityFailure extends RuntimeException
                     {
 
-                        Source source;
+                        public ResolveEntityFailure( final Throwable cause )
+                        {
+                            super( cause );
+                        }
 
-                        SAXException saxException;
+                        void propagate() throws IOException, SAXException
+                        {
+                            if ( this.getCause() instanceof IOException )
+                            {
+                                throw new IOException( this.getCause().getMessage(), this.getCause() );
+                            }
+                            else if ( this.getCause() instanceof SAXException )
+                            {
+                                throw new SAXException( this.getCause().getMessage(), (Exception) this.getCause() );
+                            }
 
-                        IOException ioException;
+                            throw new AssertionError( this );
+                        }
 
                     }
 
-                    final Map<Boolean, List<ResolveEntityResult>> results = s1.map( s  ->
+                    try
                     {
-                        final ResolveEntityResult r = new ResolveEntityResult();
-
-                        try
+                        sources.addAll( st0.map( s  ->
                         {
-                            r.source =
-                                new SAXSource( entityResolver.resolveEntity( s.getPublicId(), s.getSystemId() ) );
+                            try
+                            {
+                                return new SAXSource( entityResolver.resolveEntity( s.getPublicId(),
+                                                                                    s.getSystemId() ) );
 
-                        }
-                        catch ( final SAXException e )
-                        {
-                            r.saxException = e;
-                        }
-                        catch ( final IOException e )
-                        {
-                            r.ioException = e;
-                        }
+                            }
+                            catch ( final SAXException | IOException e )
+                            {
+                                throw new ResolveEntityFailure( e );
+                            }
+                        } ).collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                               {
+                                                   l1.addAll( l2 );
+                                                   return l1;
+                                               }, Collector.Characteristics.CONCURRENT,
+                                                   Collector.Characteristics.UNORDERED ) ) );
 
-                        return r;
-                    } ).collect( Collectors.groupingBy( r  -> r.source != null ) );
-
-                    final List<ResolveEntityResult> sourceResults = results.get( true );
-                    final List<ResolveEntityResult> exceptionResults = results.get( false );
-
-                    if ( exceptionResults != null && !exceptionResults.isEmpty() )
-                    {
-                        final ResolveEntityResult r = exceptionResults.get( 0 );
-
-                        if ( r.ioException != null )
-                        {
-                            throw r.ioException;
-                        }
-                        if ( r.saxException != null )
-                        {
-                            throw r.saxException;
-                        }
                     }
-
-                    if ( sourceResults != null )
+                    catch ( final ResolveEntityFailure e )
                     {
-                        try ( final Stream<ResolveEntityResult> s2 = sourceResults.parallelStream() )
-                        {
-                            sources.addAll( s2.map( r  -> r.source ).collect( Collectors.toList() ) );
-                        }
+                        e.propagate();
+                        throw new AssertionError( e );
                     }
                 }
             }
@@ -1258,9 +1255,9 @@ public class DefaultModelContext extends ModelContext
 
             if ( this.isLoggable( Level.FINE ) )
             {
-                try ( final Stream<Source> s1 = sources.parallelStream() )
+                try ( final Stream<Source> st0 = sources.parallelStream().unordered() )
                 {
-                    this.log( Level.FINE, getMessage( "creatingSchema", s1.map( s  -> s.getSystemId() ).
+                    this.log( Level.FINE, getMessage( "creatingSchema", st0.map( s  -> s.getSystemId() ).
                                                       collect( Collectors.joining( ", " ) ),
                                                       System.nanoTime() - t0 ), null );
 
@@ -1296,9 +1293,9 @@ public class DefaultModelContext extends ModelContext
 
             if ( schemas != null )
             {
-                try ( final Stream<Schema> s1 = schemas.getSchema().parallelStream() )
+                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
                 {
-                    packageNames = s1.filter( s  -> s.getContextId() != null ).
+                    packageNames = st0.filter( s  -> s.getContextId() != null ).
                         map( s  -> s.getContextId() ).
                         collect( Collectors.joining( ":" ) );
 
@@ -1343,16 +1340,16 @@ public class DefaultModelContext extends ModelContext
 
             if ( schemas != null )
             {
-                try ( final Stream<Schema> s1 = schemas.getSchema().parallelStream() )
+                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
                 {
-                    packageNames = s1.filter( s  -> s.getContextId() != null ).
+                    packageNames = st0.filter( s  -> s.getContextId() != null ).
                         map( s  -> s.getContextId() ).collect( Collectors.joining( ":" ) );
 
                 }
 
-                try ( final Stream<Schema> s1 = schemas.getSchema().parallelStream() )
+                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
                 {
-                    schemaLocation = s1.filter( s  -> s.getPublicId() != null && s.getSystemId() != null ).
+                    schemaLocation = st0.filter( s  -> s.getPublicId() != null && s.getSystemId() != null ).
                         map( s  -> new StringBuilder( s.getPublicId() ).append( ' ' ).
                             append( s.getSystemId() ).toString() ).
                         collect( Collectors.joining( " " ) );
@@ -1394,9 +1391,10 @@ public class DefaultModelContext extends ModelContext
                 }
                 else
                 {
-                    try ( final Stream<Marshaller.Listener> s1 = listenerList.getListeners().parallelStream() )
+                    try ( final Stream<Marshaller.Listener> st0 =
+                        listenerList.getListeners().parallelStream().unordered() )
                     {
-                        final String list = s1.map( l  -> l.toString() ).collect( Collectors.joining( "," ) );
+                        final String list = st0.map( l  -> l.toString() ).collect( Collectors.joining( "," ) );
                         this.log( Level.FINE, getMessage( "creatingMarshallerWithListeners", packageNames,
                                                           schemaLocation, list, System.nanoTime() - t0 ), null );
 
@@ -1429,9 +1427,9 @@ public class DefaultModelContext extends ModelContext
 
             if ( schemas != null )
             {
-                try ( final Stream<Schema> s1 = schemas.getSchema().parallelStream() )
+                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
                 {
-                    packageNames = s1.filter( s  -> s.getContextId() != null ).
+                    packageNames = st0.filter( s  -> s.getContextId() != null ).
                         map( s  -> s.getContextId() ).collect( Collectors.joining( ":" ) );
 
                 }
@@ -1466,9 +1464,10 @@ public class DefaultModelContext extends ModelContext
                 }
                 else
                 {
-                    try ( final Stream<Unmarshaller.Listener> s1 = listenerList.getListeners().parallelStream() )
+                    try ( final Stream<Unmarshaller.Listener> st0 =
+                        listenerList.getListeners().parallelStream().unordered() )
                     {
-                        final String list = s1.map( l  -> l.toString() ).collect( Collectors.joining( "," ) );
+                        final String list = st0.map( l  -> l.toString() ).collect( Collectors.joining( "," ) );
                         this.log( Level.FINE, getMessage( "creatingUnmarshallerWithListeners",
                                                           packageNames, list, System.nanoTime() - t0 ), null );
 
@@ -1598,8 +1597,28 @@ public class DefaultModelContext extends ModelContext
                     p.load( in );
                 }
 
-                try ( final Stream<Map.Entry<Object, Object>> s1 = p.entrySet().parallelStream() )
+                try ( final Stream<Map.Entry<Object, Object>> st0 = p.entrySet().parallelStream().unordered() )
                 {
+                    final class CreateModletServiceObjectFailure extends RuntimeException
+                    {
+
+                        public CreateModletServiceObjectFailure( final Throwable cause )
+                        {
+                            super( cause );
+                        }
+
+                        void propagate() throws ModelException
+                        {
+                            if ( this.getCause() instanceof ModelException )
+                            {
+                                throw new ModelException( this.getCause().getMessage(), this.getCause() );
+                            }
+
+                            throw new AssertionError( this );
+                        }
+
+                    }
+
                     final class CreateModletServiceObjectResult<ST>
                     {
 
@@ -1607,54 +1626,43 @@ public class DefaultModelContext extends ModelContext
 
                         ST serviceObject;
 
-                        ModelException modelException;
-
                     }
 
-                    final Map<Boolean, List<CreateModletServiceObjectResult<T>>> results =
-                        s1.filter( e  -> e.getKey().toString().startsWith( serviceNamePrefix ) ).
-                            map( e  ->
-                            {
-                                final CreateModletServiceObjectResult<T> r = new CreateModletServiceObjectResult<>();
-
-                                final String configuration = e.getValue().toString();
-
-                                if ( isLoggable( Level.FINEST ) )
-                                {
-                                    log( Level.FINEST, getMessage( "serviceInfo", platformServices.getAbsolutePath(),
-                                                                   serviceClass.getName(), configuration ), null );
-
-                                }
-
-                                try
-                                {
-                                    r.serviceKey = e.getKey().toString();
-                                    r.serviceObject = this.createModletServiceObject( serviceClass, configuration );
-                                }
-                                catch ( final ModelException ex )
-                                {
-                                    r.modelException = ex;
-                                }
-
-                                return r;
-                            } ).collect( Collectors.groupingBy( r  -> r.serviceObject != null ) );
-
-                    final List<CreateModletServiceObjectResult<T>> objectResults = results.get( true );
-                    final List<CreateModletServiceObjectResult<T>> exceptionResults = results.get( false );
-
-                    if ( exceptionResults != null && !exceptionResults.isEmpty() )
+                    try
                     {
-                        throw exceptionResults.get( 0 ).modelException;
+                        sortedPlatformServices.putAll(
+                            st0.filter( e  -> e.getKey().toString().startsWith( serviceNamePrefix ) ).
+                                map( e  ->
+                                {
+                                    try
+                                    {
+                                        final CreateModletServiceObjectResult<T> r =
+                                            new CreateModletServiceObjectResult<>();
+
+                                        final String configuration = e.getValue().toString();
+
+                                        if ( isLoggable( Level.FINEST ) )
+                                        {
+                                            log( Level.FINEST,
+                                                 getMessage( "serviceInfo", platformServices.getAbsolutePath(),
+                                                             serviceClass.getName(), configuration ), null );
+
+                                        }
+
+                                        r.serviceKey = e.getKey().toString();
+                                        r.serviceObject = this.createModletServiceObject( serviceClass, configuration );
+                                        return r;
+                                    }
+                                    catch ( final ModelException ex )
+                                    {
+                                        throw new CreateModletServiceObjectFailure( ex );
+                                    }
+                                } ).collect( Collectors.toMap( r  -> r.serviceKey, r  -> r.serviceObject ) ) );
                     }
-
-                    if ( objectResults != null )
+                    catch ( final CreateModletServiceObjectFailure e )
                     {
-                        try ( final Stream<CreateModletServiceObjectResult<T>> s2 = objectResults.parallelStream() )
-                        {
-                            sortedPlatformServices.putAll(
-                                s2.collect( Collectors.toMap( r  -> r.serviceKey, r  -> r.serviceObject ) ) );
-
-                        }
+                        e.propagate();
+                        throw new AssertionError( e );
                     }
                 }
             }
@@ -1678,60 +1686,63 @@ public class DefaultModelContext extends ModelContext
 
                 try ( final BufferedReader reader = new BufferedReader( new InputStreamReader( url.openStream(),
                                                                                                "UTF-8" ) );
-                      final Stream<String> s1 = reader.lines() )
+                      final Stream<String> st0 = reader.lines().parallel().unordered() )
                 {
-                    final class CreateModletServiceObjectResult<ST>
+                    final class CreateModletServiceObjectFailure extends RuntimeException
                     {
 
-                        ST serviceObject;
-
-                        ModelException modelException;
-
-                    }
-
-                    final Map<Boolean, List<CreateModletServiceObjectResult<T>>> results =
-                        s1.filter( l  -> !l.contains( "#" ) ).map( l  ->
+                        public CreateModletServiceObjectFailure( final Throwable cause )
                         {
-                            final CreateModletServiceObjectResult<T> r = new CreateModletServiceObjectResult<>();
-
-                            try
-                            {
-                                if ( isLoggable( Level.FINEST ) )
-                                {
-                                    log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
-                                                                   serviceClass.getName(), l ), null );
-
-                                }
-
-                                r.serviceObject = this.createModletServiceObject( serviceClass, l );
-                            }
-                            catch ( final ModelException e )
-                            {
-                                r.modelException = e;
-                            }
-
-                            return r;
-                        } ).collect( Collectors.groupingBy( r  -> r.serviceObject != null ) );
-
-                    final List<CreateModletServiceObjectResult<T>> objectResults = results.get( true );
-                    final List<CreateModletServiceObjectResult<T>> exceptionResults = results.get( false );
-
-                    if ( exceptionResults != null && !exceptionResults.isEmpty() )
-                    {
-                        throw exceptionResults.get( 0 ).modelException;
-                    }
-
-                    if ( objectResults != null )
-                    {
-                        try ( final Stream<CreateModletServiceObjectResult<T>> s2 = objectResults.parallelStream() )
-                        {
-                            sortedClasspathServices.addAll(
-                                s2.map( r  -> r.serviceObject ).collect( Collectors.toList() ) );
-
+                            super( cause );
                         }
+
+                        void propagate() throws ModelException
+                        {
+                            if ( this.getCause() instanceof ModelException )
+                            {
+                                throw new ModelException( this.getCause().getMessage(), this.getCause() );
+                            }
+
+                            throw new AssertionError( this );
+                        }
+
                     }
 
-                    Collections.sort( sortedClasspathServices, ( o1, o2 )  -> ordinalOf( o1 ) - ordinalOf( o2 ) );
+                    try
+                    {
+                        sortedClasspathServices.addAll(
+                            st0.filter( l  -> !l.contains( "#" ) ).
+                                map( l  ->
+                                {
+                                    try
+                                    {
+                                        if ( isLoggable( Level.FINEST ) )
+                                        {
+                                            log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
+                                                                           serviceClass.getName(), l ), null );
+
+                                        }
+
+                                        return this.createModletServiceObject( serviceClass, l );
+                                    }
+                                    catch ( final ModelException e )
+                                    {
+                                        throw new CreateModletServiceObjectFailure( e );
+                                    }
+                                } ).collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                                       {
+                                                           l1.addAll( l2 );
+                                                           return l1;
+                                                       }, Collector.Characteristics.CONCURRENT,
+                                                           Collector.Characteristics.UNORDERED ) ) );
+
+                        Collections.sort( sortedClasspathServices, ( o1, o2 )  -> ordinalOf( o1 ) - ordinalOf( o2 ) );
+                    }
+                    catch ( final CreateModletServiceObjectFailure e )
+                    {
+                        e.propagate();
+                        throw new AssertionError( e );
+                    }
                 }
             }
 
@@ -1832,16 +1843,37 @@ public class DefaultModelContext extends ModelContext
                     this.log( Level.FINEST, getMessage( "processing", externalForm ), null );
                 }
 
-                try ( final Stream<Map.Entry<String, Attributes>> s1 = mf.getEntries().entrySet().parallelStream() )
+                try ( final Stream<Map.Entry<String, Attributes>> st0 =
+                    mf.getEntries().entrySet().parallelStream().unordered() )
                 {
-                    final class CreateUriResult
+                    final class CreateUriFailure extends RuntimeException
                     {
 
-                        URI uri;
+                        public CreateUriFailure( final Throwable cause )
+                        {
+                            super( cause );
+                        }
 
-                        MalformedURLException malformedUrlException;
+                        void propagate() throws MalformedURLException, URISyntaxException
+                        {
+                            if ( this.getCause() instanceof MalformedURLException )
+                            {
+                                throw (MalformedURLException) new MalformedURLException( this.getCause().getMessage() ).
+                                    initCause( this.getCause() );
 
-                        URISyntaxException uriSyntaxException;
+                            }
+                            else if ( this.getCause() instanceof URISyntaxException )
+                            {
+                                throw (URISyntaxException) new URISyntaxException(
+                                    ( (URISyntaxException) this.getCause() ).getInput(),
+                                    ( (URISyntaxException) this.getCause() ).getReason(),
+                                    ( (URISyntaxException) this.getCause() ).getIndex() ).
+                                    initCause( this.getCause() );
+
+                            }
+
+                            throw new AssertionError( this );
+                        }
 
                     }
 
@@ -1849,9 +1881,9 @@ public class DefaultModelContext extends ModelContext
                     {
                         final char[] chars = s.toCharArray();
 
-                        try ( final IntStream s2 = IntStream.range( 0, chars.length ).parallel().unordered() )
+                        try ( final IntStream st1 = IntStream.range( 0, chars.length ).parallel().unordered() )
                         {
-                            s2.forEach( idx  ->
+                            st1.forEach( idx  ->
                             {
                                 chars[idx] = Character.toLowerCase( chars[idx] );
                             } );
@@ -1860,63 +1892,45 @@ public class DefaultModelContext extends ModelContext
                         return String.valueOf( chars );
                     } );
 
-                    final Map<Boolean, List<CreateUriResult>> results = s1.filter( entry  ->
+                    try
                     {
-                        try ( final Stream<String> s2 = Arrays.asList( SCHEMA_EXTENSIONS ).parallelStream() )
+                        st0.filter( entry  ->
                         {
-                            final boolean found = s2.filter( ext  -> parallelToLowerCase.apply( entry.getKey() ).
-                                endsWith( '.' + parallelToLowerCase.apply( ext ) ) ).findAny().isPresent();
-
-                            if ( found && isLoggable( Level.FINEST ) )
+                            try ( final Stream<String> st2 =
+                                Arrays.asList( SCHEMA_EXTENSIONS ).parallelStream().unordered() )
                             {
-                                log( Level.FINEST, getMessage( "foundSchemaCandidate", entry.getKey() ), null );
+                                final boolean found = st2.filter( ext  -> parallelToLowerCase.apply( entry.getKey() ).
+                                    endsWith( '.' + parallelToLowerCase.apply( ext ) ) ).findAny().isPresent();
+
+                                if ( found && isLoggable( Level.FINEST ) )
+                                {
+                                    log( Level.FINEST, getMessage( "foundSchemaCandidate", entry.getKey() ), null );
+                                }
+
+                                return found;
                             }
-
-                            return found;
-                        }
-                    } ).map( entry  ->
-                    {
-                        final CreateUriResult r = new CreateUriResult();
-
-                        try
+                        } ).map( entry  ->
                         {
-                            r.uri = new URL( baseUrl + entry.getKey() ).toURI();
-                        }
-                        catch ( final MalformedURLException ex )
-                        {
-                            r.malformedUrlException = ex;
-                        }
-                        catch ( final URISyntaxException ex )
-                        {
-                            r.uriSyntaxException = ex;
-                        }
+                            try
+                            {
+                                return new URL( baseUrl + entry.getKey() ).toURI();
+                            }
+                            catch ( final MalformedURLException | URISyntaxException ex )
+                            {
+                                throw new CreateUriFailure( ex );
+                            }
+                        } ).collect( Collector.of( CopyOnWriteArraySet::new, Set::add, ( s1, s2 )  ->
+                                               {
+                                                   s1.addAll( s2 );
+                                                   return s2;
+                                               }, Collector.Characteristics.CONCURRENT,
+                                                   Collector.Characteristics.UNORDERED ) );
 
-                        return r;
-                    } ).collect( Collectors.groupingBy( r  -> r.uri != null ) );
-
-                    final List<CreateUriResult> uriResults = results.get( true );
-                    final List<CreateUriResult> exceptionResults = results.get( false );
-
-                    if ( exceptionResults != null && !exceptionResults.isEmpty() )
-                    {
-                        final CreateUriResult r = exceptionResults.get( 0 );
-
-                        if ( r.malformedUrlException != null )
-                        {
-                            throw r.malformedUrlException;
-                        }
-                        if ( r.uriSyntaxException != null )
-                        {
-                            throw r.uriSyntaxException;
-                        }
                     }
-
-                    if ( uriResults != null )
+                    catch ( final CreateUriFailure ex )
                     {
-                        try ( final Stream<CreateUriResult> s2 = uriResults.parallelStream() )
-                        {
-                            resources.addAll( s2.map( r  -> r.uri ).collect( Collectors.toList() ) );
-                        }
+                        ex.propagate();
+                        throw new AssertionError( ex );
                     }
                 }
             }
@@ -2137,18 +2151,18 @@ class MarshallerListenerList extends Marshaller.Listener
     @Override
     public void beforeMarshal( final Object source )
     {
-        try ( final Stream<Marshaller.Listener> stream = this.getListeners().parallelStream() )
+        try ( final Stream<Marshaller.Listener> st0 = this.getListeners().parallelStream().unordered() )
         {
-            stream.forEach( ( l )  -> l.beforeMarshal( source ) );
+            st0.forEach( ( l )  -> l.beforeMarshal( source ) );
         }
     }
 
     @Override
     public void afterMarshal( final Object source )
     {
-        try ( final Stream<Marshaller.Listener> stream = this.getListeners().parallelStream() )
+        try ( final Stream<Marshaller.Listener> st0 = this.getListeners().parallelStream().unordered() )
         {
-            stream.forEach( ( l )  -> l.afterMarshal( source ) );
+            st0.forEach( ( l )  -> l.afterMarshal( source ) );
         }
     }
 
@@ -2195,18 +2209,18 @@ class UnmarshallerListenerList extends Unmarshaller.Listener
     @Override
     public void beforeUnmarshal( final Object target, final Object parent )
     {
-        try ( final Stream<Unmarshaller.Listener> stream = this.getListeners().parallelStream() )
+        try ( final Stream<Unmarshaller.Listener> st0 = this.getListeners().parallelStream().unordered() )
         {
-            stream.forEach( ( l )  -> l.beforeUnmarshal( target, parent ) );
+            st0.forEach( ( l )  -> l.beforeUnmarshal( target, parent ) );
         }
     }
 
     @Override
     public void afterUnmarshal( final Object target, final Object parent )
     {
-        try ( final Stream<Unmarshaller.Listener> stream = this.getListeners().parallelStream() )
+        try ( final Stream<Unmarshaller.Listener> st0 = this.getListeners().parallelStream().unordered() )
         {
-            stream.forEach( ( l )  -> l.afterUnmarshal( target, parent ) );
+            st0.forEach( ( l )  -> l.afterUnmarshal( target, parent ) );
         }
     }
 

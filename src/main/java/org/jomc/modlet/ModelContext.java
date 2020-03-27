@@ -532,9 +532,9 @@ public abstract class ModelContext
     {
         if ( this.isLoggable( Objects.requireNonNull( level, "level" ) ) )
         {
-            try ( final Stream<Listener> s1 = this.getListeners().parallelStream() )
+            try ( final Stream<Listener> st0 = this.getListeners().parallelStream().unordered() )
             {
-                s1.forEach( l  -> l.onLog( level, message, throwable ) );
+                st0.forEach( l  -> l.onLog( level, message, throwable ) );
             }
         }
     }
@@ -624,9 +624,9 @@ public abstract class ModelContext
                                                   System.nanoTime() - t0 ), null );
             }
 
-            try ( final Stream<ModelValidationReport.Detail> s1 = report.getDetails().parallelStream() )
+            try ( final Stream<ModelValidationReport.Detail> st0 = report.getDetails().parallelStream().unordered() )
             {
-                s1.forEach( d  ->
+                st0.forEach( d  ->
                 {
                     if ( isLoggable( d.getLevel() ) )
                     {
