@@ -190,16 +190,6 @@ public class DefaultServiceFactory implements ServiceFactory
                             super( cause );
                         }
 
-                        void propagate() throws ModelException
-                        {
-                            if ( this.getCause() instanceof ModelException )
-                            {
-                                throw new ModelException( this.getCause().getMessage(), this.getCause() );
-                            }
-
-                            throw new AssertionError( this );
-                        }
-
                     }
 
                     try
@@ -218,7 +208,11 @@ public class DefaultServiceFactory implements ServiceFactory
                     }
                     catch ( final InitPropertyFailure e )
                     {
-                        e.propagate();
+                        if ( e.getCause() instanceof ModelException )
+                        {
+                            throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                        }
+
                         throw new AssertionError( e );
                     }
                 }

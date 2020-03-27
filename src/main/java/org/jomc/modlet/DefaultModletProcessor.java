@@ -440,19 +440,6 @@ public class DefaultModletProcessor implements ModletProcessor
                     super( cause );
                 }
 
-                void propagate() throws ModelException
-                {
-                    if ( this.getCause() instanceof URISyntaxException
-                             || this.getCause() instanceof TransformerConfigurationException )
-                    {
-                        throw new ModelException( DefaultModletProcessor.getMessage( this.getCause() ),
-                                                  this.getCause() );
-
-                    }
-
-                    throw new AssertionError( this );
-                }
-
             }
 
             try
@@ -501,7 +488,12 @@ public class DefaultModletProcessor implements ModletProcessor
             }
             catch ( final CreateTransformerFailure e )
             {
-                e.propagate();
+                if ( e.getCause() instanceof URISyntaxException
+                         || e.getCause() instanceof TransformerConfigurationException )
+                {
+                    throw new ModelException( getMessage( e.getCause() ), e.getCause() );
+                }
+
                 throw new AssertionError( e );
             }
         }

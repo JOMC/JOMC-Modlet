@@ -545,39 +545,6 @@ public class DefaultModletProvider implements ModletProvider
                     this.url = Objects.requireNonNull( url, "url" );
                 }
 
-                void propagate() throws ModelException
-                {
-                    if ( this.getCause() instanceof UnmarshalException )
-                    {
-                        String message = DefaultModletProvider.getMessage( this.getCause() );
-                        if ( message == null && ( (UnmarshalException) this.getCause() ).getLinkedException() != null )
-                        {
-                            message = DefaultModletProvider.getMessage( ( (JAXBException) this.getCause() ).
-                                getLinkedException() );
-
-                        }
-
-                        message = DefaultModletProvider.getMessage( "unmarshalException", this.url.toExternalForm(),
-                                                                    message != null ? " " + message : "" );
-
-                        throw new ModelException( message, this.getCause() );
-                    }
-                    else if ( this.getCause() instanceof JAXBException )
-                    {
-                        String message = DefaultModletProvider.getMessage( this.getCause() );
-                        if ( message == null && ( (JAXBException) this.getCause() ).getLinkedException() != null )
-                        {
-                            message = DefaultModletProvider.getMessage( ( (JAXBException) this.getCause() ).
-                                getLinkedException() );
-
-                        }
-
-                        throw new ModelException( message, this.getCause() );
-                    }
-
-                    throw new AssertionError( this );
-                }
-
             }
 
             try
@@ -630,7 +597,30 @@ public class DefaultModletProvider implements ModletProvider
             }
             catch ( final UnmarshalFailure e )
             {
-                e.propagate();
+                if ( e.getCause() instanceof UnmarshalException )
+                {
+                    String message = getMessage( e.getCause() );
+                    if ( message == null && ( (UnmarshalException) e.getCause() ).getLinkedException() != null )
+                    {
+                        message = getMessage( ( (JAXBException) e.getCause() ).getLinkedException() );
+                    }
+
+                    message = getMessage( "unmarshalException", e.url.toExternalForm(),
+                                          message != null ? " " + message : "" );
+
+                    throw new ModelException( message, e.getCause() );
+                }
+                else if ( e.getCause() instanceof JAXBException )
+                {
+                    String message = getMessage( e.getCause() );
+                    if ( message == null && ( (JAXBException) e.getCause() ).getLinkedException() != null )
+                    {
+                        message = getMessage( ( (JAXBException) e.getCause() ).getLinkedException() );
+                    }
+
+                    throw new ModelException( message, e.getCause() );
+                }
+
                 throw new AssertionError( e );
             }
         }

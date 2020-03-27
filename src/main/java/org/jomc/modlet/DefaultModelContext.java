@@ -656,16 +656,6 @@ public class DefaultModelContext extends ModelContext
                     super( cause );
                 }
 
-                void propagate() throws ModelException
-                {
-                    if ( this.getCause() instanceof ModelException )
-                    {
-                        throw new ModelException( this.getCause().getMessage(), this.getCause() );
-                    }
-
-                    throw new AssertionError( this );
-                }
-
             }
 
             try
@@ -698,7 +688,11 @@ public class DefaultModelContext extends ModelContext
             }
             catch ( final ValidateModelFailure e )
             {
-                e.propagate();
+                if ( e.getCause() instanceof ModelException )
+                {
+                    throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                }
+
                 throw new AssertionError( e );
             }
         }
@@ -1166,20 +1160,6 @@ public class DefaultModelContext extends ModelContext
                             super( cause );
                         }
 
-                        void propagate() throws IOException, SAXException
-                        {
-                            if ( this.getCause() instanceof IOException )
-                            {
-                                throw new IOException( this.getCause().getMessage(), this.getCause() );
-                            }
-                            else if ( this.getCause() instanceof SAXException )
-                            {
-                                throw new SAXException( this.getCause().getMessage(), (Exception) this.getCause() );
-                            }
-
-                            throw new AssertionError( this );
-                        }
-
                     }
 
                     try
@@ -1206,7 +1186,15 @@ public class DefaultModelContext extends ModelContext
                     }
                     catch ( final ResolveEntityFailure e )
                     {
-                        e.propagate();
+                        if ( e.getCause() instanceof IOException )
+                        {
+                            throw new IOException( e.getCause().getMessage(), e.getCause() );
+                        }
+                        else if ( e.getCause() instanceof SAXException )
+                        {
+                            throw new SAXException( e.getCause().getMessage(), (Exception) e.getCause() );
+                        }
+
                         throw new AssertionError( e );
                     }
                 }
@@ -1607,16 +1595,6 @@ public class DefaultModelContext extends ModelContext
                             super( cause );
                         }
 
-                        void propagate() throws ModelException
-                        {
-                            if ( this.getCause() instanceof ModelException )
-                            {
-                                throw new ModelException( this.getCause().getMessage(), this.getCause() );
-                            }
-
-                            throw new AssertionError( this );
-                        }
-
                     }
 
                     final class CreateModletServiceObjectResult<ST>
@@ -1661,7 +1639,11 @@ public class DefaultModelContext extends ModelContext
                     }
                     catch ( final CreateModletServiceObjectFailure e )
                     {
-                        e.propagate();
+                        if ( e.getCause() instanceof ModelException )
+                        {
+                            throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                        }
+
                         throw new AssertionError( e );
                     }
                 }
@@ -1694,16 +1676,6 @@ public class DefaultModelContext extends ModelContext
                         public CreateModletServiceObjectFailure( final Throwable cause )
                         {
                             super( cause );
-                        }
-
-                        void propagate() throws ModelException
-                        {
-                            if ( this.getCause() instanceof ModelException )
-                            {
-                                throw new ModelException( this.getCause().getMessage(), this.getCause() );
-                            }
-
-                            throw new AssertionError( this );
                         }
 
                     }
@@ -1740,7 +1712,11 @@ public class DefaultModelContext extends ModelContext
                     }
                     catch ( final CreateModletServiceObjectFailure e )
                     {
-                        e.propagate();
+                        if ( e.getCause() instanceof ModelException )
+                        {
+                            throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                        }
+
                         throw new AssertionError( e );
                     }
                 }
@@ -1854,27 +1830,6 @@ public class DefaultModelContext extends ModelContext
                             super( cause );
                         }
 
-                        void propagate() throws MalformedURLException, URISyntaxException
-                        {
-                            if ( this.getCause() instanceof MalformedURLException )
-                            {
-                                throw (MalformedURLException) new MalformedURLException( this.getCause().getMessage() ).
-                                    initCause( this.getCause() );
-
-                            }
-                            else if ( this.getCause() instanceof URISyntaxException )
-                            {
-                                throw (URISyntaxException) new URISyntaxException(
-                                    ( (URISyntaxException) this.getCause() ).getInput(),
-                                    ( (URISyntaxException) this.getCause() ).getReason(),
-                                    ( (URISyntaxException) this.getCause() ).getIndex() ).
-                                    initCause( this.getCause() );
-
-                            }
-
-                            throw new AssertionError( this );
-                        }
-
                     }
 
                     final Function<String, String> parallelToLowerCase = ( s  ->
@@ -1929,7 +1884,22 @@ public class DefaultModelContext extends ModelContext
                     }
                     catch ( final CreateUriFailure ex )
                     {
-                        ex.propagate();
+                        if ( ex.getCause() instanceof MalformedURLException )
+                        {
+                            throw (MalformedURLException) new MalformedURLException( ex.getCause().getMessage() ).
+                                initCause( ex.getCause() );
+
+                        }
+                        else if ( ex.getCause() instanceof URISyntaxException )
+                        {
+                            throw (URISyntaxException) new URISyntaxException(
+                                ( (URISyntaxException) ex.getCause() ).getInput(),
+                                ( (URISyntaxException) ex.getCause() ).getReason(),
+                                ( (URISyntaxException) ex.getCause() ).getIndex() ).
+                                initCause( ex.getCause() );
+
+                        }
+
                         throw new AssertionError( ex );
                     }
                 }
