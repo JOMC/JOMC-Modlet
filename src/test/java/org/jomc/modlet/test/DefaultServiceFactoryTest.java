@@ -33,6 +33,8 @@ package org.jomc.modlet.test;
 import org.jomc.modlet.DefaultServiceFactory;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for class {@code org.jomc.modlet.DefaultServiceFactory}.
@@ -97,6 +99,35 @@ public class DefaultServiceFactoryTest extends ServiceFactoryTest
 
         DefaultServiceFactory.setDefaultOrdinal( null );
         this.getServiceFactory().setOrdinal( null );
+    }
+
+    @Test
+    public final void testDefaultEnabled() throws Exception
+    {
+        System.clearProperty( "org.jomc.modlet.DefaultServiceFactory.defaultEnabled" );
+        DefaultServiceFactory.setDefaultEnabled( null );
+        assertTrue( DefaultServiceFactory.isDefaultEnabled() );
+        DefaultServiceFactory.setDefaultEnabled( null );
+        System.setProperty( "org.jomc.modlet.DefaultServiceFactory.defaultEnabled", "false" );
+        assertFalse( DefaultServiceFactory.isDefaultEnabled() );
+        System.clearProperty( "org.jomc.modlet.DefaultServiceFactory.defaultEnabled" );
+        DefaultServiceFactory.setDefaultEnabled( null );
+        assertTrue( DefaultServiceFactory.isDefaultEnabled() );
+    }
+
+    @Test
+    public final void testEnabled() throws Exception
+    {
+        DefaultServiceFactory.setDefaultEnabled( null );
+        this.getServiceFactory().setEnabled( null );
+        assertTrue( this.getServiceFactory().isEnabled() );
+
+        DefaultServiceFactory.setDefaultEnabled( false );
+        this.getServiceFactory().setEnabled( null );
+        assertFalse( this.getServiceFactory().isEnabled() );
+
+        DefaultServiceFactory.setDefaultEnabled( null );
+        this.getServiceFactory().setEnabled( null );
     }
 
 }
