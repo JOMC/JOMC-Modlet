@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.stream.Stream;
@@ -49,6 +50,35 @@ import java.util.stream.Stream;
  */
 public class DefaultServiceFactory implements ServiceFactory
 {
+
+    /**
+     * Constant for the name of the system property controlling property {@code defaultEnabled}.
+     *
+     * @see #isDefaultEnabled()
+     * @since 1.11.0
+     */
+    private static final String DEFAULT_ENABLED_PROPERTY_NAME =
+        "org.jomc.modlet.DefaultServiceFactory.defaultEnabled";
+
+    /**
+     * Default value of the flag indicating the factory is enabled by default.
+     *
+     * @see #isDefaultEnabled()
+     * @since 1.11.0
+     */
+    private static final Boolean DEFAULT_ENABLED = Boolean.TRUE;
+
+    /**
+     * Flag indicating the factory is enabled by default.
+     * @since 1.11.0
+     */
+    private static volatile Boolean defaultEnabled;
+
+    /**
+     * Flag indicating the factory is enabled.
+     * @since 1.11.0
+     */
+    private volatile Boolean enabled;
 
     /**
      * Constant for the name of the system property controlling property {@code defaultOrdinal}.
@@ -81,6 +111,78 @@ public class DefaultServiceFactory implements ServiceFactory
     public DefaultServiceFactory()
     {
         super();
+    }
+
+    /**
+     * Gets a flag indicating the factory is enabled by default.
+     * <p>
+     * The default enabled flag is controlled by system property
+     * {@code org.jomc.modlet.DefaultServiceFactory.defaultEnabled} holding a value indicating the factory is
+     * enabled by default. If that property is not set, the {@code true} default is returned.
+     * </p>
+     *
+     * @return {@code true}, if the factory is enabled by default; {@code false}, if the factory is disabled by
+     * default.
+     *
+     * @see #isEnabled()
+     * @see #setDefaultEnabled(java.lang.Boolean)
+     * @since 1.11.0
+     */
+    public static boolean isDefaultEnabled()
+    {
+        if ( defaultEnabled == null )
+        {
+            defaultEnabled = Boolean.valueOf( System.getProperty(
+                DEFAULT_ENABLED_PROPERTY_NAME, Boolean.toString( DEFAULT_ENABLED ) ) );
+
+        }
+
+        return defaultEnabled;
+    }
+
+    /**
+     * Sets the flag indicating the factory is enabled by default.
+     *
+     * @param value The new value of the flag indicating the factory is enabled by default or {@code null}.
+     *
+     * @see #isDefaultEnabled()
+     * @since 1.11.0
+     */
+    public static void setDefaultEnabled( final Boolean value )
+    {
+        defaultEnabled = value;
+    }
+
+    /**
+     * Gets a flag indicating the factory is enabled.
+     *
+     * @return {@code true}, if the factory is enabled; {@code false}, if the factory is disabled.
+     *
+     * @see #isDefaultEnabled()
+     * @see #setEnabled(java.lang.Boolean)
+     * @since 1.11.0
+     */
+    public final boolean isEnabled()
+    {
+        if ( this.enabled == null )
+        {
+            this.enabled = isDefaultEnabled();
+        }
+
+        return this.enabled;
+    }
+
+    /**
+     * Sets the flag indicating the factory is enabled.
+     *
+     * @param value The new value of the flag indicating the factory is enabled or {@code null}.
+     *
+     * @see #isEnabled()
+     * @since 1.11.0
+     */
+    public final void setEnabled( final Boolean value )
+    {
+        this.enabled = value;
     }
 
     /**
@@ -149,7 +251,7 @@ public class DefaultServiceFactory implements ServiceFactory
     }
 
     @Override
-    public <T> T createServiceObject( final ModelContext context, final Service service, final Class<T> type )
+    public <T> Optional<T> createServiceObject( final ModelContext context, final Service service, final Class<T> type )
         throws ModelException
     {
         Objects.requireNonNull( context, "context" );
@@ -158,67 +260,80 @@ public class DefaultServiceFactory implements ServiceFactory
 
         try
         {
-            final Class<?> clazz = context.findClass( service.getClazz() );
-
-            if ( clazz == null )
+            final T serviceObject;
+            if ( this.isEnabled() )
             {
-                throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(), service.
-                                                      getIdentifier(),
-                                                      service.getClazz() ) );
+                final Optional<Class<?>> clazz = context.findClass( service.getClazz() );
 
-            }
-
-            if ( !type.isAssignableFrom( clazz ) )
-            {
-                throw new ModelException( getMessage( "illegalService", service.getOrdinal(), service.
-                                                      getIdentifier(),
-                                                      service.getClazz(), type.getName() ) );
-
-            }
-
-            final T serviceObject = clazz.asSubclass( type ).newInstance();
-
-            if ( !service.getProperty().isEmpty() )
-            {
-                try ( final Stream<Property> st0 = service.getProperty().parallelStream().unordered() )
+                if ( !clazz.isPresent() )
                 {
-                    final class InitPropertyFailure extends RuntimeException
-                    {
+                    throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(), service.
+                                                          getIdentifier(),
+                                                          service.getClazz() ) );
 
-                        public InitPropertyFailure( final Throwable cause )
+                }
+
+                if ( !type.isAssignableFrom( clazz.get() ) )
+                {
+                    throw new ModelException( getMessage( "illegalService", service.getOrdinal(), service.
+                                                          getIdentifier(),
+                                                          service.getClazz(), type.getName() ) );
+
+                }
+
+                serviceObject = clazz.get().asSubclass( type ).newInstance();
+
+                if ( !service.getProperty().isEmpty() )
+                {
+                    try ( final Stream<Property> st0 = service.getProperty().parallelStream().unordered() )
+                    {
+                        final class InitPropertyFailure extends RuntimeException
                         {
-                            super( cause );
+
+                            public InitPropertyFailure( final Throwable cause )
+                            {
+                                super( cause );
+                            }
+
                         }
 
-                    }
-
-                    try
-                    {
-                        st0.forEach( p  ->
+                        try
                         {
-                            try
+                            st0.forEach( p  ->
                             {
-                                initProperty( context, serviceObject, p.getName(), p.getValue() );
-                            }
-                            catch ( final ModelException e )
-                            {
-                                throw new InitPropertyFailure( e );
-                            }
-                        } );
-                    }
-                    catch ( final InitPropertyFailure e )
-                    {
-                        if ( e.getCause() instanceof ModelException )
-                        {
-                            throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                                try
+                                {
+                                    initProperty( context, serviceObject, p.getName(), p.getValue() );
+                                }
+                                catch ( final ModelException e )
+                                {
+                                    throw new InitPropertyFailure( e );
+                                }
+                            } );
                         }
+                        catch ( final InitPropertyFailure e )
+                        {
+                            if ( e.getCause() instanceof ModelException )
+                            {
+                                throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                            }
 
-                        throw new AssertionError( e );
+                            throw new AssertionError( e );
+                        }
                     }
                 }
             }
+            else
+            {
+                serviceObject = null;
 
-            return serviceObject;
+                if ( context.isLoggable( Level.FINER ) )
+                {
+                    context.log( Level.FINER, getMessage( "disabled", this.getClass().getSimpleName() ), null );
+                }
+            }
+
+            return Optional.of( serviceObject );
         }
         catch ( final InstantiationException | IllegalAccessException e )
         {

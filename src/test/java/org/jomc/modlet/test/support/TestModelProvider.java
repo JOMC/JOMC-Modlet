@@ -31,6 +31,7 @@
 package org.jomc.modlet.test.support;
 
 import java.net.URL;
+import java.util.Optional;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
@@ -119,7 +120,7 @@ public final class TestModelProvider implements ModelProvider
     }
 
     @Override
-    public Model findModel( final ModelContext context, final Model model ) throws ModelException
+    public Optional<Model> findModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
         {
@@ -134,7 +135,7 @@ public final class TestModelProvider implements ModelProvider
 
         final Model created = model.clone();
         created.getAny().add( new ObjectFactory().createTest( new TestComplexType() ) );
-        return created;
+        return Optional.of( created );
     }
 
     public boolean isBooleanProperty()

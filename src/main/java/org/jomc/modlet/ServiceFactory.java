@@ -30,6 +30,8 @@
  */
 package org.jomc.modlet;
 
+import java.util.Optional;
+
 /**
  * {@code Service} factory interface.
  *
@@ -56,13 +58,12 @@ public interface ServiceFactory
      * @param type The class of the type of the service object.
      * @param <T> The type of the service object.
      *
-     * @return An new service object for {@code service} or {@code null}, if the factory is not responsible for creating
-     * service objects of {@code type}.
+     * @return An new service object for {@code service} or no value, if no service object is produced.
      *
      * @throws NullPointerException if {@code context}, {@code service} or {@code type} is {@code null}.
      * @throws ModelException if creating the service object fails.
      */
-    <T> T createServiceObject( ModelContext context, Service service, Class<T> type )
-        throws NullPointerException, ModelException;
+    <T> Optional<T> createServiceObject( ModelContext context, Service service, Class<T> type )
+        throws ModelException;
 
 }

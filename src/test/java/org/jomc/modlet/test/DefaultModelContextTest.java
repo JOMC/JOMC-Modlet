@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import javax.xml.bind.JAXBContext;
@@ -202,22 +203,23 @@ public class DefaultModelContextTest extends ModelContextTest
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        final TestModletProvider testModletProvider =
-            (TestModletProvider) this.getModelContext().getAttribute( TestModletProvider.class.getName() );
+        final Optional<Object> testModletProvider =
+            this.getModelContext().getAttribute( TestModletProvider.class.getName() );
 
         assertNotNull( testModletProvider );
-        assertTrue( testModletProvider.isBooleanProperty() );
-        assertEquals( 'T', testModletProvider.getCharacterProperty() );
-        assertEquals( (byte) -1, testModletProvider.getByteProperty() );
-        assertEquals( (short) -1, testModletProvider.getShortProperty() );
-        assertEquals( -1, testModletProvider.getIntProperty() );
-        assertEquals( -1, testModletProvider.getLongProperty() );
-        assertEquals( -1, testModletProvider.getFloatProperty(), 0 );
-        assertEquals( -1, testModletProvider.getDoubleProperty(), 0 );
-        assertEquals( "TEST", testModletProvider.getStringProperty() );
-        assertEquals( new URL( "file:///tmp" ), testModletProvider.getUrlProperty() );
-        assertEquals( Thread.State.RUNNABLE, testModletProvider.getEnumProperty() );
-        assertNull( testModletProvider.getObjectProperty() );
+        assertTrue( testModletProvider.isPresent() );
+        assertTrue( ( (TestModletProvider) testModletProvider.get() ).isBooleanProperty() );
+        assertEquals( 'T', ( (TestModletProvider) testModletProvider.get() ).getCharacterProperty() );
+        assertEquals( (byte) -1, ( (TestModletProvider) testModletProvider.get() ).getByteProperty() );
+        assertEquals( (short) -1, ( (TestModletProvider) testModletProvider.get() ).getShortProperty() );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getIntProperty() );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getLongProperty() );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getFloatProperty(), 0 );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getDoubleProperty(), 0 );
+        assertEquals( "TEST", ( (TestModletProvider) testModletProvider.get() ).getStringProperty() );
+        assertEquals( new URL( "file:///tmp" ), ( (TestModletProvider) testModletProvider.get() ).getUrlProperty() );
+        assertEquals( Thread.State.RUNNABLE, ( (TestModletProvider) testModletProvider.get() ).getEnumProperty() );
+        assertNull( ( (TestModletProvider) testModletProvider.get() ).getObjectProperty() );
 
         this.getModelContext().setProviderLocation( "META-INF/illegal-extended-services-1" );
         this.getModelContext().setModlets( null );
@@ -371,22 +373,23 @@ public class DefaultModelContextTest extends ModelContextTest
         modlets = this.getModelContext().findModlets( new Modlets() );
         assertNotNull( modlets );
 
-        final TestModletProvider testModletProvider =
-            (TestModletProvider) this.getModelContext().getAttribute( TestModletProvider.class.getName() );
+        final Optional<Object> testModletProvider =
+            this.getModelContext().getAttribute( TestModletProvider.class.getName() );
 
         assertNotNull( testModletProvider );
-        assertTrue( testModletProvider.isBooleanProperty() );
-        assertEquals( 'T', testModletProvider.getCharacterProperty() );
-        assertEquals( (byte) -1, testModletProvider.getByteProperty() );
-        assertEquals( (short) -1, testModletProvider.getShortProperty() );
-        assertEquals( -1, testModletProvider.getIntProperty() );
-        assertEquals( -1, testModletProvider.getLongProperty() );
-        assertEquals( -1, testModletProvider.getFloatProperty(), 0 );
-        assertEquals( -1, testModletProvider.getDoubleProperty(), 0 );
-        assertEquals( "TEST", testModletProvider.getStringProperty() );
-        assertEquals( new URL( "file:///tmp" ), testModletProvider.getUrlProperty() );
-        assertEquals( Thread.State.RUNNABLE, testModletProvider.getEnumProperty() );
-        assertNull( testModletProvider.getObjectProperty() );
+        assertTrue( testModletProvider.isPresent() );
+        assertTrue( ( (TestModletProvider) testModletProvider.get() ).isBooleanProperty() );
+        assertEquals( 'T', ( (TestModletProvider) testModletProvider.get() ).getCharacterProperty() );
+        assertEquals( (byte) -1, ( (TestModletProvider) testModletProvider.get() ).getByteProperty() );
+        assertEquals( (short) -1, ( (TestModletProvider) testModletProvider.get() ).getShortProperty() );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getIntProperty() );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getLongProperty() );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getFloatProperty(), 0 );
+        assertEquals( -1, ( (TestModletProvider) testModletProvider.get() ).getDoubleProperty(), 0 );
+        assertEquals( "TEST", ( (TestModletProvider) testModletProvider.get() ).getStringProperty() );
+        assertEquals( new URL( "file:///tmp" ), ( (TestModletProvider) testModletProvider.get() ).getUrlProperty() );
+        assertEquals( Thread.State.RUNNABLE, ( (TestModletProvider) testModletProvider.get() ).getEnumProperty() );
+        assertNull( ( (TestModletProvider) testModletProvider.get() ).getObjectProperty() );
 
         this.getModelContext().setAttribute( DefaultModelContext.PROVIDER_LOCATION_ATTRIBUTE_NAME,
                                              "META-INF/illegal-extended-services-1" );
@@ -502,8 +505,10 @@ public class DefaultModelContextTest extends ModelContextTest
 
         model = this.getModelContext().processModel( model );
         assertNotNull( this.getModelContext().getAttribute( TestModelProcessor.class.getName() ) );
+        assertTrue( this.getModelContext().getAttribute( TestModelProcessor.class.getName() ).isPresent() );
         assertNotNull( model.getAnyObject( TestComplexType.class ) );
-        assertFalse( model.getAnyObject( TestComplexType.class ).getAny().isEmpty() );
+        assertTrue( model.getAnyObject( TestComplexType.class ).isPresent() );
+        assertFalse( model.getAnyObject( TestComplexType.class ).get().getAny().isEmpty() );
     }
 
     @Test
@@ -634,7 +639,7 @@ public class DefaultModelContextTest extends ModelContextTest
 
         this.getModelContext().findModlets( new Modlets() );
 
-        List<Class> sortedProviders = (List<Class>) this.getModelContext().getAttribute( "SORTING_TEST" );
+        List<Class<?>> sortedProviders = (List<Class<?>>) this.getModelContext().getAttribute( "SORTING_TEST" ).get();
         assertNotNull( sortedProviders );
         assertEquals( 4, sortedProviders.size() );
         assertEquals( NullModletProvider.class, sortedProviders.get( 0 ) );
@@ -651,7 +656,7 @@ public class DefaultModelContextTest extends ModelContextTest
 
         this.getModelContext().findModlets( new Modlets() );
 
-        sortedProviders = (List<Class>) this.getModelContext().getAttribute( "SORTING_TEST" );
+        sortedProviders = (List<Class<?>>) this.getModelContext().getAttribute( "SORTING_TEST" ).get();
         assertNotNull( sortedProviders );
         assertEquals( 4, sortedProviders.size() );
         assertEquals( TestModletProvider.class, sortedProviders.get( 0 ) );

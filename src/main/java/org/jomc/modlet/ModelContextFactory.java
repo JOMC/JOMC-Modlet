@@ -34,6 +34,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
@@ -97,14 +98,10 @@ public abstract class ModelContextFactory
      */
     public static ModelContextFactory newInstance( final String factoryClassName ) throws ModelContextFactoryError
     {
-        if ( factoryClassName == null )
-        {
-            throw new NullPointerException( "factoryClassName" );
-        }
-
         try
         {
-            final Class<?> factoryClass = Class.forName( factoryClassName );
+            final Class<?> factoryClass =
+                Class.forName( Objects.requireNonNull( factoryClassName, "factoryClassName" ) );
 
             if ( !ModelContextFactory.class.isAssignableFrom( factoryClass ) )
             {

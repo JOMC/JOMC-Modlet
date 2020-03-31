@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -217,8 +218,7 @@ public abstract class ModelContext
      *
      * @param name The name of the attribute to get.
      *
-     * @return The value of the attribute with name {@code name}; {@code null} if no attribute matching {@code name} is
-     * found.
+     * @return The value of the attribute with name {@code name} or no value, if no such attribute is found.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      *
@@ -226,9 +226,9 @@ public abstract class ModelContext
      * @see #setAttribute(java.lang.String, java.lang.Object)
      * @see #clearAttribute(java.lang.String)
      */
-    public Object getAttribute( final String name )
+    public Optional<Object> getAttribute( final String name )
     {
-        return this.attributes.get( Objects.requireNonNull( name, "name" ) );
+        return Optional.ofNullable( this.attributes.get( Objects.requireNonNull( name, "name" ) ) );
     }
 
     /**
@@ -247,14 +247,7 @@ public abstract class ModelContext
      */
     public Object getAttribute( final String name, final Object def )
     {
-        Object value = this.getAttribute( Objects.requireNonNull( name, "name" ) );
-
-        if ( value == null )
-        {
-            value = def;
-        }
-
-        return value;
+        return this.getAttribute( Objects.requireNonNull( name, "name" ) ).orElse( def );
     }
 
     /**
@@ -263,7 +256,7 @@ public abstract class ModelContext
      * @param name The name of the attribute to set.
      * @param value The value of the attribute to set.
      *
-     * @return The previous value of the attribute with name {@code name}; {@code null} if no such value is found.
+     * @return The previous value of the attribute with name {@code name} or no value, if no such value is found.
      *
      * @throws NullPointerException if {@code name} or {@code value} is {@code null}.
      *
@@ -271,11 +264,12 @@ public abstract class ModelContext
      * @see #getAttribute(java.lang.String, java.lang.Object)
      * @see #clearAttribute(java.lang.String)
      */
-    public Object setAttribute( final String name, final Object value )
+    public Optional<Object> setAttribute( final String name, final Object value )
     {
-        return this.attributes.put( Objects.requireNonNull( name, "name" ),
-                                    Objects.requireNonNull( value, "value" ) );
+        final Object previousValue = this.attributes.put( Objects.requireNonNull( name, "name" ),
+                                                          Objects.requireNonNull( value, "value" ) );
 
+        return Optional.ofNullable( previousValue );
     }
 
     /**
@@ -407,19 +401,13 @@ public abstract class ModelContext
 
         if ( this.modlets != null )
         {
-            for ( int i = 0, s0 = this.modlets.getModlet().size(); i < s0; i++ )
+            try ( final Stream<Modlet> st0 = this.modlets.getModlet().parallelStream().unordered() )
             {
-                final Modlet m = this.modlets.getModlet().get( i );
+                st0.filter( m  -> m.getSchemas() != null ).
+                    map( m  -> m.getSchemas().getSchemaBySystemId( oldModletSchemaSystemId ) ).
+                    filter( s  -> s.isPresent() ).
+                    forEach( s  -> s.get().setSystemId( value ) );
 
-                if ( m.getSchemas() != null )
-                {
-                    final Schema s = m.getSchemas().getSchemaBySystemId( oldModletSchemaSystemId );
-
-                    if ( s != null )
-                    {
-                        s.setSystemId( value );
-                    }
-                }
             }
         }
     }
@@ -584,38 +572,28 @@ public abstract class ModelContext
             this.modlets.getModlet().add( modlet );
 
             long t0 = System.nanoTime();
-            final Modlets provided = this.findModlets( this.modlets );
+            this.modlets = Objects.requireNonNull( this.findModlets( this.modlets ), this.toString() );
 
             if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINE, getMessage( "findModletsReport",
-                                                  provided != null ? provided.getModlet().size() : 0,
+                this.log( Level.FINE, getMessage( "findModletsReport", this.modlets.getModlet().size(),
                                                   System.nanoTime() - t0 ), null );
 
             }
 
-            if ( provided != null )
-            {
-                this.modlets = provided;
-            }
-
             t0 = System.nanoTime();
-            final Modlets processed = this.processModlets( this.modlets );
+            this.modlets = Objects.requireNonNull( this.processModlets( this.modlets ), this.toString() );
 
             if ( this.isLoggable( Level.FINE ) )
             {
-                this.log( Level.FINE, getMessage( "processModletsReport",
-                                                  processed != null ? processed.getModlet().size() : 0,
+                this.log( Level.FINE, getMessage( "processModletsReport", this.modlets.getModlet().size(),
                                                   System.nanoTime() - t0 ), null );
-            }
 
-            if ( processed != null )
-            {
-                this.modlets = processed;
             }
 
             t0 = System.nanoTime();
-            final ModelValidationReport report = this.validateModlets( this.modlets );
+            final ModelValidationReport report =
+                Objects.requireNonNull( this.validateModlets( this.modlets ), this.toString() );
 
             if ( this.isLoggable( Level.FINE ) )
             {
@@ -626,13 +604,14 @@ public abstract class ModelContext
 
             try ( final Stream<ModelValidationReport.Detail> st0 = report.getDetails().parallelStream().unordered() )
             {
-                st0.forEach( d  ->
-                {
-                    if ( isLoggable( d.getLevel() ) )
+                st0.filter( d  -> d.getMessage().isPresent() && d.getLevel().isPresent() ).
+                    forEach( d  ->
                     {
-                        log( d.getLevel(), d.getMessage(), null );
-                    }
-                } );
+                        if ( isLoggable( d.getLevel().get() ) )
+                        {
+                            log( d.getLevel().get(), d.getMessage().get(), null );
+                        }
+                    } );
             }
 
             if ( !report.isModelValid() )
@@ -662,18 +641,18 @@ public abstract class ModelContext
      *
      * @param name The name of the class to search.
      *
-     * @return A class object of the class with name {@code name} or {@code null}, if no such class is found.
+     * @return A class object of the class with name {@code name} or no value, if no such class is found.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      * @throws ModelException if searching fails.
      *
      * @see #getClassLoader()
      */
-    public Class<?> findClass( final String name ) throws ModelException
+    public Optional<Class<?>> findClass( final String name ) throws ModelException
     {
         try
         {
-            return Class.forName( Objects.requireNonNull( name, "name" ), false, this.getClassLoader() );
+            return Optional.of( Class.forName( Objects.requireNonNull( name, "name" ), false, this.getClassLoader() ) );
         }
         catch ( final ClassNotFoundException e )
         {
@@ -682,7 +661,7 @@ public abstract class ModelContext
                 this.log( Level.FINE, getMessage( e ), e );
             }
 
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -691,14 +670,14 @@ public abstract class ModelContext
      *
      * @param name The name of the resource to search.
      *
-     * @return An URL object for reading the resource or {@code null}, if no such resource is found.
+     * @return An URL object for reading the resource or no value, if no such resource is found.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      * @throws ModelException if searching fails.
      *
      * @see #getClassLoader()
      */
-    public URL findResource( final String name ) throws ModelException
+    public Optional<URL> findResource( final String name ) throws ModelException
     {
         final long t0 = System.nanoTime();
         final URL resource = this.getClassLoader() == null
@@ -710,7 +689,7 @@ public abstract class ModelContext
             this.log( Level.FINE, getMessage( "resourcesReport", name, System.nanoTime() - t0 ), null );
         }
 
-        return resource;
+        return Optional.ofNullable( resource );
     }
 
     /**
@@ -754,7 +733,7 @@ public abstract class ModelContext
      *
      * @param modlets The {@code Modlets} currently being searched.
      *
-     * @return The {@code Modlets} found in the context or {@code null}.
+     * @return The {@code Modlets} found in the context.
      *
      * @throws NullPointerException if {@code modlets} is {@code null}.
      * @throws ModelException if searching {@code Modlets} fails.
@@ -770,7 +749,7 @@ public abstract class ModelContext
      *
      * @param modlets The {@code Modlets} currently being processed.
      *
-     * @return The processed {@code Modlets} or {@code null}.
+     * @return The processed {@code Modlets}.
      *
      * @throws NullPointerException if {@code modlets} is {@code null}.
      * @throws ModelException if processing {@code Modlets} fails.

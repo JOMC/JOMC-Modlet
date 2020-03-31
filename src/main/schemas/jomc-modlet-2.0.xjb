@@ -56,18 +56,17 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} list or
-     * {@code null} if no such element is found.
+     * no value if no such element is found.
      *
      * @throws NullPointerException if {@code any}, {@code namespaceURI}, {@code localPart} or {@code type} is
      * {@code null}.
      * @throws IllegalStateException if {@code any} contains more than one matching element.
-     *
-     * @since 1.1
      */
-    protected <T> javax.xml.bind.JAXBElement<T> getAnyElement( final java.util.List<Object> any,
-                                                               final String namespaceURI,
-                                                               final String localPart,
-                                                               final Class<T> type )
+    @SuppressWarnings( "unchecked" )
+    protected <T> java.util.Optional<javax.xml.bind.JAXBElement<T>> getAnyElement( final java.util.List<Object> any,
+                                                                                   final String namespaceURI,
+                                                                                   final String localPart,
+                                                                                   final Class<T> type )
     {
         java.util.Objects.requireNonNull( any, "any" );
         java.util.Objects.requireNonNull( namespaceURI, "namespaceURI" );
@@ -104,15 +103,11 @@
             }
         }
 
-        if ( anyElement != null && anyElement.getValue() != null && anyElement.getValue().getClass().equals( type ) )
-        {
-            @SuppressWarnings( "unchecked" ) final javax.xml.bind.JAXBElement<T> e =
-                (javax.xml.bind.JAXBElement<T>) anyElement;
-
-            return e;
-        }
-
-        return null;
+        return java.util.Optional.ofNullable(
+            anyElement != null && anyElement.getValue() != null && anyElement.getValue().getClass().equals( type )
+                ? (javax.xml.bind.JAXBElement<T>) anyElement
+                : null
+        );
     }
 
     /**
@@ -178,17 +173,16 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} list or {@code null}, if no such instance is found.
+     * @return The instance of {@code clazz} from the {@code any} list or no value, if no such instance is found.
      *
      * @throws NullPointerException if {@code any} or {@code clazz} is {@code null}.
      * @throws IllegalStateException if {@code any} contains more than one matching object.
      */
-    protected <T> T getAnyObject( final java.util.List<Object> any, final Class<T> clazz )
+    @SuppressWarnings( "unchecked" )
+    protected <T> java.util.Optional<T> getAnyObject( final java.util.List<Object> any, final Class<T> clazz )
     {
         java.util.Objects.requireNonNull( any, "any" );
         java.util.Objects.requireNonNull( clazz, "clazz" );
-
-        T anyObject = null;
 
         try ( final java.util.stream.Stream<?> st0 = any.parallelStream().unordered() )
         {
@@ -217,14 +211,12 @@
                                                              clazz.getName() ) );
 
             }
-            if ( !candidates.isEmpty() )
-            {
-                @SuppressWarnings( "unchecked" ) final T object = (T) candidates.get( 0 );
-                anyObject = object;
-            }
-        }
 
-        return anyObject;
+            return java.util.Optional.ofNullable( !candidates.isEmpty()
+                                                      ? (T) candidates.get( 0 )
+                                                      : null );
+
+        }
     }
 
     /**
@@ -304,17 +296,16 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null}, if no such element is found.
+     * of the instance or no value, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
-     *
-     * @since 1.1
      */
-    public <T> javax.xml.bind.JAXBElement<T> getAnyElement( final String namespaceURI, final String localPart,
-                                                            final Class<T> type )
+    public <T> java.util.Optional<javax.xml.bind.JAXBElement<T>> getAnyElement( final String namespaceURI,
+                                                                                final String localPart,
+                                                                                final Class<T> type )
     {
         return this.getAnyElement( this.getAny(), namespaceURI, localPart, type );
     }
@@ -350,7 +341,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or no value, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
@@ -358,7 +349,7 @@
      *
      * @see #getAnyObject(java.util.List, java.lang.Class)
      */
-    public <T> T getAnyObject( final Class<T> clazz )
+    public <T> java.util.Optional<T> getAnyObject( final Class<T> clazz )
     {
         return this.getAnyObject( this.getAny(), clazz );
     }
@@ -390,19 +381,19 @@
      *
      * @param name The name of the modlet to return.
      *
-     * @return The first matching modlet or {@code null}, if no such modlet is found.
+     * @return The first matching modlet or no value, if no such modlet is found.
      *
      * @throws NullPointerException if {@code name} is {@code null}.
      *
      * @see #getModlet()
      * @see Modlet#getName()
      */
-    public Modlet getModlet( final String name )
+    public java.util.Optional<Modlet> getModlet( final String name )
     {
         java.util.Objects.requireNonNull( name, "name" );
         try ( final java.util.stream.Stream<Modlet> st0 = this.getModlet().parallelStream().unordered() )
         {
-            return st0.filter( m  -> name.equals( m.getName() ) ).findFirst().orElse( null );
+            return st0.filter( m  -> name.equals( m.getName() ) ).findFirst();
         }
     }
 
@@ -512,14 +503,14 @@
      *
      * @param model The identifier of the model to return schemas of.
      *
-     * @return A list of schemas for {@code model} or {@code null}, if no such schemas are found.
+     * @return A list of schemas of the model identified by {@code model} or no value, if no such model is found.
      *
      * @throws NullPointerException if {@code model} is {@code null}.
      *
      * @see #getModlet()
      * @see Modlet#getModel()
      */
-    public Schemas getSchemas( final String model )
+    public java.util.Optional<Schemas> getSchemas( final String model )
     {
         java.util.Objects.requireNonNull( model, "model" );
         final Schemas schemas = new Schemas();
@@ -546,7 +537,7 @@
 
         }
 
-        return modelFound.get() && !schemas.getSchema().isEmpty() ? schemas : null;
+        return java.util.Optional.ofNullable( modelFound.get() ? schemas : null );
     }
 
     /**
@@ -554,14 +545,14 @@
      *
      * @param model The identifier of the model to return services of.
      *
-     * @return A list of services for {@code model} or {@code null}, if no such services are found.
+     * @return A list of services of the model identified by {@code model} or no value, if no such model is found.
      *
      * @throws NullPointerException if {@code model} is {@code null}.
      *
      * @see #getModlet()
      * @see Modlet#getModel()
      */
-    public Services getServices( final String model )
+    public java.util.Optional<Services> getServices( final String model )
     {
         java.util.Objects.requireNonNull( model, "model" );
         final Services services = new Services();
@@ -588,7 +579,7 @@
 
         }
 
-        return modelFound.get() && !services.getService().isEmpty() ? services : null;
+        return java.util.Optional.ofNullable( modelFound.get() ? services : null );
     }]]>
       </ci:code>
     </jaxb:bindings>
@@ -625,17 +616,16 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null}, if no such element is found.
+     * of the instance or no value, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
-     *
-     * @since 1.1
      */
-    public <T> javax.xml.bind.JAXBElement<T> getAnyElement( final String namespaceURI, final String localPart,
-                                                            final Class<T> type )
+    public <T> java.util.Optional<javax.xml.bind.JAXBElement<T>> getAnyElement( final String namespaceURI,
+                                                                                final String localPart,
+                                                                                final Class<T> type )
     {
         return this.getAnyElement( this.getAny(), namespaceURI, localPart, type );
     }
@@ -671,7 +661,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or no value, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
@@ -679,7 +669,7 @@
      *
      * @see #getAnyObject(java.util.List, java.lang.Class)
      */
-    public <T> T getAnyObject( final Class<T> clazz )
+    public <T> java.util.Optional<T> getAnyObject( final Class<T> clazz )
     {
         return this.getAnyObject( this.getAny(), clazz );
     }
@@ -711,19 +701,19 @@
      *
      * @param publicId The public identifier of the schema to return.
      *
-     * @return The first matching schema or {@code null}, if no such schema is found.
+     * @return The first matching schema or no value, if no such schema is found.
      *
      * @throws NullPointerException if {@code publicId} is {@code null}.
      *
      * @see #getSchema()
      * @see Schema#getPublicId()
      */
-    public Schema getSchemaByPublicId( final String publicId )
+    public java.util.Optional<Schema> getSchemaByPublicId( final String publicId )
     {
         java.util.Objects.requireNonNull( publicId, "publicId" );
         try ( final java.util.stream.Stream<Schema> st0 = this.getSchema().parallelStream() )
         {
-            return st0.filter( s  -> publicId.equals( s.getPublicId() ) ).findFirst().orElse( null );
+            return st0.filter( s  -> publicId.equals( s.getPublicId() ) ).findFirst();
         }
     }
 
@@ -732,19 +722,19 @@
      *
      * @param systemId The system identifier of the schema to return.
      *
-     * @return The first matching schema or {@code null}, if no such schema is found.
+     * @return The first matching schema or no value, if no such schema is found.
      *
      * @throws NullPointerException if {@code systemId} is {@code null}.
      *
      * @see #getSchema()
      * @see Schema#getSystemId()
      */
-    public Schema getSchemaBySystemId( final String systemId )
+    public java.util.Optional<Schema> getSchemaBySystemId( final String systemId )
     {
         java.util.Objects.requireNonNull( systemId, "systemId" );
         try ( final java.util.stream.Stream<Schema> st0 = this.getSchema().parallelStream() )
         {
-            return st0.filter( s  -> systemId.equals( s.getSystemId() ) ).findFirst().orElse( null );
+            return st0.filter( s  -> systemId.equals( s.getSystemId() ) ).findFirst();
         }
     }]]>
       </ci:code>
@@ -782,17 +772,16 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null}, if no such element is found.
+     * of the instance or no value, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
-     *
-     * @since 1.1
      */
-    public <T> javax.xml.bind.JAXBElement<T> getAnyElement( final String namespaceURI, final String localPart,
-                                                            final Class<T> type )
+    public <T> java.util.Optional<javax.xml.bind.JAXBElement<T>> getAnyElement( final String namespaceURI,
+                                                                                final String localPart,
+                                                                                final Class<T> type )
     {
         return this.getAnyElement( this.getAny(), namespaceURI, localPart, type );
     }
@@ -828,7 +817,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or no value, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
@@ -836,7 +825,7 @@
      *
      * @see #getAnyObject(java.util.List, java.lang.Class)
      */
-    public <T> T getAnyObject( final Class<T> clazz )
+    public <T> java.util.Optional<T> getAnyObject( final Class<T> clazz )
     {
         return this.getAnyObject( this.getAny(), clazz );
     }
@@ -944,17 +933,16 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null}, if no such element is found.
+     * of the instance or no value, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
-     *
-     * @since 1.1
      */
-    public <T> javax.xml.bind.JAXBElement<T> getAnyElement( final String namespaceURI, final String localPart,
-                                                            final Class<T> type )
+    public <T> java.util.Optional<javax.xml.bind.JAXBElement<T>> getAnyElement( final String namespaceURI,
+                                                                                final String localPart,
+                                                                                final Class<T> type )
     {
         return this.getAnyElement( this.getAny(), namespaceURI, localPart, type );
     }
@@ -998,7 +986,7 @@
      *
      * @see #getAnyObject(java.util.List, java.lang.Class)
      */
-    public <T> T getAnyObject( final Class<T> clazz )
+    public <T> java.util.Optional<T> getAnyObject( final Class<T> clazz )
     {
         return this.getAnyObject( this.getAny(), clazz );
     }
@@ -1045,17 +1033,16 @@
      * @param <T> The type the element is bound to.
      *
      * @return The {@code JAXBElement} matching {@code namespaceURI} and {@code localPart} from the {@code any} property
-     * of the instance or {@code null}, if no such element is found.
+     * of the instance or no value, if no such element is found.
      *
      * @throws NullPointerException if {@code namespaceURI}, {@code localPart} or {@code type} is {@code null}.
      * @throws IllegalStateException if the {@code any} property contains more than one matching element.
      *
      * @see #getAnyElement(java.util.List, java.lang.String, java.lang.String, java.lang.Class)
-     *
-     * @since 1.2
      */
-    public <T> javax.xml.bind.JAXBElement<T> getAnyElement( final String namespaceURI, final String localPart,
-                                                            final Class<T> type )
+    public <T> java.util.Optional<javax.xml.bind.JAXBElement<T>> getAnyElement( final String namespaceURI,
+                                                                                final String localPart,
+                                                                                final Class<T> type )
     {
         return this.getAnyElement( this.getAny(), namespaceURI, localPart, type );
     }
@@ -1099,7 +1086,7 @@
      *
      * @see #getAnyObject(java.util.List, java.lang.Class)
      */
-    public <T> T getAnyObject( final Class<T> clazz )
+    public <T> java.util.Optional<T> getAnyObject( final Class<T> clazz )
     {
         return this.getAnyObject( this.getAny(), clazz );
     }

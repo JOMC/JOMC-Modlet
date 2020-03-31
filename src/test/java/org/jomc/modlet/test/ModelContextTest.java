@@ -174,14 +174,16 @@ public class ModelContextTest
             return null;
         } );
 
-        assertNull( this.getModelContext().getAttribute( "ATTRIBUTE" ) );
+        assertNotNull( this.getModelContext().getAttribute( "ATTRIBUTE" ) );
+        assertFalse( this.getModelContext().getAttribute( "ATTRIBUTE" ).isPresent() );
         assertEquals( "TEST", this.getModelContext().getAttribute( "ATTRIBUTE", "TEST" ) );
-        assertNull( this.getModelContext().setAttribute( "ATTRIBUTE", "VALUE" ) );
+        assertFalse( this.getModelContext().setAttribute( "ATTRIBUTE", "VALUE" ).isPresent() );
         assertEquals( "VALUE", this.getModelContext().getAttribute( "ATTRIBUTE", "TEST" ) );
-        assertEquals( "VALUE", this.getModelContext().setAttribute( "ATTRIBUTE", "TEST" ) );
-        assertEquals( "TEST", this.getModelContext().getAttribute( "ATTRIBUTE" ) );
+        assertEquals( "VALUE", this.getModelContext().setAttribute( "ATTRIBUTE", "TEST" ).get() );
+        assertEquals( "TEST", this.getModelContext().getAttribute( "ATTRIBUTE" ).get() );
         this.getModelContext().clearAttribute( "ATTRIBUTE" );
-        assertNull( this.getModelContext().getAttribute( "ATTRIBUTE" ) );
+        assertNotNull( this.getModelContext().getAttribute( "ATTRIBUTE" ) );
+        assertFalse( this.getModelContext().getAttribute( "ATTRIBUTE" ).isPresent() );
         assertEquals( "TEST", this.getModelContext().getAttribute( "ATTRIBUTE", "TEST" ) );
     }
 
@@ -189,8 +191,11 @@ public class ModelContextTest
     public final void testFindClass() throws Exception
     {
         assertNullPointerException( ()  -> this.getModelContext().findClass( null ) );
-        assertEquals( Object.class, this.getModelContext().findClass( "java.lang.Object" ) );
-        assertNull( this.getModelContext().findClass( "DOES_NOT_EXIST" ) );
+        assertNotNull( this.getModelContext().findClass( "java.lang.Object" ) );
+        assertTrue( this.getModelContext().findClass( "java.lang.Object" ).isPresent() );
+        assertEquals( Object.class, this.getModelContext().findClass( "java.lang.Object" ).get() );
+        assertNotNull( this.getModelContext().findClass( "DOES_NOT_EXIST" ) );
+        assertFalse( this.getModelContext().findClass( "DOES_NOT_EXIST" ).isPresent() );
     }
 
     @Test

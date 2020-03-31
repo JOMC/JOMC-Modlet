@@ -30,6 +30,8 @@
  */
 package org.jomc.modlet;
 
+import java.util.Optional;
+
 /**
  * {@code Modlet} processor interface.
  *
@@ -54,11 +56,11 @@ public interface ModletProcessor
      * @param context The context to process {@code Modlets} with.
      * @param modlets The {@code Modlets} currently being processed.
      *
-     * @return The processed {@code Modlets} or {@code null}.
+     * @return The processed {@code Modlets} or no value, if no result is produced.
      *
      * @throws NullPointerException if {@code context} or {@code modlets} is {@code null}.
      * @throws ModelException if processing {@code Modlets} fails.
      */
-    Modlets processModlets( ModelContext context, Modlets modlets ) throws NullPointerException, ModelException;
+    Optional<Modlets> processModlets( ModelContext context, Modlets modlets ) throws ModelException;
 
 }

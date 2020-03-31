@@ -31,6 +31,7 @@
 package org.jomc.modlet.test.support;
 
 import java.net.URL;
+import java.util.Optional;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
@@ -118,7 +119,8 @@ public final class TestModelValidator implements ModelValidator
     }
 
     @Override
-    public ModelValidationReport validateModel( final ModelContext context, final Model model ) throws ModelException
+    public Optional<ModelValidationReport> validateModel( final ModelContext context, final Model model )
+        throws ModelException
     {
         if ( context == null )
         {
@@ -130,7 +132,7 @@ public final class TestModelValidator implements ModelValidator
         }
 
         context.setAttribute( TestModelValidator.class.getName(), this );
-        return new ModelValidationReport();
+        return Optional.of( new ModelValidationReport() );
     }
 
     public boolean isBooleanProperty()

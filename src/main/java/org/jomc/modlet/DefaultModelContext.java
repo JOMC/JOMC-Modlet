@@ -254,9 +254,12 @@ public class DefaultModelContext extends ModelContext
             }
         }
 
-        if ( this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+        final Optional<Object> providerLocationAttribute = this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
+
+        if ( providerLocationAttribute.isPresent()
+                 && providerLocationAttribute.get() instanceof String )
         {
-            location = (String) this.getAttribute( PROVIDER_LOCATION_ATTRIBUTE_NAME );
+            location = (String) providerLocationAttribute.get();
 
             if ( this.isLoggable( Level.CONFIG ) )
             {
@@ -341,9 +344,13 @@ public class DefaultModelContext extends ModelContext
             }
         }
 
-        if ( this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+        final Optional<Object> platformProviderLocationAttribute =
+            this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
+
+        if ( platformProviderLocationAttribute.isPresent()
+                 && platformProviderLocationAttribute.get() instanceof String )
         {
-            location = (String) this.getAttribute( PLATFORM_PROVIDER_LOCATION_ATTRIBUTE_NAME );
+            location = (String) platformProviderLocationAttribute.get();
 
             if ( this.isLoggable( Level.CONFIG ) )
             {
@@ -391,11 +398,12 @@ public class DefaultModelContext extends ModelContext
                 this.log( Level.FINER, getMessage( "creatingModlets", provider.toString() ), null );
             }
 
-            final Modlets provided = provider.findModlets( this, found );
+            final Optional<Modlets> provided =
+                Objects.requireNonNull( provider.findModlets( this, found ), provider.toString() );
 
-            if ( provided != null )
+            if ( provided.isPresent() )
             {
-                found = provided;
+                found = provided.get();
             }
         }
 
@@ -471,11 +479,12 @@ public class DefaultModelContext extends ModelContext
                 this.log( Level.FINER, getMessage( "processingModlets", processor.toString() ), null );
             }
 
-            final Modlets processed = processor.processModlets( this, result );
+            final Optional<Modlets> processed =
+                Objects.requireNonNull( processor.processModlets( this, result ), processor.toString() );
 
-            if ( processed != null )
+            if ( processed.isPresent() )
             {
-                result = processed;
+                result = processed.get();
             }
         }
 
@@ -508,12 +517,10 @@ public class DefaultModelContext extends ModelContext
                 this.log( Level.FINER, getMessage( "validatingModlets", modletValidator.toString() ), null );
             }
 
-            final ModelValidationReport current = modletValidator.validateModlets( this, cloned );
+            final Optional<ModelValidationReport> current =
+                Objects.requireNonNull( modletValidator.validateModlets( this, cloned ), modletValidator.toString() );
 
-            if ( current != null )
-            {
-                report.getDetails().addAll( current.getDetails() );
-            }
+            current.ifPresent( r  -> report.getDetails().addAll( r.getDetails() ) );
         }
 
         return report;
@@ -566,11 +573,12 @@ public class DefaultModelContext extends ModelContext
                 this.log( Level.FINER, getMessage( "creatingModel", m.getIdentifier(), provider.toString() ), null );
             }
 
-            final Model provided = provider.findModel( this, m );
+            final Optional<Model> provided =
+                Objects.requireNonNull( provider.findModel( this, m ), provider.toString() );
 
-            if ( provided != null )
+            if ( provided.isPresent() )
             {
-                m = provided;
+                m = provided.get();
             }
         }
 
@@ -609,11 +617,12 @@ public class DefaultModelContext extends ModelContext
 
             }
 
-            final Model current = processor.processModel( this, processed );
+            final Optional<Model> current =
+                Objects.requireNonNull( processor.processModel( this, processed ), processor.toString() );
 
-            if ( current != null )
+            if ( current.isPresent() )
             {
-                processed = current;
+                processed = current.get();
             }
         }
 
@@ -671,13 +680,16 @@ public class DefaultModelContext extends ModelContext
 
                         }
 
-                        return modelValidator.validateModel( DefaultModelContext.this, cloned );
+                        return Objects.requireNonNull( modelValidator.validateModel( DefaultModelContext.this, cloned ),
+                                                       modelValidator.toString() );
+
                     }
                     catch ( final ModelException e )
                     {
                         throw new ValidateModelFailure( e );
                     }
-                } ).flatMap( r  -> r.getDetails().parallelStream().unordered() ).
+                } ).filter( r  -> r.isPresent() ).
+                    flatMap( r  -> r.get().getDetails().parallelStream().unordered() ).
                     collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
                                        {
                                            l1.addAll( l2 );
@@ -762,7 +774,7 @@ public class DefaultModelContext extends ModelContext
     @Override
     public EntityResolver createEntityResolver( final String model ) throws ModelException
     {
-        final Schemas schemas = getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
+        final Optional<Schemas> schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
         return new DefaultHandler()
         {
 
@@ -774,37 +786,37 @@ public class DefaultModelContext extends ModelContext
 
                 try
                 {
-                    Schema s = null;
+                    Optional<Schema> s = Optional.empty();
 
-                    if ( schemas != null )
+                    if ( schemas.isPresent() )
                     {
                         if ( systemId != null && !"".equals( systemId ) )
                         {
-                            s = schemas.getSchemaBySystemId( systemId );
+                            s = schemas.get().getSchemaBySystemId( systemId );
                         }
                         else if ( publicId != null )
                         {
-                            s = schemas.getSchemaByPublicId( publicId );
+                            s = schemas.get().getSchemaByPublicId( publicId );
                         }
                     }
 
-                    if ( s != null )
+                    if ( s.isPresent() )
                     {
                         schemaSource = new InputSource();
-                        schemaSource.setPublicId( s.getPublicId() );
-                        schemaSource.setSystemId( s.getSystemId() );
+                        schemaSource.setPublicId( s.get().getPublicId() );
+                        schemaSource.setSystemId( s.get().getSystemId() );
 
-                        if ( s.getClasspathId() != null )
+                        if ( s.get().getClasspathId() != null )
                         {
-                            final URL resource = findResource( s.getClasspathId() );
+                            final Optional<URL> resource = findResource( s.get().getClasspathId() );
 
-                            if ( resource != null )
+                            if ( resource.isPresent() )
                             {
-                                schemaSource.setSystemId( resource.toExternalForm() );
+                                schemaSource.setSystemId( resource.get().toExternalForm() );
                             }
                             else if ( isLoggable( Level.WARNING ) )
                             {
-                                log( Level.WARNING, getMessage( "resourceNotFound", s.getClasspathId() ), null );
+                                log( Level.WARNING, getMessage( "resourceNotFound", s.get().getClasspathId() ), null );
                             }
                         }
 
@@ -1143,14 +1155,14 @@ public class DefaultModelContext extends ModelContext
         try
         {
             final long t0 = System.nanoTime();
-            final Schemas schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
+            final Optional<Schemas> schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
             final EntityResolver entityResolver = this.createEntityResolver( model );
             final SchemaFactory f = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
-            final List<Source> sources = new ArrayList<>( schemas != null ? schemas.getSchema().size() : 0 );
+            final List<Source> sources = new ArrayList<>( schemas.isPresent() ? schemas.get().getSchema().size() : 0 );
 
-            if ( schemas != null )
+            if ( schemas.isPresent() )
             {
-                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
+                try ( final Stream<Schema> st0 = schemas.get().getSchema().parallelStream().unordered() )
                 {
                     final class ResolveEntityFailure extends RuntimeException
                     {
@@ -1277,11 +1289,11 @@ public class DefaultModelContext extends ModelContext
         {
             String packageNames = null;
             final long t0 = System.nanoTime();
-            final Schemas schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
+            final Optional<Schemas> schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
 
-            if ( schemas != null )
+            if ( schemas.isPresent() )
             {
-                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
+                try ( final Stream<Schema> st0 = schemas.get().getSchema().parallelStream().unordered() )
                 {
                     packageNames = st0.filter( s  -> s.getContextId() != null ).
                         map( s  -> s.getContextId() ).
@@ -1324,18 +1336,18 @@ public class DefaultModelContext extends ModelContext
             String packageNames = null;
             String schemaLocation = null;
             final long t0 = System.nanoTime();
-            final Schemas schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
+            final Optional<Schemas> schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
 
-            if ( schemas != null )
+            if ( schemas.isPresent() )
             {
-                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
+                try ( final Stream<Schema> st0 = schemas.get().getSchema().parallelStream().unordered() )
                 {
                     packageNames = st0.filter( s  -> s.getContextId() != null ).
                         map( s  -> s.getContextId() ).collect( Collectors.joining( ":" ) );
 
                 }
 
-                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
+                try ( final Stream<Schema> st0 = schemas.get().getSchema().parallelStream().unordered() )
                 {
                     schemaLocation = st0.filter( s  -> s.getPublicId() != null && s.getSystemId() != null ).
                         map( s  -> new StringBuilder( s.getPublicId() ).append( ' ' ).
@@ -1411,11 +1423,11 @@ public class DefaultModelContext extends ModelContext
         {
             String packageNames = null;
             final long t0 = System.nanoTime();
-            final Schemas schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
+            final Optional<Schemas> schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
 
-            if ( schemas != null )
+            if ( schemas.isPresent() )
             {
-                try ( final Stream<Schema> st0 = schemas.getSchema().parallelStream().unordered() )
+                try ( final Stream<Schema> st0 = schemas.get().getSchema().parallelStream().unordered() )
                 {
                     packageNames = st0.filter( s  -> s.getContextId() != null ).
                         map( s  -> s.getContextId() ).collect( Collectors.joining( ":" ) );
@@ -1495,15 +1507,15 @@ public class DefaultModelContext extends ModelContext
         Objects.requireNonNull( service, "service" );
         Objects.requireNonNull( type, "type" );
 
-        final Services modelServices = this.getModlets().getServices( model );
+        final Optional<Services> modelServices = this.getModlets().getServices( model );
         final Collection<T> serviceObjects =
-            new ArrayList<>( modelServices != null ? modelServices.getService().size() : 0 );
+            new ArrayList<>( modelServices.isPresent() ? modelServices.get().getService().size() : 0 );
 
-        if ( modelServices != null )
+        if ( modelServices.isPresent() )
         {
             final Collection<ServiceFactory> factories = this.loadModletServices( ServiceFactory.class );
 
-            for ( final Service s : modelServices.getServices( service ) )
+            for ( final Service s : modelServices.get().getServices( service ) )
             {
                 serviceObjects.add( this.createServiceObject( s, type, factories ) );
             }
@@ -1537,9 +1549,10 @@ public class DefaultModelContext extends ModelContext
 
         for ( final ServiceFactory factory : factories )
         {
-            final T current = factory.createServiceObject( this, service, type );
+            final Optional<T> current =
+                Objects.requireNonNull( factory.createServiceObject( this, service, type ), factory.toString() );
 
-            if ( current != null )
+            if ( current.isPresent() )
             {
                 if ( this.isLoggable( Level.FINER ) )
                 {
@@ -1548,7 +1561,7 @@ public class DefaultModelContext extends ModelContext
 
                 }
 
-                serviceObject = current;
+                serviceObject = current.get();
                 break;
             }
         }
@@ -1784,7 +1797,10 @@ public class DefaultModelContext extends ModelContext
         service.setClazz( className );
 
         // Need a way to exchange the service factory creating modlet service objects?
-        return new DefaultServiceFactory().createServiceObject( this, service, serviceClass );
+        final DefaultServiceFactory defaultServiceFactory = new DefaultServiceFactory();
+        defaultServiceFactory.setEnabled( true );
+
+        return defaultServiceFactory.createServiceObject( this, service, serviceClass ).get();
     }
 
     /**

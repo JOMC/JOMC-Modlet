@@ -33,6 +33,7 @@ package org.jomc.modlet;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.stream.Collector;
@@ -108,9 +109,9 @@ public class ModelValidationReport implements Serializable
          *
          * @return The identifier of this detail or {@code null}.
          */
-        public String getIdentifier()
+        public Optional<String> getIdentifier()
         {
-            return this.identifier;
+            return Optional.ofNullable( this.identifier );
         }
 
         /**
@@ -118,9 +119,9 @@ public class ModelValidationReport implements Serializable
          *
          * @return The level of this detail or {@code null}.
          */
-        public Level getLevel()
+        public Optional<Level> getLevel()
         {
-            return this.level;
+            return Optional.ofNullable( this.level );
         }
 
         /**
@@ -128,9 +129,9 @@ public class ModelValidationReport implements Serializable
          *
          * @return The message of this detail or {@code null}.
          */
-        public String getMessage()
+        public Optional<String> getMessage()
         {
-            return this.message;
+            return Optional.ofNullable( this.message );
         }
 
         /**
@@ -138,9 +139,9 @@ public class ModelValidationReport implements Serializable
          *
          * @return The JAXB element of this detail or {@code null}.
          */
-        public JAXBElement<?> getElement()
+        public Optional<JAXBElement<?>> getElement()
         {
-            return this.element;
+            return Optional.ofNullable( this.element );
         }
 
         /**
@@ -152,7 +153,7 @@ public class ModelValidationReport implements Serializable
         {
             return new StringBuilder( 200 ).append( '{' ).
                 append( "identifier=" ).append( this.getIdentifier() ).
-                append( ", level=" ).append( this.getLevel().getLocalizedName() ).
+                append( ", level=" ).append( this.getLevel() ).
                 append( ", message=" ).append( this.getMessage() ).
                 append( ", element=" ).append( this.getElement() ).append( '}' ).toString();
 
@@ -211,15 +212,20 @@ public class ModelValidationReport implements Serializable
      *
      * @param identifier The identifier of the details to return or {@code null}.
      *
-     * @return An unmodifiable list containing all details of the instance matching {@code identifier}.
+     * @return An unmodifiable list containing all details of the instance matching {@code identifier} or an empty list,
+     * if no matching details were found.
+     *
+     * @throws NullPointerException if {@code identifier} is {@code null}.
      */
     public List<Detail> getDetails( final String identifier )
     {
         try ( final Stream<Detail> st0 = this.getDetails().parallelStream().unordered() )
         {
             return Collections.unmodifiableList(
-                st0.filter( d  -> ( identifier == null && d.getIdentifier() == null )
-                                       || ( identifier != null && identifier.equals( d.getIdentifier() ) ) ).
+                st0.filter( d  -> ( identifier != null
+                                     ? d.getIdentifier().isPresent()
+                                       && identifier.equals( d.getIdentifier().get() )
+                                     : !d.getIdentifier().isPresent() ) ).
                     collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
                                        {
                                            l1.addAll( l2 );
@@ -242,7 +248,9 @@ public class ModelValidationReport implements Serializable
     {
         try ( final Stream<Detail> st0 = this.getDetails().parallelStream().unordered() )
         {
-            return st0.noneMatch( d  -> d.getLevel() != null && d.getLevel().intValue() > Level.WARNING.intValue() );
+            return st0.noneMatch( d  -> d.getLevel().isPresent()
+                                             && d.getLevel().get().intValue() > Level.WARNING.intValue() );
+
         }
     }
 

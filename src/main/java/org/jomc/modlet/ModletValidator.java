@@ -30,6 +30,8 @@
  */
 package org.jomc.modlet;
 
+import java.util.Optional;
+
 /**
  * {@code Modlet} validator interface.
  *
@@ -54,14 +56,14 @@ public interface ModletValidator
      * @param context The context to validate {@code Modlets} with.
      * @param modlets The {@code Modlets} to validate.
      *
-     * @return Validation report.
+     * @return Validation report or no value, if no report is produced.
      *
      * @throws NullPointerException if {@code context} or {@code modlets} is {@code null}.
      * @throws ModelException if validating {@code modlets} fails.
      *
      * @see ModelValidationReport#isModelValid()
      */
-    ModelValidationReport validateModlets( ModelContext context, Modlets modlets )
-        throws NullPointerException, ModelException;
+    Optional<ModelValidationReport> validateModlets( ModelContext context, Modlets modlets )
+        throws ModelException;
 
 }

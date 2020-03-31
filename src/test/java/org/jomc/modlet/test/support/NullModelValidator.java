@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test.support;
 
+import java.util.Optional;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
@@ -51,7 +52,8 @@ public final class NullModelValidator implements ModelValidator
     }
 
     @Override
-    public ModelValidationReport validateModel( final ModelContext context, final Model model ) throws ModelException
+    public Optional<ModelValidationReport> validateModel( final ModelContext context, final Model model )
+        throws ModelException
     {
         if ( context == null )
         {
@@ -63,7 +65,7 @@ public final class NullModelValidator implements ModelValidator
         }
 
         context.setAttribute( NullModelValidator.class.getName(), this );
-        return null;
+        return Optional.empty();
     }
 
 }

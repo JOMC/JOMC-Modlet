@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import org.jomc.modlet.Modlet;
 import org.jomc.modlet.Modlets;
@@ -39,8 +40,8 @@ import org.jomc.modlet.Service;
 import org.jomc.modlet.Services;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -68,9 +69,9 @@ public class ModletsTest
     }
 
     @Test
-    public final void GetSchemasReturnsNullForUnknownModel() throws Exception
+    public final void GetSchemasReturnsNoValueForUnknownModel() throws Exception
     {
-        assertNull( new Modlets().getSchemas( "Test" ) );
+        assertFalse( new Modlets().getSchemas( "Test" ).isPresent() );
     }
 
     @Test
@@ -88,10 +89,11 @@ public class ModletsTest
         schema.setSystemId( "Modlet 1 Schema System Id" );
         schema.setPublicId( "Modlet 1 Schema Public Id" );
 
-        Schemas result = modlets.getSchemas( "Modlet 1" );
+        Optional<Schemas> result = modlets.getSchemas( "Modlet 1" );
         assertNotNull( result );
-        assertNotNull( result.getSchemaBySystemId( "Modlet 1 Schema System Id" ) );
-        assertNotNull( result.getSchemaByPublicId( "Modlet 1 Schema Public Id" ) );
+        assertTrue( result.isPresent() );
+        assertTrue( result.get().getSchemaBySystemId( "Modlet 1 Schema System Id" ).isPresent() );
+        assertTrue( result.get().getSchemaByPublicId( "Modlet 1 Schema Public Id" ).isPresent() );
 
         modlet = new Modlet();
         modlets.getModlet().add( modlet );
@@ -106,17 +108,19 @@ public class ModletsTest
 
         result = modlets.getSchemas( "Modlet 1" );
         assertNotNull( result );
-        assertNotNull( result.getSchemaBySystemId( "Modlet 1 Schema System Id" ) );
-        assertNotNull( result.getSchemaByPublicId( "Modlet 1 Schema Public Id" ) );
-        assertNull( result.getSchemaBySystemId( "Modlet 2 Schema System Id" ) );
-        assertNull( result.getSchemaByPublicId( "Modlet 2 Schema Public Id" ) );
+        assertTrue( result.isPresent() );
+        assertTrue( result.get().getSchemaBySystemId( "Modlet 1 Schema System Id" ).isPresent() );
+        assertTrue( result.get().getSchemaByPublicId( "Modlet 1 Schema Public Id" ).isPresent() );
+        assertFalse( result.get().getSchemaBySystemId( "Modlet 2 Schema System Id" ).isPresent() );
+        assertFalse( result.get().getSchemaByPublicId( "Modlet 2 Schema Public Id" ).isPresent() );
 
         result = modlets.getSchemas( "Modlet 2" );
         assertNotNull( result );
-        assertNull( result.getSchemaBySystemId( "Modlet 1 Schema System Id" ) );
-        assertNull( result.getSchemaByPublicId( "Modlet 1 Schema Public Id" ) );
-        assertNotNull( result.getSchemaBySystemId( "Modlet 2 Schema System Id" ) );
-        assertNotNull( result.getSchemaByPublicId( "Modlet 2 Schema Public Id" ) );
+        assertTrue( result.isPresent() );
+        assertFalse( result.get().getSchemaBySystemId( "Modlet 1 Schema System Id" ).isPresent() );
+        assertFalse( result.get().getSchemaByPublicId( "Modlet 1 Schema Public Id" ).isPresent() );
+        assertTrue( result.get().getSchemaBySystemId( "Modlet 2 Schema System Id" ).isPresent() );
+        assertTrue( result.get().getSchemaByPublicId( "Modlet 2 Schema Public Id" ).isPresent() );
     }
 
     @Test
@@ -126,9 +130,9 @@ public class ModletsTest
     }
 
     @Test
-    public final void GetServicesReturnsNullForUnknownModel() throws Exception
+    public final void GetServicesReturnsNoValueForUnknownModel() throws Exception
     {
-        assertNull( new Modlets().getServices( "Test" ) );
+        assertFalse( new Modlets().getServices( "Test" ).isPresent() );
     }
 
     @Test
@@ -146,9 +150,10 @@ public class ModletsTest
         service.setIdentifier( "Modlet 1 Service Identifier" );
         service.setClazz( "Modlet 1 Service Class" );
 
-        Services result = modlets.getServices( "Modlet 1" );
+        Optional<Services> result = modlets.getServices( "Modlet 1" );
         assertNotNull( result );
-        assertNotNull( result.getServices( "Modlet 1 Service Identifier" ) );
+        assertTrue( result.isPresent() );
+        assertNotNull( result.get().getServices( "Modlet 1 Service Identifier" ) );
 
         modlet = new Modlet();
         modlets.getModlet().add( modlet );
@@ -163,18 +168,20 @@ public class ModletsTest
 
         result = modlets.getServices( "Modlet 1" );
         assertNotNull( result );
-        assertEquals( 1, result.getServices( "Modlet 1 Service Identifier" ).size() );
+        assertTrue( result.isPresent() );
+        assertEquals( 1, result.get().getServices( "Modlet 1 Service Identifier" ).size() );
         assertEquals( "Modlet 1 Service Identifier",
-                      result.getServices( "Modlet 1 Service Identifier" ).get( 0 ).getIdentifier() );
+                      result.get().getServices( "Modlet 1 Service Identifier" ).get( 0 ).getIdentifier() );
 
-        assertTrue( result.getServices( "Modlet 2 Service Identifier" ).isEmpty() );
+        assertTrue( result.get().getServices( "Modlet 2 Service Identifier" ).isEmpty() );
 
         result = modlets.getServices( "Modlet 2" );
         assertNotNull( result );
-        assertTrue( result.getServices( "Modlet 1 Service Identifier" ).isEmpty() );
-        assertEquals( 1, result.getServices( "Modlet 2 Service Identifier" ).size() );
+        assertTrue( result.isPresent() );
+        assertTrue( result.get().getServices( "Modlet 1 Service Identifier" ).isEmpty() );
+        assertEquals( 1, result.get().getServices( "Modlet 2 Service Identifier" ).size() );
         assertEquals( "Modlet 2 Service Identifier",
-                      result.getServices( "Modlet 2 Service Identifier" ).get( 0 ).getIdentifier() );
+                      result.get().getServices( "Modlet 2 Service Identifier" ).get( 0 ).getIdentifier() );
 
     }
 

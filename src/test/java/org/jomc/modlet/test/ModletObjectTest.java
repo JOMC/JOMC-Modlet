@@ -32,6 +32,7 @@ package org.jomc.modlet.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -61,14 +62,14 @@ public class ModletObjectTest
     {
 
         @Override
-        public <T> JAXBElement<T> getAnyElement( final List<Object> any, final String namespaceURI,
-                                                 final String localPart, final Class<T> type )
+        public <T> Optional<JAXBElement<T>> getAnyElement( final List<Object> any, final String namespaceURI,
+                                                           final String localPart, final Class<T> type )
         {
             return super.getAnyElement( any, namespaceURI, localPart, type );
         }
 
         @Override
-        public <T> T getAnyObject( final List<Object> any, final Class<T> clazz )
+        public <T> Optional<T> getAnyObject( final List<Object> any, final Class<T> clazz )
         {
             return super.getAnyObject( any, clazz );
         }

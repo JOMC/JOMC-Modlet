@@ -36,8 +36,8 @@ import java.util.logging.Level;
 import org.jomc.modlet.ModelValidationReport;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Test cases for class {@code org.jomc.modlet.ModelValidationReport}.
@@ -85,10 +85,10 @@ public class ModelValidationReportTest
         assertEquals( 1, report.getDetails( "Identifier 9" ).size() );
         assertEquals( 1, report.getDetails( "Identifier 10" ).size() );
 
-        assertEquals( "Identifier", detail.getIdentifier() );
-        assertEquals( Level.OFF, detail.getLevel() );
-        assertEquals( "Message", detail.getMessage() );
-        assertNull( detail.getElement() );
+        assertEquals( "Identifier", detail.getIdentifier().get() );
+        assertEquals( Level.OFF, detail.getLevel().get() );
+        assertEquals( "Message", detail.getMessage().get() );
+        assertFalse( detail.getElement().isPresent() );
     }
 
     private <T> T readObject( final String location, final Class<T> type ) throws IOException, ClassNotFoundException

@@ -33,6 +33,7 @@ package org.jomc.modlet.test.support;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModelProcessor;
@@ -138,19 +139,19 @@ public final class TestModletProvider implements ModletProvider
     }
 
     @Override
-    public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
+    public Optional<Modlets> findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
     {
         final Modlets provided = modlets.clone();
 
-        List<Class> sortedProviders = (List<Class>) context.getAttribute( "SORTING_TEST" );
+        Optional<Object> sortedProviders = context.getAttribute( "SORTING_TEST" );
 
-        if ( sortedProviders == null )
+        if ( !sortedProviders.isPresent() )
         {
-            sortedProviders = new LinkedList<>();
-            context.setAttribute( "SORTING_TEST", sortedProviders );
+            context.setAttribute( "SORTING_TEST", new LinkedList<Class<?>>() );
+            sortedProviders = context.getAttribute( "SORTING_TEST" );
         }
 
-        sortedProviders.add( this.getClass() );
+        ( (List<Class<?>>) sortedProviders.get() ).add( this.getClass() );
 
         final Modlet modlet = new Modlet();
         modlets.getModlet().add( modlet );
@@ -176,7 +177,7 @@ public final class TestModletProvider implements ModletProvider
         context.setAttribute( TestModletProvider.class.getName(), this );
 
         provided.getModlet().add( modlet );
-        return provided;
+        return Optional.of( provided );
     }
 
     public boolean isBooleanProperty()

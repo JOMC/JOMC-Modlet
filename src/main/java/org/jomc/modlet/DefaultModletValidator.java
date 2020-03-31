@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -254,8 +255,8 @@ public class DefaultModletValidator implements ModletValidator
     }
 
     @Override
-    public ModelValidationReport validateModlets( final ModelContext context, final Modlets modlets )
-        throws NullPointerException, ModelException
+    public Optional<ModelValidationReport> validateModlets( final ModelContext context, final Modlets modlets )
+        throws ModelException
     {
         Objects.requireNonNull( context, "context" );
         Objects.requireNonNull( modlets, "modlets" );
@@ -263,10 +264,13 @@ public class DefaultModletValidator implements ModletValidator
         try
         {
             boolean contextEnabled = this.isEnabled();
-            if ( DEFAULT_ENABLED == contextEnabled
-                     && context.getAttribute( ENABLED_ATTRIBUTE_NAME ) instanceof Boolean )
+            if ( DEFAULT_ENABLED == contextEnabled )
             {
-                contextEnabled = (Boolean) context.getAttribute( ENABLED_ATTRIBUTE_NAME );
+                final Optional<Object> enabledAttribute = context.getAttribute( ENABLED_ATTRIBUTE_NAME );
+                if ( enabledAttribute.isPresent() && enabledAttribute.get() instanceof Boolean )
+                {
+                    contextEnabled = (Boolean) enabledAttribute.get();
+                }
             }
 
             final ModelValidationReport report = new ModelValidationReport();
@@ -297,8 +301,8 @@ public class DefaultModletValidator implements ModletValidator
                                 {
                                     modletBySchema.put( schema, modlet );
 
-                                    final Schema existingPublicIdSchema;
-                                    final Schema existingSystemIdSchema;
+                                    final Optional<Schema> existingPublicIdSchema;
+                                    final Optional<Schema> existingSystemIdSchema;
                                     synchronized ( modelSchemas )
                                     {
                                         existingPublicIdSchema =
@@ -310,10 +314,10 @@ public class DefaultModletValidator implements ModletValidator
                                         modelSchemas.getSchema().add( schema );
                                     }
 
-                                    if ( existingPublicIdSchema != null )
+                                    if ( existingPublicIdSchema.isPresent() )
                                     {
                                         final Modlet modletOfSchema =
-                                            modletBySchema.get( existingPublicIdSchema );
+                                            modletBySchema.get( existingPublicIdSchema.get() );
 
                                         final ModelValidationReport.Detail detail =
                                             new ModelValidationReport.Detail(
@@ -327,10 +331,10 @@ public class DefaultModletValidator implements ModletValidator
                                         report.getDetails().add( detail );
                                     }
 
-                                    if ( existingSystemIdSchema != null )
+                                    if ( existingSystemIdSchema.isPresent() )
                                     {
                                         final Modlet modletOfSchema =
-                                            modletBySchema.get( existingSystemIdSchema );
+                                            modletBySchema.get( existingSystemIdSchema.get() );
 
                                         final ModelValidationReport.Detail detail =
                                             new ModelValidationReport.Detail(
@@ -353,7 +357,7 @@ public class DefaultModletValidator implements ModletValidator
                 context.log( Level.FINER, getMessage( "disabled", this.getClass().getSimpleName() ), null );
             }
 
-            return report;
+            return Optional.of( report );
         }
         catch ( final IOException e )
         {

@@ -31,12 +31,14 @@
 package org.jomc.modlet.test.support;
 
 import java.net.URL;
+import java.util.Optional;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
 import org.jomc.modlet.ModelProcessor;
 import org.jomc.modlet.test.TestComplexType;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * {@code ModelProcessor} test implementation.
@@ -119,7 +121,7 @@ public final class TestModelProcessor implements ModelProcessor
     }
 
     @Override
-    public Model processModel( final ModelContext context, final Model model ) throws ModelException
+    public Optional<Model> processModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
         {
@@ -133,11 +135,12 @@ public final class TestModelProcessor implements ModelProcessor
         context.setAttribute( TestModelProcessor.class.getName(), this );
 
         final Model processed = model.clone();
-        final TestComplexType t = processed.getAnyObject( TestComplexType.class );
+        final Optional<TestComplexType> t = processed.getAnyObject( TestComplexType.class );
         assertNotNull( t );
+        assertTrue( t.isPresent() );
 
-        t.getAny().add( new TestComplexType() );
-        return processed;
+        t.get().getAny().add( new TestComplexType() );
+        return Optional.of( processed );
     }
 
     public boolean isBooleanProperty()

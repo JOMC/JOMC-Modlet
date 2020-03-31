@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test.support;
 
+import java.util.Optional;
 import org.jomc.modlet.Model;
 import org.jomc.modlet.ModelContext;
 import org.jomc.modlet.ModelException;
@@ -50,7 +51,7 @@ public final class NullModelProvider implements ModelProvider
     }
 
     @Override
-    public Model findModel( final ModelContext context, final Model model ) throws ModelException
+    public Optional<Model> findModel( final ModelContext context, final Model model ) throws ModelException
     {
         if ( context == null )
         {
@@ -62,7 +63,7 @@ public final class NullModelProvider implements ModelProvider
         }
 
         context.setAttribute( NullModelProvider.class.getName(), this );
-        return null;
+        return Optional.empty();
     }
 
 }

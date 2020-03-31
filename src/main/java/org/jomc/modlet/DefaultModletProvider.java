@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
@@ -501,8 +502,8 @@ public class DefaultModletProvider implements ModletProvider
      * @param context The context to search for {@code Modlets}.
      * @param location The location to search at.
      *
-     * @return The {@code Modlets} found at {@code location} in {@code context} or {@code null}, if no {@code Modlets}
-     * are found.
+     * @return The {@code Modlets} found at {@code location} in {@code context} or empty {@code Modlets}, if no
+     * {@code Modlets} are found.
      *
      * @throws NullPointerException if {@code context} or {@code location} is {@code null}.
      * @throws ModelException if searching the context fails.
@@ -516,10 +517,13 @@ public class DefaultModletProvider implements ModletProvider
         Objects.requireNonNull( location, "location" );
 
         boolean contextValidating = this.isValidating();
-        if ( DEFAULT_VALIDATING == contextValidating
-                 && context.getAttribute( VALIDATING_ATTRIBUTE_NAME ) instanceof Boolean )
+        if ( DEFAULT_VALIDATING == contextValidating )
         {
-            contextValidating = (Boolean) context.getAttribute( VALIDATING_ATTRIBUTE_NAME );
+            final Optional<Object> validatingAttribute = context.getAttribute( VALIDATING_ATTRIBUTE_NAME );
+            if ( validatingAttribute.isPresent() && validatingAttribute.get() instanceof Boolean )
+            {
+                contextValidating = (Boolean) validatingAttribute.get();
+            }
         }
 
         final Modlets modlets = new Modlets();
@@ -633,7 +637,7 @@ public class DefaultModletProvider implements ModletProvider
 
         }
 
-        return modlets.getModlet().isEmpty() ? null : modlets;
+        return modlets;
     }
 
     /**
@@ -650,7 +654,7 @@ public class DefaultModletProvider implements ModletProvider
      * @since 1.6
      */
     @Override
-    public Modlets findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
+    public Optional<Modlets> findModlets( final ModelContext context, final Modlets modlets ) throws ModelException
     {
         Objects.requireNonNull( context, "context" );
         Objects.requireNonNull( modlets, "modlets" );
@@ -658,23 +662,30 @@ public class DefaultModletProvider implements ModletProvider
         Modlets provided = null;
 
         boolean contextEnabled = this.isEnabled();
-        if ( DEFAULT_ENABLED == contextEnabled && context.getAttribute( ENABLED_ATTRIBUTE_NAME ) instanceof Boolean )
+        if ( DEFAULT_ENABLED == contextEnabled )
         {
-            contextEnabled = (Boolean) context.getAttribute( ENABLED_ATTRIBUTE_NAME );
+            final Optional<Object> enabledAttribute = context.getAttribute( ENABLED_ATTRIBUTE_NAME );
+            if ( enabledAttribute.isPresent() && enabledAttribute.get() instanceof Boolean )
+            {
+                contextEnabled = (Boolean) enabledAttribute.get();
+            }
         }
 
         String contextModletLocation = this.getModletLocation();
-        if ( DEFAULT_MODLET_LOCATION.equals( contextModletLocation )
-                 && context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME ) instanceof String )
+        if ( DEFAULT_MODLET_LOCATION.equals( contextModletLocation ) )
         {
-            contextModletLocation = (String) context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME );
+            final Optional<Object> modletLocationAttribute = context.getAttribute( MODLET_LOCATION_ATTRIBUTE_NAME );
+            if ( modletLocationAttribute.isPresent() && modletLocationAttribute.get() instanceof String )
+            {
+                contextModletLocation = (String) modletLocationAttribute.get();
+            }
         }
 
         if ( contextEnabled )
         {
             final Modlets found = this.findModlets( context, contextModletLocation );
 
-            if ( found != null )
+            if ( !found.getModlet().isEmpty() )
             {
                 provided = modlets.clone();
                 provided.getModlet().addAll( found.getModlet() );
@@ -685,7 +696,7 @@ public class DefaultModletProvider implements ModletProvider
             context.log( Level.FINER, getMessage( "disabled", this.getClass().getSimpleName() ), null );
         }
 
-        return provided;
+        return Optional.ofNullable( provided );
     }
 
     private static String getMessage( final String key, final Object... arguments )

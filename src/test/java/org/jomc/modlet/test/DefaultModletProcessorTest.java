@@ -30,6 +30,7 @@
  */
 package org.jomc.modlet.test;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import org.jomc.modlet.DefaultModletProcessor;
 import org.jomc.modlet.Modlets;
@@ -37,7 +38,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -91,11 +91,11 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
         DefaultModletProcessor.setDefaultTransformerLocation( "DOES_NOT_EXIST" );
         this.getModletProcessor().setTransformerLocation( "DOES_NOT_EXIST" );
 
-        assertNull( this.getModletProcessor().findTransformers(
-            this.getModelContext(), DefaultModletProcessor.getDefaultTransformerLocation() ) );
+        assertTrue( this.getModletProcessor().findTransformers(
+            this.getModelContext(), DefaultModletProcessor.getDefaultTransformerLocation() ).isEmpty() );
 
-        assertNull( this.getModletProcessor().findTransformers(
-            this.getModelContext(), this.getModletProcessor().getTransformerLocation() ) );
+        assertTrue( this.getModletProcessor().findTransformers(
+            this.getModelContext(), this.getModletProcessor().getTransformerLocation() ).isEmpty() );
 
         DefaultModletProcessor.setDefaultTransformerLocation( null );
         this.getModletProcessor().setTransformerLocation( null );
@@ -189,20 +189,24 @@ public class DefaultModletProcessorTest extends ModletProcessorTest
         this.getModletProcessor().setTransformerLocation( this.getClass().getPackage().getName().replace( '.', '/' )
                                                               + "/system-property-test.xsl" );
 
-        final Modlets processedSystemProperty =
+        final Optional<Modlets> processedSystemProperty =
             this.getModletProcessor().processModlets( this.getModelContext(), modlets );
 
         assertNotNull( processedSystemProperty );
-        assertNotNull( processedSystemProperty.getModlet( System.getProperty( "user.home" ) ) );
+        assertTrue( processedSystemProperty.isPresent() );
+        assertNotNull( processedSystemProperty.get().getModlet( System.getProperty( "user.home" ) ) );
+        assertTrue( processedSystemProperty.get().getModlet( System.getProperty( "user.home" ) ).isPresent() );
 
         this.getModletProcessor().setTransformerLocation(
             this.getClass().getPackage().getName().replace( '.', '/' ) + "/relative-uri-test.xsl" );
 
-        final Modlets processedRelativeUri =
+        final Optional<Modlets> processedRelativeUri =
             this.getModletProcessor().processModlets( this.getModelContext(), modlets );
 
         assertNotNull( processedRelativeUri );
-        assertNotNull( processedRelativeUri.getModlet( System.getProperty( "os.name" ) ) );
+        assertTrue( processedRelativeUri.isPresent() );
+        assertNotNull( processedRelativeUri.get().getModlet( System.getProperty( "os.name" ) ) );
+        assertTrue( processedRelativeUri.get().getModlet( System.getProperty( "os.name" ) ).isPresent() );
 
         this.getModletProcessor().setTransformerLocation( null );
     }

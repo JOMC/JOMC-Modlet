@@ -30,6 +30,8 @@
  */
 package org.jomc.modlet;
 
+import java.util.Optional;
+
 /**
  * {@code Modlet} provider interface.
  *
@@ -55,12 +57,12 @@ public interface ModletProvider
      * @param context The context to search for {@code Modlets}.
      * @param modlets The {@code Modlets} currently being searched.
      *
-     * @return The {@code Modlets} found in the context or {@code null}, if no {@code Modlets} are found.
+     * @return The {@code Modlets} found in the context or no value, if no {@code Modlets} are found.
      *
      * @throws NullPointerException if {@code context} or {@code modlets} is {@code null}.
      * @throws ModelException if searching the context fails.
      * @since 1.6
      */
-    Modlets findModlets( ModelContext context, Modlets modlets ) throws NullPointerException, ModelException;
+    Optional<Modlets> findModlets( ModelContext context, Modlets modlets ) throws ModelException;
 
 }
