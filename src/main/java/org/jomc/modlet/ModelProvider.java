@@ -51,6 +51,6 @@ public interface ModelProvider
      * @throws NullPointerException if {@code context} or {@code model} is {@code null}.
      * @throws ModelException if searching the context fails.
      */
-    Model findModel( ModelContext context, Model model ) throws NullPointerException, ModelException;
+    Model findModel( ModelContext context, Model model ) throws ModelException;
 
 }

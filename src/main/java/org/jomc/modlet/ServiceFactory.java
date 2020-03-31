@@ -63,6 +63,6 @@ public interface ServiceFactory
      * @throws ModelException if creating the service object fails.
      */
     <T> T createServiceObject( ModelContext context, Service service, Class<T> type )
-        throws NullPointerException, ModelException;
+        throws ModelException;
 
 }

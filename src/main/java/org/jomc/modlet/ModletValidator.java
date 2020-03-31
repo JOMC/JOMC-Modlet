@@ -62,6 +62,6 @@ public interface ModletValidator
      * @see ModelValidationReport#isModelValid()
      */
     ModelValidationReport validateModlets( ModelContext context, Modlets modlets )
-        throws NullPointerException, ModelException;
+        throws ModelException;
 
 }

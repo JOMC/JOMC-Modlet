@@ -76,6 +76,6 @@ public interface ModletProvider
      * @throws ModelException if searching the context fails.
      * @since 1.6
      */
-    Modlets findModlets( ModelContext context, Modlets modlets ) throws NullPointerException, ModelException;
+    Modlets findModlets( ModelContext context, Modlets modlets ) throws ModelException;
 
 }

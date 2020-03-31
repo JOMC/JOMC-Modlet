@@ -54,6 +54,6 @@ public interface ModelValidator
      * @see ModelValidationReport#isModelValid()
      */
     ModelValidationReport validateModel( ModelContext context, Model model )
-        throws NullPointerException, ModelException;
+        throws ModelException;
 
 }

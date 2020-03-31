@@ -252,7 +252,7 @@ public class DefaultModletValidator implements ModletValidator
 
     @Override
     public ModelValidationReport validateModlets( final ModelContext context, final Modlets modlets )
-        throws NullPointerException, ModelException
+        throws ModelException
     {
         if ( context == null )
         {

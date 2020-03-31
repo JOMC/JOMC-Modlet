@@ -151,7 +151,7 @@ public class ModelValidationReport implements Serializable
         {
             return new StringBuilder( 200 ).append( '{' ).
                 append( "identifier=" ).append( this.getIdentifier() ).
-                append( ", level=" ).append( this.getLevel().getLocalizedName() ).
+                append( ", level=" ).append( this.getLevel() ).
                 append( ", message=" ).append( this.getMessage() ).
                 append( ", element=" ).append( this.getElement() ).append( '}' ).toString();
 

@@ -59,6 +59,6 @@ public interface ModletProcessor
      * @throws NullPointerException if {@code context} or {@code modlets} is {@code null}.
      * @throws ModelException if processing {@code Modlets} fails.
      */
-    Modlets processModlets( ModelContext context, Modlets modlets ) throws NullPointerException, ModelException;
+    Modlets processModlets( ModelContext context, Modlets modlets ) throws ModelException;
 
 }

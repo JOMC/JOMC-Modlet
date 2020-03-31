@@ -56,6 +56,35 @@ public class DefaultServiceFactory implements ServiceFactory
 {
 
     /**
+     * Constant for the name of the system property controlling property {@code defaultEnabled}.
+     *
+     * @see #isDefaultEnabled()
+     * @since 1.11.0
+     */
+    private static final String DEFAULT_ENABLED_PROPERTY_NAME =
+        "org.jomc.modlet.DefaultServiceFactory.defaultEnabled";
+
+    /**
+     * Default value of the flag indicating the factory is enabled by default.
+     *
+     * @see #isDefaultEnabled()
+     * @since 1.11.0
+     */
+    private static final Boolean DEFAULT_ENABLED = Boolean.TRUE;
+
+    /**
+     * Flag indicating the factory is enabled by default.
+     * @since 1.11.0
+     */
+    private static volatile Boolean defaultEnabled;
+
+    /**
+     * Flag indicating the factory is enabled.
+     * @since 1.11.0
+     */
+    private volatile Boolean enabled;
+
+    /**
      * Constant for the name of the system property controlling property {@code defaultOrdinal}.
      *
      * @see #getDefaultOrdinal()
@@ -86,6 +115,78 @@ public class DefaultServiceFactory implements ServiceFactory
     public DefaultServiceFactory()
     {
         super();
+    }
+
+    /**
+     * Gets a flag indicating the factory is enabled by default.
+     * <p>
+     * The default enabled flag is controlled by system property
+     * {@code org.jomc.modlet.DefaultServiceFactory.defaultEnabled} holding a value indicating the factory is
+     * enabled by default. If that property is not set, the {@code true} default is returned.
+     * </p>
+     *
+     * @return {@code true}, if the factory is enabled by default; {@code false}, if the factory is disabled by
+     * default.
+     *
+     * @see #isEnabled()
+     * @see #setDefaultEnabled(java.lang.Boolean)
+     * @since 1.11.0
+     */
+    public static boolean isDefaultEnabled()
+    {
+        if ( defaultEnabled == null )
+        {
+            defaultEnabled = Boolean.valueOf( System.getProperty(
+                DEFAULT_ENABLED_PROPERTY_NAME, Boolean.toString( DEFAULT_ENABLED ) ) );
+
+        }
+
+        return defaultEnabled;
+    }
+
+    /**
+     * Sets the flag indicating the factory is enabled by default.
+     *
+     * @param value The new value of the flag indicating the factory is enabled by default or {@code null}.
+     *
+     * @see #isDefaultEnabled()
+     * @since 1.11.0
+     */
+    public static void setDefaultEnabled( final Boolean value )
+    {
+        defaultEnabled = value;
+    }
+
+    /**
+     * Gets a flag indicating the factory is enabled.
+     *
+     * @return {@code true}, if the factory is enabled; {@code false}, if the factory is disabled.
+     *
+     * @see #isDefaultEnabled()
+     * @see #setEnabled(java.lang.Boolean)
+     * @since 1.11.0
+     */
+    public final boolean isEnabled()
+    {
+        if ( this.enabled == null )
+        {
+            this.enabled = isDefaultEnabled();
+        }
+
+        return this.enabled;
+    }
+
+    /**
+     * Sets the flag indicating the factory is enabled.
+     *
+     * @param value The new value of the flag indicating the factory is enabled or {@code null}.
+     *
+     * @see #isEnabled()
+     * @since 1.11.0
+     */
+    public final void setEnabled( final Boolean value )
+    {
+        this.enabled = value;
     }
 
     /**
@@ -170,61 +271,73 @@ public class DefaultServiceFactory implements ServiceFactory
 
         try
         {
-            final Class<?> clazz = context.findClass( service.getClazz() );
-
-            if ( clazz == null )
+            final T serviceObject;
+            if ( this.isEnabled() )
             {
-                throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(), service.
-                                                      getIdentifier(),
-                                                      service.getClazz() ) );
+                final Class<?> clazz = context.findClass( service.getClazz() );
 
-            }
-
-            if ( !type.isAssignableFrom( clazz ) )
-            {
-                throw new ModelException( getMessage( "illegalService", service.getOrdinal(), service.
-                                                      getIdentifier(),
-                                                      service.getClazz(), type.getName() ) );
-
-            }
-
-            final T serviceObject = clazz.asSubclass( type ).newInstance();
-
-            if ( !service.getProperty().isEmpty() )
-            {
-                if ( context.getExecutorService() != null && service.getProperty().size() > 1 )
+                if ( clazz == null )
                 {
-                    final List<Callable<Void>> tasks =
-                        new ArrayList<Callable<Void>>( service.getProperty().size() );
+                    throw new ModelException( getMessage( "serviceNotFound", service.getOrdinal(),
+                                                          service.getIdentifier(), service.getClazz() ) );
 
-                    for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+                }
+
+                if ( !type.isAssignableFrom( clazz ) )
+                {
+                    throw new ModelException( getMessage( "illegalService", service.getOrdinal(),
+                                                          service.getIdentifier(), service.getClazz(),
+                                                          type.getName() ) );
+
+                }
+
+                serviceObject = clazz.asSubclass( type ).newInstance();
+
+                if ( !service.getProperty().isEmpty() )
+                {
+                    if ( context.getExecutorService() != null && service.getProperty().size() > 1 )
                     {
-                        final Property p = service.getProperty().get( i );
+                        final List<Callable<Void>> tasks =
+                            new ArrayList<Callable<Void>>( service.getProperty().size() );
 
-                        tasks.add( new Callable<Void>()
+                        for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
                         {
+                            final Property p = service.getProperty().get( i );
 
-                            public Void call() throws ModelException
+                            tasks.add( new Callable<Void>()
                             {
-                                initProperty( context, serviceObject, p.getName(), p.getValue() );
-                                return null;
-                            }
 
-                        } );
+                                public Void call() throws ModelException
+                                {
+                                    initProperty( context, serviceObject, p.getName(), p.getValue() );
+                                    return null;
+                                }
+
+                            } );
+                        }
+
+                        for ( final Future<Void> task : context.getExecutorService().invokeAll( tasks ) )
+                        {
+                            task.get();
+                        }
                     }
-
-                    for ( final Future<Void> task : context.getExecutorService().invokeAll( tasks ) )
+                    else
                     {
-                        task.get();
+                        for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
+                        {
+                            final Property p = service.getProperty().get( i );
+                            this.initProperty( context, serviceObject, p.getName(), p.getValue() );
+                        }
                     }
                 }
-                else
+            }
+            else
+            {
+                serviceObject = null;
+
+                if ( context.isLoggable( Level.FINER ) )
                 {
-                    for ( int i = 0, s0 = service.getProperty().size(); i < s0; i++ )
-                    {
-                        final Property p = service.getProperty().get( i );
-                        this.initProperty( context, serviceObject, p.getName(), p.getValue() );
-                    }
+                    context.log( Level.FINER, getMessage( "disabled", this.getClass().getSimpleName() ), null );
                 }
             }
 

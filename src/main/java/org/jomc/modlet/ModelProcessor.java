@@ -51,6 +51,6 @@ public interface ModelProcessor
      * @throws NullPointerException if {@code context} or {@code model} is {@code null}.
      * @throws ModelException if processing fails.
      */
-    Model processModel( ModelContext context, Model model ) throws NullPointerException, ModelException;
+    Model processModel( ModelContext context, Model model ) throws ModelException;
 
 }
