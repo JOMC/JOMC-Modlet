@@ -978,7 +978,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or no value, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.
@@ -1078,7 +1078,7 @@
      * @param clazz The class to return an instance of.
      * @param <T> The type of the object to return.
      *
-     * @return The instance of {@code clazz} from the {@code any} property of the instance or {@code null}, if no such
+     * @return The instance of {@code clazz} from the {@code any} property of the instance or no value, if no such
      * instance is found.
      *
      * @throws NullPointerException if {@code clazz} is {@code null}.

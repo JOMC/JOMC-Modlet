@@ -315,7 +315,7 @@ public class DefaultServiceFactory implements ServiceFactory
                         {
                             if ( e.getCause() instanceof ModelException )
                             {
-                                throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                                throw (ModelException) e.getCause();
                             }
 
                             throw new AssertionError( e );

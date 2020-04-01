@@ -702,7 +702,7 @@ public class DefaultModelContext extends ModelContext
             {
                 if ( e.getCause() instanceof ModelException )
                 {
-                    throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                    throw (ModelException) e.getCause();
                 }
 
                 throw new AssertionError( e );
@@ -1200,11 +1200,11 @@ public class DefaultModelContext extends ModelContext
                     {
                         if ( e.getCause() instanceof IOException )
                         {
-                            throw new IOException( e.getCause().getMessage(), e.getCause() );
+                            throw (IOException) e.getCause();
                         }
                         else if ( e.getCause() instanceof SAXException )
                         {
-                            throw new SAXException( e.getCause().getMessage(), (Exception) e.getCause() );
+                            throw (SAXException) e.getCause();
                         }
 
                         throw new AssertionError( e );
@@ -1654,7 +1654,7 @@ public class DefaultModelContext extends ModelContext
                     {
                         if ( e.getCause() instanceof ModelException )
                         {
-                            throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                            throw (ModelException) e.getCause();
                         }
 
                         throw new AssertionError( e );
@@ -1727,7 +1727,7 @@ public class DefaultModelContext extends ModelContext
                     {
                         if ( e.getCause() instanceof ModelException )
                         {
-                            throw new ModelException( e.getCause().getMessage(), e.getCause() );
+                            throw (ModelException) e.getCause();
                         }
 
                         throw new AssertionError( e );
@@ -1902,18 +1902,11 @@ public class DefaultModelContext extends ModelContext
                     {
                         if ( ex.getCause() instanceof MalformedURLException )
                         {
-                            throw (MalformedURLException) new MalformedURLException( ex.getCause().getMessage() ).
-                                initCause( ex.getCause() );
-
+                            throw (MalformedURLException) ex.getCause();
                         }
                         else if ( ex.getCause() instanceof URISyntaxException )
                         {
-                            throw (URISyntaxException) new URISyntaxException(
-                                ( (URISyntaxException) ex.getCause() ).getInput(),
-                                ( (URISyntaxException) ex.getCause() ).getReason(),
-                                ( (URISyntaxException) ex.getCause() ).getIndex() ).
-                                initCause( ex.getCause() );
-
+                            throw (URISyntaxException) ex.getCause();
                         }
 
                         throw new AssertionError( ex );
