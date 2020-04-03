@@ -667,8 +667,7 @@ public class DefaultModelContext extends ModelContext
 
                 <T extends Exception> void handleCause( final Class<T> cause ) throws T
                 {
-                    if ( Objects.requireNonNull( cause, "cause" ).getClass().
-                        isAssignableFrom( this.getCause().getClass() ) )
+                    if ( Objects.requireNonNull( cause, "cause" ).isAssignableFrom( this.getCause().getClass() ) )
                     {
                         throw (T) this.getCause();
                     }
@@ -1184,7 +1183,7 @@ public class DefaultModelContext extends ModelContext
 
                         <T extends Exception> void handleCause( final Class<T> cause ) throws T
                         {
-                            if ( Objects.requireNonNull( cause, "cause" ).getClass().
+                            if ( Objects.requireNonNull( cause, "cause" ).
                                 isAssignableFrom( this.getCause().getClass() ) )
                             {
                                 throw (T) this.getCause();
@@ -1628,7 +1627,7 @@ public class DefaultModelContext extends ModelContext
 
                         <T extends Exception> void handleCause( final Class<T> cause ) throws T
                         {
-                            if ( Objects.requireNonNull( cause, "cause" ).getClass().
+                            if ( Objects.requireNonNull( cause, "cause" ).
                                 isAssignableFrom( this.getCause().getClass() ) )
                             {
                                 throw (T) this.getCause();
@@ -1721,7 +1720,7 @@ public class DefaultModelContext extends ModelContext
 
                         <T extends Exception> void handleCause( final Class<T> cause ) throws T
                         {
-                            if ( Objects.requireNonNull( cause, "cause" ).getClass().
+                            if ( Objects.requireNonNull( cause, "cause" ).
                                 isAssignableFrom( this.getCause().getClass() ) )
                             {
                                 throw (T) this.getCause();
@@ -1886,7 +1885,7 @@ public class DefaultModelContext extends ModelContext
 
                         <T extends Exception> void handleCause( final Class<T> cause ) throws T
                         {
-                            if ( Objects.requireNonNull( cause, "cause" ).getClass().
+                            if ( Objects.requireNonNull( cause, "cause" ).
                                 isAssignableFrom( this.getCause().getClass() ) )
                             {
                                 throw (T) this.getCause();

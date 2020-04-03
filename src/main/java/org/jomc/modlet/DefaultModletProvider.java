@@ -554,8 +554,7 @@ public class DefaultModletProvider implements ModletProvider
                     final Class<T> cause, final Function<T, R> createExceptionFunction )
                     throws R
                 {
-                    if ( Objects.requireNonNull( cause, "cause" ).getClass().
-                        isAssignableFrom( this.getCause().getClass() ) )
+                    if ( Objects.requireNonNull( cause, "cause" ).isAssignableFrom( this.getCause().getClass() ) )
                     {
                         throw Objects.requireNonNull( Objects.requireNonNull( createExceptionFunction,
                                                                               "createExceptionFunction" ).
