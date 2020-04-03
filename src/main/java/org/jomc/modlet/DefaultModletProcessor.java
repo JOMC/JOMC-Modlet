@@ -446,7 +446,8 @@ public class DefaultModletProcessor implements ModletProcessor
                     final Class<T> cause, final Function<T, R> createExceptionFunction )
                     throws R
                 {
-                    if ( this.getCause().getClass().isAssignableFrom( Objects.requireNonNull( cause, "cause" ) ) )
+                    if ( Objects.requireNonNull( cause, "cause" ).getClass().
+                        isAssignableFrom( this.getCause().getClass() ) )
                     {
                         throw Objects.requireNonNull( Objects.requireNonNull( createExceptionFunction,
                                                                               "createExceptionFunction" ).

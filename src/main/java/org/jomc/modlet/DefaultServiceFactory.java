@@ -297,8 +297,8 @@ public class DefaultServiceFactory implements ServiceFactory
 
                             <T extends Exception> void handleCause( final Class<T> cause ) throws T
                             {
-                                if ( this.getCause().getClass().isAssignableFrom(
-                                    Objects.requireNonNull( cause, "cause" ) ) )
+                                if ( Objects.requireNonNull( cause, "cause" ).getClass().
+                                    isAssignableFrom( this.getCause().getClass() ) )
                                 {
                                     throw (T) this.getCause();
                                 }
