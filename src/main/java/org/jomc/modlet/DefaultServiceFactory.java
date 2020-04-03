@@ -290,9 +290,23 @@ public class DefaultServiceFactory implements ServiceFactory
                         final class InitPropertyFailure extends RuntimeException
                         {
 
-                            public InitPropertyFailure( final Throwable cause )
+                            InitPropertyFailure( final Throwable cause )
                             {
-                                super( cause );
+                                super( Objects.requireNonNull( cause, "cause" ) );
+                            }
+
+                            <T extends Exception> void handleCause( final Class<T> cause ) throws T
+                            {
+                                if ( this.getCause().getClass().isAssignableFrom(
+                                    Objects.requireNonNull( cause, "cause" ) ) )
+                                {
+                                    throw (T) this.getCause();
+                                }
+                            }
+
+                            Error unhandledCauseError()
+                            {
+                                return new AssertionError( this.getCause() );
                             }
 
                         }
@@ -311,14 +325,10 @@ public class DefaultServiceFactory implements ServiceFactory
                                 }
                             } );
                         }
-                        catch ( final InitPropertyFailure e )
+                        catch ( final InitPropertyFailure f )
                         {
-                            if ( e.getCause() instanceof ModelException )
-                            {
-                                throw (ModelException) e.getCause();
-                            }
-
-                            throw new AssertionError( e );
+                            f.handleCause( ModelException.class );
+                            throw f.unhandledCauseError();
                         }
                     }
                 }

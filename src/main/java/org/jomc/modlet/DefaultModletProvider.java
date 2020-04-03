@@ -39,6 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -541,12 +542,30 @@ public class DefaultModletProvider implements ModletProvider
             final class UnmarshalFailure extends RuntimeException
             {
 
-                final URL url;
+                final URL resource;
 
-                public UnmarshalFailure( final URL url, final Throwable cause )
+                UnmarshalFailure( final URL resource, final Throwable cause )
                 {
-                    super( cause );
-                    this.url = Objects.requireNonNull( url, "url" );
+                    super( Objects.requireNonNull( cause, "cause" ) );
+                    this.resource = Objects.requireNonNull( resource, "resource" );
+                }
+
+                <T extends Exception, R extends Exception> void handleCause(
+                    final Class<T> cause, final Function<T, R> createExceptionFunction )
+                    throws R
+                {
+                    if ( this.getCause().getClass().isAssignableFrom( Objects.requireNonNull( cause, "cause" ) ) )
+                    {
+                        throw Objects.requireNonNull( Objects.requireNonNull( createExceptionFunction,
+                                                                              "createExceptionFunction" ).
+                            apply( (T) this.getCause() ), createExceptionFunction.toString() );
+
+                    }
+                }
+
+                Error unhandledCauseError()
+                {
+                    return new AssertionError( this.getCause() );
                 }
 
             }
@@ -599,33 +618,11 @@ public class DefaultModletProvider implements ModletProvider
                                            Collector.Characteristics.UNORDERED ) ) );
 
             }
-            catch ( final UnmarshalFailure e )
+            catch ( final UnmarshalFailure f )
             {
-                if ( e.getCause() instanceof UnmarshalException )
-                {
-                    String message = getMessage( e.getCause() );
-                    if ( message == null && ( (UnmarshalException) e.getCause() ).getLinkedException() != null )
-                    {
-                        message = getMessage( ( (JAXBException) e.getCause() ).getLinkedException() );
-                    }
-
-                    message = getMessage( "unmarshalException", e.url.toExternalForm(),
-                                          message != null ? " " + message : "" );
-
-                    throw new ModelException( message, e.getCause() );
-                }
-                else if ( e.getCause() instanceof JAXBException )
-                {
-                    String message = getMessage( e.getCause() );
-                    if ( message == null && ( (JAXBException) e.getCause() ).getLinkedException() != null )
-                    {
-                        message = getMessage( ( (JAXBException) e.getCause() ).getLinkedException() );
-                    }
-
-                    throw new ModelException( message, e.getCause() );
-                }
-
-                throw new AssertionError( e );
+                f.handleCause( UnmarshalException.class, e  -> new ModelException( getMessage( e, f.resource ), e ) );
+                f.handleCause( JAXBException.class, e  -> new ModelException( getMessage( e ), e ) );
+                throw f.unhandledCauseError();
             }
         }
 
@@ -714,6 +711,23 @@ public class DefaultModletProvider implements ModletProvider
                          : getMessage( t.getCause() )
                    : null;
 
+    }
+
+    private static String getMessage( final JAXBException e )
+    {
+        String message = getMessage( (Throwable) e );
+        if ( message == null && e.getLinkedException() != null )
+        {
+            message = getMessage( e.getLinkedException() );
+        }
+        return message;
+    }
+
+    private static String getMessage( final UnmarshalException e, final URL resource )
+    {
+        String message = getMessage( e );
+        message = getMessage( "unmarshalException", resource.toExternalForm(), message != null ? " " + message : "" );
+        return message;
     }
 
 }

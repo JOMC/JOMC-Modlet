@@ -660,9 +660,22 @@ public class DefaultModelContext extends ModelContext
             final class ValidateModelFailure extends RuntimeException
             {
 
-                public ValidateModelFailure( final Throwable cause )
+                ValidateModelFailure( final Throwable cause )
                 {
-                    super( cause );
+                    super( Objects.requireNonNull( cause, "cause" ) );
+                }
+
+                <T extends Exception> void handleCause( final Class<T> cause ) throws T
+                {
+                    if ( this.getCause().getClass().isAssignableFrom( Objects.requireNonNull( cause, "cause" ) ) )
+                    {
+                        throw (T) this.getCause();
+                    }
+                }
+
+                Error unhandledCauseError()
+                {
+                    return new AssertionError( this.getCause() );
                 }
 
             }
@@ -698,14 +711,10 @@ public class DefaultModelContext extends ModelContext
                                            Collector.Characteristics.UNORDERED ) ) );
 
             }
-            catch ( final ValidateModelFailure e )
+            catch ( final ValidateModelFailure f )
             {
-                if ( e.getCause() instanceof ModelException )
-                {
-                    throw (ModelException) e.getCause();
-                }
-
-                throw new AssertionError( e );
+                f.handleCause( ModelException.class );
+                throw f.unhandledCauseError();
             }
         }
 
@@ -1157,7 +1166,7 @@ public class DefaultModelContext extends ModelContext
             final long t0 = System.nanoTime();
             final Optional<Schemas> schemas = this.getModlets().getSchemas( Objects.requireNonNull( model, "model" ) );
             final EntityResolver entityResolver = this.createEntityResolver( model );
-            final SchemaFactory f = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+            final SchemaFactory schemaFactory = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
             final List<Source> sources = new ArrayList<>( schemas.isPresent() ? schemas.get().getSchema().size() : 0 );
 
             if ( schemas.isPresent() )
@@ -1167,9 +1176,23 @@ public class DefaultModelContext extends ModelContext
                     final class ResolveEntityFailure extends RuntimeException
                     {
 
-                        public ResolveEntityFailure( final Throwable cause )
+                        ResolveEntityFailure( final Throwable cause )
                         {
-                            super( cause );
+                            super( Objects.requireNonNull( cause, "cause" ) );
+                        }
+
+                        <T extends Exception> void handleCause( final Class<T> cause ) throws T
+                        {
+                            if ( this.getCause().getClass().isAssignableFrom(
+                                Objects.requireNonNull( cause, "cause" ) ) )
+                            {
+                                throw (T) this.getCause();
+                            }
+                        }
+
+                        Error unhandledCauseError()
+                        {
+                            return new AssertionError( this.getCause() );
                         }
 
                     }
@@ -1196,18 +1219,11 @@ public class DefaultModelContext extends ModelContext
                                                    Collector.Characteristics.UNORDERED ) ) );
 
                     }
-                    catch ( final ResolveEntityFailure e )
+                    catch ( final ResolveEntityFailure f )
                     {
-                        if ( e.getCause() instanceof IOException )
-                        {
-                            throw (IOException) e.getCause();
-                        }
-                        else if ( e.getCause() instanceof SAXException )
-                        {
-                            throw (SAXException) e.getCause();
-                        }
-
-                        throw new AssertionError( e );
+                        f.handleCause( IOException.class );
+                        f.handleCause( SAXException.class );
+                        throw f.unhandledCauseError();
                     }
                 }
             }
@@ -1217,8 +1233,8 @@ public class DefaultModelContext extends ModelContext
                 throw new ModelException( getMessage( "missingSchemasForModel", model ) );
             }
 
-            f.setResourceResolver( this.createResourceResolver( model ) );
-            f.setErrorHandler( new ErrorHandler()
+            schemaFactory.setResourceResolver( this.createResourceResolver( model ) );
+            schemaFactory.setErrorHandler( new ErrorHandler()
             {
                 // See http://java.net/jira/browse/JAXP-66
 
@@ -1251,7 +1267,8 @@ public class DefaultModelContext extends ModelContext
 
             } );
 
-            final javax.xml.validation.Schema schema = f.newSchema( sources.toArray( new Source[ sources.size() ] ) );
+            final javax.xml.validation.Schema schema =
+                schemaFactory.newSchema( sources.toArray( new Source[ sources.size() ] ) );
 
             if ( this.isLoggable( Level.FINE ) )
             {
@@ -1603,9 +1620,23 @@ public class DefaultModelContext extends ModelContext
                     final class CreateModletServiceObjectFailure extends RuntimeException
                     {
 
-                        public CreateModletServiceObjectFailure( final Throwable cause )
+                        CreateModletServiceObjectFailure( final Throwable cause )
                         {
-                            super( cause );
+                            super( Objects.requireNonNull( cause, "cause" ) );
+                        }
+
+                        <T extends Throwable> void handleCause( final Class<T> cause ) throws T
+                        {
+                            if ( this.getCause().getClass().isAssignableFrom(
+                                Objects.requireNonNull( cause, "cause" ) ) )
+                            {
+                                throw (T) this.getCause();
+                            }
+                        }
+
+                        Error unhandledCauseError()
+                        {
+                            return new AssertionError( this.getCause() );
                         }
 
                     }
@@ -1650,14 +1681,10 @@ public class DefaultModelContext extends ModelContext
                                     }
                                 } ).collect( Collectors.toMap( r  -> r.serviceKey, r  -> r.serviceObject ) ) );
                     }
-                    catch ( final CreateModletServiceObjectFailure e )
+                    catch ( final CreateModletServiceObjectFailure f )
                     {
-                        if ( e.getCause() instanceof ModelException )
-                        {
-                            throw (ModelException) e.getCause();
-                        }
-
-                        throw new AssertionError( e );
+                        f.handleCause( ModelException.class );
+                        throw f.unhandledCauseError();
                     }
                 }
             }
@@ -1686,9 +1713,23 @@ public class DefaultModelContext extends ModelContext
                     final class CreateModletServiceObjectFailure extends RuntimeException
                     {
 
-                        public CreateModletServiceObjectFailure( final Throwable cause )
+                        CreateModletServiceObjectFailure( final Throwable cause )
                         {
-                            super( cause );
+                            super( Objects.requireNonNull( cause, "cause" ) );
+                        }
+
+                        <T extends Exception> void handleCause( final Class<T> cause ) throws T
+                        {
+                            if ( this.getCause().getClass().isAssignableFrom(
+                                Objects.requireNonNull( cause, "cause" ) ) )
+                            {
+                                throw (T) this.getCause();
+                            }
+                        }
+
+                        Error unhandledCauseError()
+                        {
+                            return new AssertionError( this.getCause() );
                         }
 
                     }
@@ -1723,14 +1764,10 @@ public class DefaultModelContext extends ModelContext
 
                         Collections.sort( sortedClasspathServices, ( o1, o2 )  -> ordinalOf( o1 ) - ordinalOf( o2 ) );
                     }
-                    catch ( final CreateModletServiceObjectFailure e )
+                    catch ( final CreateModletServiceObjectFailure f )
                     {
-                        if ( e.getCause() instanceof ModelException )
-                        {
-                            throw (ModelException) e.getCause();
-                        }
-
-                        throw new AssertionError( e );
+                        f.handleCause( ModelException.class );
+                        throw f.unhandledCauseError();
                     }
                 }
             }
@@ -1841,9 +1878,23 @@ public class DefaultModelContext extends ModelContext
                     final class CreateUriFailure extends RuntimeException
                     {
 
-                        public CreateUriFailure( final Throwable cause )
+                        CreateUriFailure( final Throwable cause )
                         {
-                            super( cause );
+                            super( Objects.requireNonNull( cause, "cause" ) );
+                        }
+
+                        <T extends Exception> void handleCause( final Class<T> cause ) throws T
+                        {
+                            if ( this.getCause().getClass().isAssignableFrom(
+                                Objects.requireNonNull( cause, "cause" ) ) )
+                            {
+                                throw (T) this.getCause();
+                            }
+                        }
+
+                        Error unhandledCauseError()
+                        {
+                            return new AssertionError( this.getCause() );
                         }
 
                     }
@@ -1898,18 +1949,11 @@ public class DefaultModelContext extends ModelContext
                                                    Collector.Characteristics.UNORDERED ) );
 
                     }
-                    catch ( final CreateUriFailure ex )
+                    catch ( final CreateUriFailure f )
                     {
-                        if ( ex.getCause() instanceof MalformedURLException )
-                        {
-                            throw (MalformedURLException) ex.getCause();
-                        }
-                        else if ( ex.getCause() instanceof URISyntaxException )
-                        {
-                            throw (URISyntaxException) ex.getCause();
-                        }
-
-                        throw new AssertionError( ex );
+                        f.handleCause( MalformedURLException.class );
+                        f.handleCause( URISyntaxException.class );
+                        throw f.unhandledCauseError();
                     }
                 }
             }
