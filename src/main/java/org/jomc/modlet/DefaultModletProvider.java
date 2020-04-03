@@ -570,53 +570,57 @@ public class DefaultModletProvider implements ModletProvider
 
             }
 
+            final Function<URL, Modlets> toModlets = url  ->
+            {
+                try
+                {
+                    final Modlets result = new Modlets();
+
+                    Unmarshaller unmarshaller = threadLocalUnmarshaller.get();
+                    if ( unmarshaller == null )
+                    {
+                        unmarshaller = ctx.createUnmarshaller();
+                        unmarshaller.setSchema( schema );
+
+                        threadLocalUnmarshaller.set( unmarshaller );
+                    }
+
+                    Object content = unmarshaller.unmarshal( url );
+
+                    if ( content instanceof JAXBElement<?> )
+                    {
+                        content = ( (JAXBElement<?>) content ).getValue();
+                    }
+
+                    if ( content instanceof Modlet )
+                    {
+                        result.getModlet().add( (Modlet) content );
+                    }
+                    else if ( content instanceof Modlets )
+                    {
+                        result.getModlet().addAll( ( (Modlets) content ).getModlet() );
+                    }
+
+                    return result;
+                }
+                catch ( final JAXBException e )
+                {
+                    throw new UnmarshalFailure( url, e );
+                }
+            };
+
             try
             {
-                modlets.getModlet().addAll( st0.map( url  ->
-                {
-                    try
-                    {
-                        final Modlets result = new Modlets();
-
-                        Unmarshaller unmarshaller = threadLocalUnmarshaller.get();
-                        if ( unmarshaller == null )
-                        {
-                            unmarshaller = ctx.createUnmarshaller();
-                            unmarshaller.setSchema( schema );
-
-                            threadLocalUnmarshaller.set( unmarshaller );
-                        }
-
-                        Object content = unmarshaller.unmarshal( url );
-
-                        if ( content instanceof JAXBElement<?> )
-                        {
-                            content = ( (JAXBElement<?>) content ).getValue();
-                        }
-
-                        if ( content instanceof Modlet )
-                        {
-                            result.getModlet().add( (Modlet) content );
-                        }
-                        else if ( content instanceof Modlets )
-                        {
-                            result.getModlet().addAll( ( (Modlets) content ).getModlet() );
-                        }
-
-                        return result;
-                    }
-                    catch ( final JAXBException e )
-                    {
-                        throw new UnmarshalFailure( url, e );
-                    }
-                } ).flatMap( m  -> m.getModlet().parallelStream().unordered() ).
-                    collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
-                                       {
-                                           l1.addAll( l2 );
-                                           return l1;
-                                       }, Collector.Characteristics.CONCURRENT,
-                                           Collector.Characteristics.UNORDERED ) ) );
-
+                modlets.getModlet().addAll(
+                    st0.map( toModlets ).
+                        flatMap( m  -> m.getModlet().parallelStream().unordered() ).
+                        collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                           {
+                                               l1.addAll( l2 );
+                                               return l1;
+                                           }, Collector.Characteristics.CONCURRENT,
+                                               Collector.Characteristics.UNORDERED ) )
+                );
             }
             catch ( final UnmarshalFailure f )
             {

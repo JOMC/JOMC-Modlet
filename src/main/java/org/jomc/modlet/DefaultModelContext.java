@@ -60,6 +60,7 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
@@ -680,36 +681,41 @@ public class DefaultModelContext extends ModelContext
 
             }
 
+            final Function<ModelValidator, Optional<ModelValidationReport>> toOptionalModelValidationReport =
+                modelValidator  ->
+            {
+                try
+                {
+                    if ( isLoggable( Level.FINER ) )
+                    {
+                        log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
+                                                      modelValidator.toString() ), null );
+
+                    }
+
+                    return Objects.requireNonNull( modelValidator.validateModel( DefaultModelContext.this, cloned ),
+                                                   modelValidator.toString() );
+
+                }
+                catch ( final ModelException e )
+                {
+                    throw new ValidateModelFailure( e );
+                }
+            };
+
             try
             {
-                resultReport.getDetails().addAll( st0.map( modelValidator  ->
-                {
-                    try
-                    {
-                        if ( isLoggable( Level.FINER ) )
-                        {
-                            log( Level.FINER, getMessage( "validatingModel", model.getIdentifier(),
-                                                          modelValidator.toString() ), null );
-
-                        }
-
-                        return Objects.requireNonNull( modelValidator.validateModel( DefaultModelContext.this, cloned ),
-                                                       modelValidator.toString() );
-
-                    }
-                    catch ( final ModelException e )
-                    {
-                        throw new ValidateModelFailure( e );
-                    }
-                } ).filter( r  -> r.isPresent() ).
-                    flatMap( r  -> r.get().getDetails().parallelStream().unordered() ).
-                    collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
-                                       {
-                                           l1.addAll( l2 );
-                                           return l1;
-                                       }, Collector.Characteristics.CONCURRENT,
-                                           Collector.Characteristics.UNORDERED ) ) );
-
+                resultReport.getDetails().addAll(
+                    st0.map( toOptionalModelValidationReport ).
+                        filter( r  -> r.isPresent() ).
+                        flatMap( r  -> r.get().getDetails().parallelStream().unordered() ).
+                        collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                           {
+                                               l1.addAll( l2 );
+                                               return l1;
+                                           }, Collector.Characteristics.CONCURRENT,
+                                               Collector.Characteristics.UNORDERED ) )
+                );
             }
             catch ( final ValidateModelFailure f )
             {
@@ -1650,36 +1656,37 @@ public class DefaultModelContext extends ModelContext
 
                     }
 
+                    final Function<Map.Entry<Object, Object>, CreateModletServiceObjectResult<T>> toResult = e  ->
+                    {
+                        try
+                        {
+                            final CreateModletServiceObjectResult<T> r = new CreateModletServiceObjectResult<>();
+                            final String configuration = e.getValue().toString();
+
+                            if ( isLoggable( Level.FINEST ) )
+                            {
+                                log( Level.FINEST, getMessage( "serviceInfo", platformServices.getAbsolutePath(),
+                                                               serviceClass.getName(), configuration ), null );
+
+                            }
+
+                            r.serviceKey = e.getKey().toString();
+                            r.serviceObject = this.createModletServiceObject( serviceClass, configuration );
+                            return r;
+                        }
+                        catch ( final ModelException ex )
+                        {
+                            throw new CreateModletServiceObjectFailure( ex );
+                        }
+                    };
+
                     try
                     {
                         sortedPlatformServices.putAll(
                             st0.filter( e  -> e.getKey().toString().startsWith( serviceNamePrefix ) ).
-                                map( e  ->
-                                {
-                                    try
-                                    {
-                                        final CreateModletServiceObjectResult<T> r =
-                                            new CreateModletServiceObjectResult<>();
-
-                                        final String configuration = e.getValue().toString();
-
-                                        if ( isLoggable( Level.FINEST ) )
-                                        {
-                                            log( Level.FINEST,
-                                                 getMessage( "serviceInfo", platformServices.getAbsolutePath(),
-                                                             serviceClass.getName(), configuration ), null );
-
-                                        }
-
-                                        r.serviceKey = e.getKey().toString();
-                                        r.serviceObject = this.createModletServiceObject( serviceClass, configuration );
-                                        return r;
-                                    }
-                                    catch ( final ModelException ex )
-                                    {
-                                        throw new CreateModletServiceObjectFailure( ex );
-                                    }
-                                } ).collect( Collectors.toMap( r  -> r.serviceKey, r  -> r.serviceObject ) ) );
+                                map( toResult ).
+                                collect( Collectors.toMap( r  -> r.serviceKey, r  -> r.serviceObject ) )
+                        );
                     }
                     catch ( final CreateModletServiceObjectFailure f )
                     {
@@ -1734,33 +1741,37 @@ public class DefaultModelContext extends ModelContext
 
                     }
 
+                    final Function<String, T> toModletServiceObject = line  ->
+                    {
+                        try
+                        {
+                            if ( isLoggable( Level.FINEST ) )
+                            {
+                                log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
+                                                               serviceClass.getName(), line ), null );
+
+                            }
+
+                            return createModletServiceObject( serviceClass, line );
+                        }
+                        catch ( final ModelException e )
+                        {
+                            throw new CreateModletServiceObjectFailure( e );
+                        }
+                    };
+
                     try
                     {
                         sortedClasspathServices.addAll(
                             st0.filter( l  -> !l.contains( "#" ) ).
-                                map( l  ->
-                                {
-                                    try
-                                    {
-                                        if ( isLoggable( Level.FINEST ) )
-                                        {
-                                            log( Level.FINEST, getMessage( "serviceInfo", url.toExternalForm(),
-                                                                           serviceClass.getName(), l ), null );
-
-                                        }
-
-                                        return this.createModletServiceObject( serviceClass, l );
-                                    }
-                                    catch ( final ModelException e )
-                                    {
-                                        throw new CreateModletServiceObjectFailure( e );
-                                    }
-                                } ).collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
-                                                       {
-                                                           l1.addAll( l2 );
-                                                           return l1;
-                                                       }, Collector.Characteristics.CONCURRENT,
-                                                           Collector.Characteristics.UNORDERED ) ) );
+                                map( toModletServiceObject ).
+                                collect( Collector.of( CopyOnWriteArrayList::new, List::add, ( l1, l2 )  ->
+                                                   {
+                                                       l1.addAll( l2 );
+                                                       return l1;
+                                                   }, Collector.Characteristics.CONCURRENT,
+                                                       Collector.Characteristics.UNORDERED ) )
+                        );
 
                         Collections.sort( sortedClasspathServices, ( o1, o2 )  -> ordinalOf( o1 ) - ordinalOf( o2 ) );
                     }
@@ -1914,40 +1925,47 @@ public class DefaultModelContext extends ModelContext
                         return String.valueOf( chars );
                     } );
 
+                    final Predicate<Map.Entry<String, Attributes>> schemaExtension = entry  ->
+                    {
+                        try ( final Stream<String> st1 =
+                            Arrays.asList( SCHEMA_EXTENSIONS ).parallelStream().unordered() )
+                        {
+                            final boolean found = st1.filter( ext  -> parallelToLowerCase.apply( entry.getKey() ).
+                                endsWith( '.' + parallelToLowerCase.apply( ext ) ) ).findAny().isPresent();
+
+                            if ( found && isLoggable( Level.FINEST ) )
+                            {
+                                log( Level.FINEST, getMessage( "foundSchemaCandidate", entry.getKey() ), null );
+                            }
+
+                            return found;
+                        }
+                    };
+
+                    final Function<Map.Entry<String, Attributes>, URI> toUri = entry  ->
+                    {
+                        try
+                        {
+                            return new URL( baseUrl + entry.getKey() ).toURI();
+                        }
+                        catch ( final MalformedURLException | URISyntaxException ex )
+                        {
+                            throw new CreateUriFailure( ex );
+                        }
+                    };
+
                     try
                     {
-                        st0.filter( entry  ->
-                        {
-                            try ( final Stream<String> st2 =
-                                Arrays.asList( SCHEMA_EXTENSIONS ).parallelStream().unordered() )
-                            {
-                                final boolean found = st2.filter( ext  -> parallelToLowerCase.apply( entry.getKey() ).
-                                    endsWith( '.' + parallelToLowerCase.apply( ext ) ) ).findAny().isPresent();
-
-                                if ( found && isLoggable( Level.FINEST ) )
-                                {
-                                    log( Level.FINEST, getMessage( "foundSchemaCandidate", entry.getKey() ), null );
-                                }
-
-                                return found;
-                            }
-                        } ).map( entry  ->
-                        {
-                            try
-                            {
-                                return new URL( baseUrl + entry.getKey() ).toURI();
-                            }
-                            catch ( final MalformedURLException | URISyntaxException ex )
-                            {
-                                throw new CreateUriFailure( ex );
-                            }
-                        } ).collect( Collector.of( CopyOnWriteArraySet::new, Set::add, ( s1, s2 )  ->
-                                               {
-                                                   s1.addAll( s2 );
-                                                   return s2;
-                                               }, Collector.Characteristics.CONCURRENT,
-                                                   Collector.Characteristics.UNORDERED ) );
-
+                        resources.addAll(
+                            st0.filter( schemaExtension ).
+                                map( toUri ).
+                                collect( Collector.of( CopyOnWriteArraySet::new, Set::add, ( s1, s2 )  ->
+                                                   {
+                                                       s1.addAll( s2 );
+                                                       return s2;
+                                                   }, Collector.Characteristics.CONCURRENT,
+                                                       Collector.Characteristics.UNORDERED ) )
+                        );
                     }
                     catch ( final CreateUriFailure f )
                     {
